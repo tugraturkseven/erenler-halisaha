@@ -1,17 +1,25 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
-import List from '../components/List'
+import Dnd from '../components/Dnd'
+
 function Reservation() {
     return (
         <div>
             <Navbar addReservation={true} />
-            <div className='flex flex-col justify-between items-center md:flex-row lg:justify-around'>
-                <List />
+            <div className='flex flex-col justify-between items-center '>
                 <div className="tabs mt-10">
-                    <a className="tab">Tab 1</a>
-                    <a className="tab tab-active">Tab 2</a>
-                    <a className="tab">Tab 3</a>
+                    <a className="tab">🥅 Saha 1</a>
+                    <a className="tab tab-active">🥅 Saha 2</a>
                 </div>
+                <div className='w-96  my-10'>
+                    <div className='flex flex-row text-center'>
+                        <p className='text-md font-bold flex-1'>🕖 Saat</p>
+                        <p className='text-md font-bold flex-1'>👱 Müşteri</p>
+                        <p className='text-md font-bold flex-1'>⭐ Abone</p>
+                    </div>
+                </div>
+                <Dnd></Dnd>
+
             </div>
         </div>
     )
