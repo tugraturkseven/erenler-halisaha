@@ -3,24 +3,43 @@ import Navbar from '../components/Navbar'
 import Dnd from '../components/Dnd'
 
 function Reservation() {
+
+    const firstPitchReservations = [
+        { name: 'John', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Jane', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'John', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Jane', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'John', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Jane', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'John', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Jane', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+
+    ];
+
+    const secondPitchReservations = [
+        { name: 'Ali', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Veli', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Hasan', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Kaan', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Akin', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Cart', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Curt', surname: 'Doe', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+        { name: 'Jane', surname: 'Smith', reservationNote: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+
+    ];
+
+    const reservationData = {
+        'firstPitch': firstPitchReservations,
+        'secondPitch': secondPitchReservations
+    }
+
+
+
     return (
         <div>
             <Navbar addReservation={true} />
-            <div className='flex flex-col justify-between items-center '>
-                <div className="tabs mt-10">
-                    <a className="tab">🥅 Saha 1</a>
-                    <a className="tab tab-active">🥅 Saha 2</a>
-                </div>
-                <div className='w-96  my-10'>
-                    <div className='flex flex-row text-center'>
-                        <p className='text-md font-bold flex-1'>🕖 Saat</p>
-                        <p className='text-md font-bold flex-1'>👱 Müşteri</p>
-                        <p className='text-md font-bold flex-1'>⭐ Abone</p>
-                    </div>
-                </div>
-                <Dnd></Dnd>
+            <Dnd reservation={reservationData} />
 
-            </div>
         </div>
     )
 }
