@@ -22,29 +22,29 @@ function Dnd(props) {
         firstPitch: {
             id: 'firstPitch',
             list: {
-                16.00: { name: 'qwe', note: '' },
-                17.00: { name: 'asd', note: '' },
-                18.00: { name: '', note: '' },
-                19.00: { name: '', note: '' },
+                16.00: { name: 'Ahmet', note: 'Odendi' },
+                17.00: { name: 'Mehmet', note: 'Odendi' },
+                18.00: { name: 'Ayşe', note: 'Odendi' },
+                19.00: { name: 'Fatma', note: 'Odenmedi' },
                 20.00: { name: '', note: '' },
-                21.00: { name: '', note: '' },
-                22.00: { name: '', note: '' },
-                23.00: { name: '', note: '' },
-                24.00: { name: '', note: '' }
+                21.00: { name: 'Zeynep', note: 'Odendi' },
+                22.00: { name: 'Ali', note: 'Odendi' },
+                23.00: { name: 'Elif', note: 'Odenmedi' },
+                24.00: { name: 'Osman', note: 'Odenmedi' }
             }
         },
         secondPitch: {
             id: 'secondPitch',
             list: {
-                16.15: { name: '', note: '' },
+                16.15: { name: 'Selim', note: 'Odenmedi' },
                 17.15: { name: '', note: '' },
-                18.15: { name: '', note: '' },
-                19.15: { name: '', note: '' },
-                20.15: { name: '', note: '' },
-                21.15: { name: '', note: '' },
-                22.15: { name: '', note: '' },
+                18.15: { name: 'Ahmet', note: 'Odenmedi' },
+                19.15: { name: 'Mehmet', note: 'Odendi' },
+                20.15: { name: 'Gamze', note: 'Odendi' },
+                21.15: { name: 'Berk', note: 'Odenmedi' },
+                22.15: { name: 'Ezgi', note: 'Odendi' },
                 23.15: { name: '', note: '' },
-                24.15: { name: '', note: '' }
+                24.15: { name: 'Aylin', note: 'Odendi' }
             }
         }
     };
@@ -86,9 +86,11 @@ function Dnd(props) {
         let updatedEndPitch = [...endPitchList];
 
         if (start === end) {
+            const [startItem] = updatedStartPitch.slice(source.index, source.index + 1);
+            const [endItem] = updatedStartPitch.slice(destination.index, destination.index + 1);
 
-            const [reorderedItem] = updatedStartPitch.splice(source.index, 1);
-            updatedStartPitch.splice(destination.index, 0, reorderedItem);
+            updatedStartPitch.splice(source.index, 1, endItem);
+            updatedStartPitch.splice(destination.index, 1, startItem);
 
         } else {
             const [startItem] = updatedStartPitch.splice(source.index, 1);
@@ -130,7 +132,7 @@ function Dnd(props) {
             setSecondPitchReservationData(updatedStartPitch);
         }
 
-        console.log('firstPitch', firstPitchReservationData, 'secondPitch', secondPitchReservationData);
+
     };
 
     return (
@@ -159,10 +161,10 @@ function Dnd(props) {
                                                 <div className='flex flex-col text-center w-48 md:w-96 p-4 '>
                                                     <div className='flex flex-row justify-between'>
                                                         <p className="text-md">{item.hour} </p>
-                                                        <p className="text-md  truncate">{item.name}</p>
+                                                        <p className="text-sm truncate">{item.note}</p>
                                                     </div>
+                                                    <p className="text-md  truncate">{item.name}</p>
 
-                                                    <p className="text-sm  flex-1 truncate">Lorem, ipsum.</p>
                                                 </div>
                                             </a>
 
@@ -197,10 +199,9 @@ function Dnd(props) {
                                                 <div className='flex flex-col text-center w-48 md:w-96 p-4'>
                                                     <div className='flex flex-row justify-between'>
                                                         <p className="text-md">{item.hour} </p>
-                                                        <p className="text-md  truncate">{item.name}</p>
+                                                        <p className="text-sm truncate">{item.note}</p>
                                                     </div>
-
-                                                    <p className="text-sm  flex-1 truncate">Lorem, ipsum.</p>
+                                                    <p className="text-md  truncate">{item.name}</p>
                                                 </div>
                                             </a>
 
