@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 
 
-function Dnd(props) {
+function Dnd() {
     var source, destination, start, end, startPitchList, endPitchList;
 
 
@@ -136,7 +136,7 @@ function Dnd(props) {
     };
 
     return (
-        <div className='flex flex-row justify-around items-center '>
+        <div className='flex flex-row  w-96 p-5 justify-between md:w-2/3 md:justify-around lg:w-2/3 lg:justify-around xl:w-1/3 '>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId='firstPitch'>
                     {(provided) => (
@@ -152,18 +152,19 @@ function Dnd(props) {
                                     key={item.hour}
                                 >
 
-                                    <Draggable key={item.hour} draggableId={item.hour} index={index}>
-                                        {(provided) => (
+                                    <Draggable key={item.hour} draggableId={item.hour} index={index} >
+                                        {(provided, snapshot) => (
 
-                                            <a ref={provided.innerRef}
+                                            <a href='/reservationDetails'
+                                                ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}>
-                                                <div className='flex flex-col text-center w-48 md:w-96 p-4 '>
+                                                <div className='flex flex-col text-center w-40 md:w-52 p-4 '>
                                                     <div className='flex flex-row justify-between'>
-                                                        <p className="text-md">{item.hour} </p>
-                                                        <p className="text-sm truncate">{item.note}</p>
+                                                        <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour} </p>
+                                                        <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
                                                     </div>
-                                                    <p className="text-md  truncate">{item.name}</p>
+                                                    <p className="text-lg font-bold truncate">{item.name}</p>
 
                                                 </div>
                                             </a>
@@ -190,18 +191,19 @@ function Dnd(props) {
 
                                 >
                                     <Draggable key={item.hour} draggableId={item.hour} index={index}>
-                                        {(provided) => (
+                                        {(provided, snapshot) => (
 
-                                            <a
+                                            <a href='/reservationDetails'
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}>
-                                                <div className='flex flex-col text-center w-48 md:w-96 p-4'>
+                                                <div className='flex flex-col text-center w-40 md:w-52 p-4 '>
                                                     <div className='flex flex-row justify-between'>
-                                                        <p className="text-md">{item.hour} </p>
-                                                        <p className="text-sm truncate">{item.note}</p>
+                                                        <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour} </p>
+                                                        <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
                                                     </div>
-                                                    <p className="text-md  truncate">{item.name}</p>
+                                                    <p className="text-md font-bold truncate">{item.name}</p>
+
                                                 </div>
                                             </a>
 

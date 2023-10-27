@@ -1,6 +1,4 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendar, faUser, faEnvelope } from '@fortawesome/free-regular-svg-icons'
 
 function Card(props) {
     const iconList = {
@@ -10,7 +8,7 @@ function Card(props) {
     }
     const routes = {
         Calendar: '/reservation',
-        User: '/costumer',
+        User: '/costumers',
         Sms: '/message'
     }
     return (
