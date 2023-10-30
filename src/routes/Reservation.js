@@ -30,11 +30,12 @@ function Reservation() {
         <div className='flex flex-col items-center '>
             <Navbar endButton={pickDateComponent} />
             <p className='text-xl font-semibold underline'>{selectedDay}</p>
+            <DayPicker className={`${showPicker ? '' : 'hidden'} text-lg`} onSelect={date => handleDatePick(date)} mode='single' />
             <div className='flex flex-row justify-around w-96 mt-5'>
                 <p>Saha 1</p>
                 <p>Saha 2</p>
             </div>
-            <DayPicker className={`${showPicker ? '' : 'hidden'} text-lg`} onSelect={date => handleDatePick(date)} mode='single' />
+
             <Dnd />
         </div>
     )

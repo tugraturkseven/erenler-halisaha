@@ -8,9 +8,10 @@ function Login() {
                 <p className='text-sm text-center md:text-xl'>Erenler Halısaha</p>
             </article>
             <div className='mt-10 md:mx-10 lg: w-52 space-y-5'>
-                <input type="text" placeholder="Kullanici Adi" className="input input-bordered w-full max-w-xs" />
+                <input type="text" placeholder="Telefon Numarası" className="input input-bordered w-full max-w-xs" />
                 <input type="password" placeholder="Sifre" className="input input-bordered w-full max-w-xs" />
-                <a href='/home' className='btn btn-warning btn-block'>Giriş Yap</a>
+                <a href='/home' className='btn btn-primary btn-block'>Giriş Yap</a>
+                <a href="/signin" className='btn btn-accent btn-block'>Kayıt Ol</a>
             </div>
         </div>
     )
