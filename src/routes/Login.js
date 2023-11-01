@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase'
+import { auth, getCostumerData } from '../firebase'
 import { useNavigate } from 'react-router-dom'
 
 function Login() {
 
     const navigate = useNavigate();
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [email, setEmail] = useState('tugraturkseven@hotmail.com')
+    const [password, setPassword] = useState('jackass1*')
 
     const onSubmit = async (e) => {
         e.preventDefault()
@@ -15,8 +15,9 @@ function Login() {
         await signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 // Signed in
-                const user = userCredential.user;
                 navigate("/home")
+                const user = userCredential.user;
+
                 // ...
             })
             .catch((error) => {

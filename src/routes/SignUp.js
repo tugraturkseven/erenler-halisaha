@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase'
+import { auth, createCostumer } from '../firebase'
 
 function SignUp() {
     const navigate = useNavigate();
 
+    const [name, setName] = useState('')
+    const [phone, setPhone] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
@@ -16,7 +18,8 @@ function SignUp() {
             .then((userCredential) => {
                 // Signed in
                 const user = userCredential.user;
-                console.log(user);
+                createCostumer(user.uid, name, email, phone, 'basic', '');
+                console.log('userInfo: ' + user.uid)
                 navigate("/")
 
             })
@@ -36,9 +39,9 @@ function SignUp() {
                 <p className='text-2xl font-bold text-center md:text-4xl'>Yeni Üye</p>
             </article>
             <div className='mt-10 md:mx-10 lg: w-52 space-y-5'>
-                <input type="text" placeholder="İsim Soyisim" className="input input-bordered w-full max-w-xs" />
+                <input type="text" placeholder="İsim Soyisim" className="input input-bordered w-full max-w-xs" onChange={(e) => setName(e.target.value)} />
                 <input type="email" placeholder="E Posta" className="input input-bordered w-full max-w-xs" onChange={(e) => setEmail(e.target.value)} />
-                <input type="text" placeholder="Telefon" className="input input-bordered w-full max-w-xs" />
+                <input type="text" placeholder="Telefon" className="input input-bordered w-full max-w-xs" onChange={(e) => setPhone(e.target.value)} />
                 <input type="password" placeholder="Sifre" className="input input-bordered w-full max-w-xs" onChange={(e) => setPassword(e.target.value)} />
                 <a className='btn btn-warning btn-block' onClick={onSubmit}>KAYIT OL</a>
                 <a href="/" className='btn btn-accent btn-block'>GERI DON</a>
