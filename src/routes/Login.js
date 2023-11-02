@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, getCostumerData } from '../firebase'
+import { auth } from '../firebase'
 import { useNavigate } from 'react-router-dom'
 
 function Login() {
@@ -16,8 +16,6 @@ function Login() {
             .then((userCredential) => {
                 // Signed in
                 navigate("/home")
-                const user = userCredential.user;
-
                 // ...
             })
             .catch((error) => {

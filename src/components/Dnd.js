@@ -1,70 +1,41 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { useNavigate } from 'react-router-dom';
 
-
-function Dnd() {
+function Dnd({ reservations, date }) {
     var source, destination, start, end, startPitchList, endPitchList;
 
-
-    function getReservationsData(list) {
+    function reservationDataToArray(list, pitchName) { // Turns the object in to an array 
         const reservationsData = [];
-
-        for (const timeKey in list) {
-            const hour = timeKey;
-            const { name, note } = list[timeKey];
-            reservationsData.push({ hour, name, note });
+        let hourIndex = 16;
+        for (const key in list) {
+            const hour = pitchName == 'firstPitch' ? hourIndex + ':00' : hourIndex + ':30';
+            hourIndex++;
+            const { note, reservedUserName } = list[key];
+            reservationsData.push({ hour, note, reservedUserName });
         }
 
         return reservationsData;
     }
 
-    const initialReservations = {
-        firstPitch: {
-            id: 'firstPitch',
-            list: {
-                16.00: { name: 'Ahmet', note: 'Odendi' },
-                17.00: { name: 'Mehmet', note: 'Odendi' },
-                18.00: { name: 'Ayşe', note: 'Odendi' },
-                19.00: { name: 'Fatma', note: 'Odenmedi' },
-                20.00: { name: '', note: '' },
-                21.00: { name: 'Zeynep', note: 'Odendi' },
-                22.00: { name: 'Ali', note: 'Odendi' },
-                23.00: { name: 'Elif', note: 'Odenmedi' },
-                24.00: { name: 'Osman', note: 'Odenmedi' }
-            }
-        },
-        secondPitch: {
-            id: 'secondPitch',
-            list: {
-                16.15: { name: 'Selim', note: 'Odenmedi' },
-                17.15: { name: '', note: '' },
-                18.15: { name: 'Ahmet', note: 'Odenmedi' },
-                19.15: { name: 'Mehmet', note: 'Odendi' },
-                20.15: { name: 'Gamze', note: 'Odendi' },
-                21.15: { name: 'Berk', note: 'Odenmedi' },
-                22.15: { name: 'Ezgi', note: 'Odendi' },
-                23.15: { name: '', note: '' },
-                24.15: { name: 'Aylin', note: 'Odendi' }
-            }
-        }
-    };
 
 
-    const firstPitchReservations = getReservationsData(initialReservations.firstPitch.list);
-    const secondPitchReservations = getReservationsData(initialReservations.secondPitch.list);
+    const firstPitchReservations = reservationDataToArray(reservations.firstPitch, 'firstPitch'); // turning the object into an array
+    const secondPitchReservations = reservationDataToArray(reservations.secondPitch, 'secondPitch'); // turning the object into an array
+    const [firstPitchReservationData, setFirstPitchReservationData] = useState(firstPitchReservations); // state for the first pitch
+    const [secondPitchReservationData, setSecondPitchReservationData] = useState(secondPitchReservations); // state for the second pitch
 
+    const navigate = useNavigate();
 
+    const handleReservationClick = (pitch, hour) => {
 
-    const [firstPitchReservationData, setFirstPitchReservationData] = useState(firstPitchReservations);
-    const [secondPitchReservationData, setSecondPitchReservationData] = useState(secondPitchReservations);
-
+        navigate('/reservationDetails', { state: { pitch, hour, date } });
+    }
 
 
     const onDragEnd = (result) => {
         destination = result.destination;
         source = result.source;
-
-        console.log('source:', source, 'destination:', destination);
 
 
         if (!destination) return; // If the item is dropped outside the list, do nothing
@@ -101,36 +72,14 @@ function Dnd() {
             updatedEndPitch.splice(destination.index, 0, startItem);
         }
 
-
         if (start === 'firstPitch') {
-            let hour = 16;
-            for (let i = 0; i < updatedStartPitch.length; i++) {
-                updatedStartPitch[i].hour = hour + '.00';
-                hour++;
-            }
-            hour = 16;
-            for (let i = 0; i < updatedEndPitch.length; i++) {
-                updatedEndPitch[i].hour = hour + '.15';
-                hour++;
-            }
-
-            setFirstPitchReservationData(updatedStartPitch);
-            setSecondPitchReservationData(updatedEndPitch);
+            setFirstPitchReservationData(reservationDataToArray(updatedStartPitch, 'firstPitch'));
+            setSecondPitchReservationData(reservationDataToArray(updatedEndPitch, 'secondPitch'));
         } else {
-            let hour = 16;
-            for (let i = 0; i < updatedStartPitch.length; i++) {
-                updatedStartPitch[i].hour = hour + '.15';
-                hour++;
-            }
-            hour = 16;
-            for (let i = 0; i < updatedEndPitch.length; i++) {
-                updatedEndPitch[i].hour = hour + '.00';
-                hour++;
-            }
-
-            setFirstPitchReservationData(updatedEndPitch);
-            setSecondPitchReservationData(updatedStartPitch);
+            setFirstPitchReservationData(reservationDataToArray(updatedEndPitch, 'firstPitch'));
+            setSecondPitchReservationData(reservationDataToArray(updatedStartPitch, 'secondPitch'));
         }
+
 
 
     };
@@ -155,7 +104,7 @@ function Dnd() {
                                     <Draggable key={item.hour} draggableId={item.hour} index={index} >
                                         {(provided, snapshot) => (
 
-                                            <a href='/reservationDetails'
+                                            <a onClick={() => handleReservationClick('firstPitch', item.hour)}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}>
@@ -164,7 +113,7 @@ function Dnd() {
                                                         <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour} </p>
                                                         <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
                                                     </div>
-                                                    <p className="text-lg font-bold truncate">{item.name}</p>
+                                                    <p className="text-lg font-bold truncate">{item.reservedUserName}</p>
 
                                                 </div>
                                             </a>
@@ -193,7 +142,7 @@ function Dnd() {
                                     <Draggable key={item.hour} draggableId={item.hour} index={index}>
                                         {(provided, snapshot) => (
 
-                                            <a href='/reservationDetails'
+                                            <a onClick={() => handleReservationClick('firstPitch', item.hour)}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}>
@@ -202,7 +151,7 @@ function Dnd() {
                                                         <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour} </p>
                                                         <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
                                                     </div>
-                                                    <p className="text-md font-bold truncate">{item.name}</p>
+                                                    <p className="text-md font-bold truncate">{item.reservedUserName}</p>
 
                                                 </div>
                                             </a>
