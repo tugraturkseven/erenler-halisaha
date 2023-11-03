@@ -9,7 +9,7 @@ import { signOut } from 'firebase/auth'
 function Home() {
 
     const user = auth.currentUser;
-    console.log('writed from home page. ' + user.uid);
+
 
     const navigate = useNavigate();
 

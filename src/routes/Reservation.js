@@ -10,58 +10,78 @@ import { getReservations, createNewDay } from '../firebase';
 
 
 function Reservation() {
+
     const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('tr'));
     const [showPicker, setShowPicker] = useState(false);
     const selectedDayString = selectedDay.replaceAll('.', '-');
 
-    /*
 
-       reservedUser: userId,
-        reservedUserName: getCostumerData(userId).name,
-        note: note,
-        request: request
-
-    */
-    const reservations = {
+    const reservationsSchema = {
         firstPitch: {
-            16: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            17: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            18: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            19: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            20: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            21: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            22: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            23: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            24: { reservedUser: '', reservedUserName: '', note: '', request: '' }
+            16: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            17: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            18: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            19: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            20: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            21: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            22: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            23: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            24: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' }
 
         },
         secondPitch: {
-            16: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            17: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            18: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            19: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            20: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            21: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            22: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            23: { reservedUser: '', reservedUserName: '', note: '', request: '' },
-            24: { reservedUser: '', reservedUserName: '', note: '', request: '' }
+            16: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            17: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            18: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            19: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            20: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            21: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            22: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            23: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
+            24: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' }
         }
     };
 
+    const [reservations, setReservations] = useState(reservationsSchema);
 
     useEffect(() => {
 
 
-        // Call getReservations to fetch the data
+        // Create copies of the existing reservations object
+        const updatedReservations = { ...reservations };
+
+        // Call getReservations to fetch the data for 'firstPitch'
         getReservations(selectedDayString, 'firstPitch')
             .then((data) => {
                 if (data) {
-                    // Data fetched successfully
-                    console.log(data)
+                    // Data fetched successfully, update the 'firstPitch' in the new object
+                    updatedReservations.firstPitch = data;
                 } else {
                     // Handle the case when no data is found
-                    createNewDay(selectedDayString, reservations)
+                    createNewDay(selectedDayString, updatedReservations);
+                    updatedReservations.firstPitch = reservationsSchema.firstPitch;
                 }
+                // Update the state with the new reservations object
+                setReservations(updatedReservations);
+            })
+            .catch((error) => {
+                // Handle any errors that occurred during data retrieval
+                console.error('Error:', error);
+            });
+
+        // Similar logic for 'secondPitch'
+        getReservations(selectedDayString, 'secondPitch')
+            .then((data) => {
+                if (data) {
+                    // Data fetched successfully, update the 'secondPitch' in the new object
+                    updatedReservations.secondPitch = data;
+                } else {
+                    // Handle the case when no data is found
+                    createNewDay(selectedDayString, updatedReservations);
+                    updatedReservations.secondPitch = reservationsSchema.secondPitch;
+                }
+                // Update the state with the new reservations object
+                setReservations(updatedReservations);
             })
             .catch((error) => {
                 // Handle any errors that occurred during data retrieval
@@ -69,6 +89,8 @@ function Reservation() {
             });
 
     }, [selectedDay])
+
+
 
     const pickDateComponent = (
         <button onClick={() => setShowPicker(!showPicker)} className='btn btn-ghost normal-case text-xl'>
