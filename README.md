@@ -1,70 +1,36 @@
-# Getting Started with Create React App
+# Erenler Halisaha Football Reservation System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Tech Stack
+The project is being developed via React, Firebase, Tailwind CSS, DaisyUI. 
 
-## Available Scripts
+## Project Description
+Erenler Halisaha Football Reservation System is a web application that allows users to reserve football fields at Erenler Halisaha, a football business, quickly and conveniently. The system provides separate interfaces for customers and administrators, ensuring a seamless and efficient booking process.
 
-In the project directory, you can run:
+Key features of this project include:
+- User Registration and Authentication: Users can create accounts, log in, and manage their profiles.
+- Customer Dashboard: Customers can view available football fields, check their reservations, and make new reservations.
+- Admin Panel: Administrators have access to a dashboard where they can manage reservations, view user data, and oversee the system's operation.
+- Reservation System: Users can select the date and time, choose a football field, and reserve it for their games.
+- Payment Integration: The system supports payment processing for reservations.
+- SMS Notifications: Users receive SMS notifications to confirm their reservations.
 
-### `npm start`
+The project is built using React for the frontend, Firebase for the backend, and Tailwind CSS with DaisyUI for the UI design. It provides a user-friendly and responsive, mobile-first interface for an improved user experience.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Screenshots
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+![image](https://github.com/tugraturkseven/erenler-halisaha/assets/28603785/1290deb0-f748-4281-9046-47fd1afd80f9)
+![image](https://github.com/tugraturkseven/erenler-halisaha/assets/28603785/4a642c01-69d8-455b-994f-a72afd55aa7c)
+![image](https://github.com/tugraturkseven/erenler-halisaha/assets/28603785/91be0c32-6efe-485d-b4e7-2836fe98dd56)
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Project Structure
+The project's source code is organized into the following main directories:
 
-### `npm run build`
+- `src`: Contains the source code for the React application.
+  - `assets`: Stores image and asset files.
+  - `components`: Contains reusable React components.
+  - `pages`: Defines the application's main pages.
+  - `firebase.js`: Firebase configuration file.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Thank you for using Erenler Halisaha Football Reservation System! We hope it simplifies the reservation process for football enthusiasts and contributes to a great user experience.
