@@ -4,8 +4,8 @@ import Dnd from '../components/Dnd'
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendarDays, faCalendarCheck } from '@fortawesome/free-regular-svg-icons';
-import { getReservations, createNewDay } from '../firebase';
+import { faCalendarDays } from '@fortawesome/free-regular-svg-icons';
+import { getReservations, setAllReservations } from '../firebase';
 
 
 
@@ -58,7 +58,7 @@ function Reservation() {
                     updatedReservations.firstPitch = data;
                 } else {
                     // Handle the case when no data is found
-                    createNewDay(selectedDayString, updatedReservations);
+                    setAllReservations(selectedDayString, updatedReservations);
                     updatedReservations.firstPitch = reservationsSchema.firstPitch;
                 }
                 // Update the state with the new reservations object
@@ -77,7 +77,7 @@ function Reservation() {
                     updatedReservations.secondPitch = data;
                 } else {
                     // Handle the case when no data is found
-                    createNewDay(selectedDayString, updatedReservations);
+                    setAllReservations(selectedDayString, updatedReservations);
                     updatedReservations.secondPitch = reservationsSchema.secondPitch;
                 }
                 // Update the state with the new reservations object
