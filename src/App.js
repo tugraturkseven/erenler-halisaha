@@ -12,7 +12,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <div data-theme='night' className="h-screen p-8">
+    <div data-theme='night' className="h-screen ">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />

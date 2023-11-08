@@ -2,16 +2,45 @@ import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getReservationDetails, setReservation } from '../firebase';
+import DropDown from '../components/DropDown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarDays } from '@fortawesome/free-regular-svg-icons';
 
+import DatePicker from '../components/DatePicker';
+import DateIndicator from '../components/DateIndicator';
+import { set } from 'date-fns';
 
 function ReservationDetails() {
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [note, setNote] = useState('');
 
     const location = useLocation();
     const navigate = useNavigate();
     const { pitch, hour, date } = location.state;
+
+    const [reservationDate, setReservationDate] = useState(date);
+    const [reservationPitch, setReservationPitch] = useState(pitch);
+    const [reservationHour, setReservationHour] = useState(hour);
+
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [note, setNote] = useState('');
+
+
+
+    const [showPicker, setShowPicker] = useState(false);
+
+
+
+    const handleSave = () => {
+
+        setReservation(reservationDate, reservationPitch, reservationHour, name, phone, 'approved', note).then(() => {
+            alert('Rezervasyon kaydedildi');
+            navigate('/reservation');
+        }).catch((error) => {
+            alert('Rezervasyon kaydedilemedi', error);
+        }
+        )
+    }
+
 
 
     useEffect(() => {
@@ -25,29 +54,58 @@ function ReservationDetails() {
     }, [])
 
 
-    const handleSave = () => {
+    const hours = [16, 17, 18, 19, 20, 21, 22, 23, 24];
 
-        setReservation(date, pitch, hour, name, phone, 'approved', note).then(() => {
-            alert('Rezervasyon kaydedildi');
-            navigate('/reservation');
-        }).catch((error) => {
-            alert('Rezervasyon kaydedilemedi');
+    const handlePitch = (option) => {
+        if (option === 'Saha 1') {
+            setReservationPitch('firstPitch');
+        } else {
+            setReservationPitch('secondPitch');
         }
-        )
     }
+
+    const handleDatePick = (date) => {
+        setShowPicker(false);
+        setReservationDate(date.toLocaleDateString('tr'));
+    }
+
+    const pickDateComponent = (
+        <button onClick={() => setShowPicker(!showPicker)} className='btn btn-ghost normal-case text-xl xl:text-3xl '>
+            📅
+        </button>
+    );
+
+
+
+    const clearReservation = () => {
+        setName('');
+        setPhone('');
+        setNote('');
+        setReservationHour(hour);
+        setReservationPitch(pitch);
+        setReservationDate(date);
+        handleSave();
+    }
+
 
     return (
         <div>
-            <Navbar />
+            <Navbar endButton={pickDateComponent} />
             <div className='flex flex-col gap-5 items-center'>
                 <p className='titleMedium font-bold text-center'>Rezervasyon Bilgileri</p>
-                <input className='input input-bordered' type="text" placeholder='İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
-                <input className='input input-bordered' type="text" placeholder='Telefon' value={phone} onChange={(e) => setPhone(e.target.value)} />
-                <input className='input input-bordered' type="text" placeholder='Not' value={note} onChange={(e) => setNote(e.target.value)} />
+                <DateIndicator selectedDay={reservationDate} setSelectedDay={setReservationDate} />
+                <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
+                <DropDown options={['Saha 1', 'Saha 2']} onSelect={handlePitch} selectedOption={reservationPitch === 'firstPitch' ? 'Saha 1' : 'Saha 2'} placeHolder={'🏟️ Saha'} />
+                <DropDown options={hours} onSelect={setReservationHour} selectedOption={reservationHour} placeHolder={'🕓 Saat'} />
 
-                <div className='flex flex-row gap-5'>
-                    <button className='btn btn-primary' onClick={() => handleSave()}>Kaydet</button>
-                    <button className='btn btn-secondary' onClick={() => navigate('/reservation')}>Iptal</button>
+                <input className='input input-bordered' type="text" placeholder='🏷️ İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
+                <input className='input input-bordered' type="text" placeholder='📞 Telefon' value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <input className='input input-bordered' type="text" placeholder='🗒️ Not' value={note} onChange={(e) => setNote(e.target.value)} />
+
+                <div className='flex flex-col gap-5 w-52'>
+                    <button className='btn btn-info' onClick={() => handleSave()}>💾 Kaydet</button>
+                    <button className='btn btn-secondary' onClick={() => clearReservation()}>❌ Iptal Et</button>
+                    <button className='btn btn-accent' onClick={() => navigate('/reservation')}>🚪 Geri Dön</button>
                 </div>
             </div>
         </div>

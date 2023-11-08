@@ -34,12 +34,10 @@ function Table({ data }) {
                     <td>{phone}</td>
                     <td>
                         <div className='flex flex-row '>
-                            <button className="btn btn-primary mr-5" onClick={() => handleEdit(user)}>
+                            <button className="btn btn-info mr-5" onClick={() => handleEdit(user)}>
                                 <FontAwesomeIcon icon={faEdit} />
                             </button>
-                            <button className="btn btn-secondary" onClick={() => handleDelete(user)}>
-                                <FontAwesomeIcon icon={faTrash} />
-                            </button>
+
                         </div>
 
                     </td>
@@ -55,9 +53,9 @@ function Table({ data }) {
                 <thead>
                     <tr>
                         <th></th>
-                        <th>Isim</th>
-                        <th>Telefon</th>
-                        <th>Duzenle</th>
+                        <th>🏷️ Isim</th>
+                        <th>📞 Telefon</th>
+                        <th>⚙️ Duzenle</th>
                     </tr>
                 </thead>
                 <tbody>

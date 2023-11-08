@@ -18,16 +18,15 @@ function SignUp() {
             .then((userCredential) => {
                 // Signed in
                 const user = userCredential.user;
-                createCostumer(user.uid, name, email, phone, 'basic', '');
-                console.log('userInfo: ' + user.uid)
+                createCostumer(user.uid, name, email, phone, 'customer');
+                alert('Kayit Basarili')
                 navigate("/")
 
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                console.log(errorCode, errorMessage);
-
+                alert(errorCode, errorMessage);
             });
 
 
