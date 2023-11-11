@@ -8,8 +8,6 @@ import CostumerDetails from './routes/CostumerDetails';
 import SignUp from './routes/SignUp';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-
-
 function App() {
   return (
     <div data-theme='night' className="h-screen ">

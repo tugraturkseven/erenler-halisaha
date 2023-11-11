@@ -37,9 +37,7 @@ function Table({ data }) {
                             <button className="btn btn-info mr-5" onClick={() => handleEdit(user)}>
                                 <FontAwesomeIcon icon={faEdit} />
                             </button>
-
                         </div>
-
                     </td>
                 </tr>
             )

@@ -3,12 +3,11 @@ import Navbar from '../components/Navbar'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getReservationDetails, setReservation } from '../firebase';
 import DropDown from '../components/DropDown';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarDays } from '@fortawesome/free-regular-svg-icons';
+
 
 import DatePicker from '../components/DatePicker';
 import DateIndicator from '../components/DateIndicator';
-import { set } from 'date-fns';
+
 
 function ReservationDetails() {
 
@@ -16,7 +15,7 @@ function ReservationDetails() {
     const navigate = useNavigate();
     const { pitch, hour, date } = location.state;
 
-    const [reservationDate, setReservationDate] = useState(date);
+    const [reservationDate, setReservationDate] = useState(date.replaceAll('-', '.'));
     const [reservationPitch, setReservationPitch] = useState(pitch);
     const [reservationHour, setReservationHour] = useState(hour);
 
@@ -31,8 +30,8 @@ function ReservationDetails() {
 
 
     const handleSave = () => {
-
-        setReservation(reservationDate, reservationPitch, reservationHour, name, phone, 'approved', note).then(() => {
+        const stringDate = reservationDate.replaceAll('.', '-');
+        setReservation(stringDate, reservationPitch, reservationHour, name, phone, 'approved', note).then(() => {
             alert('Rezervasyon kaydedildi');
             navigate('/reservation');
         }).catch((error) => {

@@ -35,15 +35,16 @@ function SignUp() {
     return (
         <div className='flex h-full shadow-2xl  items-center justify-center flex-col rounded-lg px-16 md:flex-row'>
             <article className='prose lg:prose-lg md:prose-md sm:prose-sm'>
-                <p className='text-2xl font-bold text-center md:text-4xl'>Yeni Üye</p>
+                <p className='text-2xl font-bold text-center md:text-4xl'>✨ Yeni Üye ✨</p>
+                <p className='text-sm text-center'>Telefon numaranızı başında 0 olmadan giriniz.</p>
             </article>
             <div className='mt-10 md:mx-10 lg: w-52 space-y-5'>
-                <input type="text" placeholder="İsim Soyisim" className="input input-bordered w-full max-w-xs" onChange={(e) => setName(e.target.value)} />
-                <input type="email" placeholder="E Posta" className="input input-bordered w-full max-w-xs" onChange={(e) => setEmail(e.target.value)} />
-                <input type="text" placeholder="Telefon" className="input input-bordered w-full max-w-xs" onChange={(e) => setPhone(e.target.value)} />
-                <input type="password" placeholder="Sifre" className="input input-bordered w-full max-w-xs" onChange={(e) => setPassword(e.target.value)} />
-                <a className='btn btn-warning btn-block' onClick={onSubmit}>KAYIT OL</a>
-                <a href="/" className='btn btn-accent btn-block'>GERI DON</a>
+                <input type="text" placeholder="🏷️ İsim Soyisim" className="input input-bordered w-full max-w-xs" onChange={(e) => setName(e.target.value)} />
+                <input type="email" placeholder="📬 E Posta" className="input input-bordered w-full max-w-xs" onChange={(e) => setEmail(e.target.value)} />
+                <input type="text" placeholder="📞 Telefon" className="input input-bordered w-full max-w-xs" onChange={(e) => setPhone(e.target.value)} />
+                <input type="password" placeholder="🔑 Sifre" className="input input-bordered w-full max-w-xs" onChange={(e) => setPassword(e.target.value)} />
+                <a className='btn btn-success btn-block' onClick={onSubmit}>🚀 KAYIT OL</a>
+                <a href="/" className='btn btn-neutral btn-block'>🚪 GERI DON</a>
             </div>
         </div>
     )
