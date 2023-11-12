@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import { setReservation, getReservationDetails } from '../firebase';
-import { set } from 'date-fns';
+
 
 
 function Dnd({ reservations, date }) {

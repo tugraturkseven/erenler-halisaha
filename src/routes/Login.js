@@ -15,7 +15,7 @@ function Login() {
         await signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 // Signed in
-                navigate("/home")
+                navigate("/reservation")
                 // ...
             })
             .catch((error) => {

@@ -6,6 +6,7 @@ import ReservationDetails from './routes/ReservationDetails';
 import Message from './routes/Message';
 import CostumerDetails from './routes/CostumerDetails';
 import SignUp from './routes/SignUp';
+import Settings from './routes/Settings';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -17,10 +18,11 @@ function App() {
           <Route path="/signin" element={<SignUp />} />
           <Route path="/home" element={<Home />} />
           <Route path='/reservation' element={<Reservation />} />
-          <Route path='/costumers' element={<Costumers />} />
+          <Route path='/customers' element={<Costumers />} />
           <Route path='/reservationDetails' element={<ReservationDetails />} />
           <Route path='/message' element={<Message />} />
           <Route path='/costumerDetails' element={<CostumerDetails />} />
+          <Route path='/settings' element={<Settings />} />
         </Routes>
       </BrowserRouter>
     </div>

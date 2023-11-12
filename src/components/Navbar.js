@@ -6,10 +6,13 @@ function Navbar(props) {
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <div className='navbar-start'>
-                {props.startButton ? props.startButton : null}
+                <button onClick={() => navigate('/reservation')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>⚽</button>
             </div>
             <div className='navbar-center'>
-                <a onClick={() => navigate('/home')} className="btn btn-ghost normal-case text-xl">⚽ Efeler Halısaha ⚽</a>
+
+                <button onClick={() => navigate('/message')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>✉️</button>
+                <button onClick={() => navigate('/customers')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>👱</button>
+                <button onClick={() => navigate('/settings')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>⚙️</button>
             </div>
             <div className='navbar-end'>
                 {props.endButton ? props.endButton : null}

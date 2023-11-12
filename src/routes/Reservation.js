@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Dnd from '../components/Dnd'
 import DatePicker from '../components/DatePicker'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendarDays } from '@fortawesome/free-regular-svg-icons';
-import { getReservations, setAllReservations } from '../firebase';
+import { getReservations, setAllReservations, getReservationSchema } from '../firebase';
 import DateIndicator from '../components/DateIndicator'
 
 
@@ -12,34 +10,12 @@ function Reservation() {
 
     const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('tr'));
     const [showPicker, setShowPicker] = useState(false);
+    const [reservationSchema, setReservationSchema] = useState([]);
     const selectedDayString = selectedDay.replaceAll('.', '-');
 
 
-    const reservationsSchema = {
-        firstPitch: {
-            16: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            17: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            18: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            19: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            20: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            21: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            22: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            23: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            24: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' }
 
-        },
-        secondPitch: {
-            16: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            17: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            18: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            19: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            20: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            21: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            22: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            23: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' },
-            24: { reservedUserName: '', reservedUserPhone: '', note: '', request: '' }
-        }
-    };
+
 
     const [reservations, setReservations] = useState(reservationsSchema);
 
@@ -88,6 +64,13 @@ function Reservation() {
             });
 
     }, [selectedDay])
+
+
+    useEffect(() => {
+        getReservationSchema((data) => {
+            setReservationSchema(data);
+        });
+    }, [])
 
 
 
