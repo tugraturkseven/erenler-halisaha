@@ -7,35 +7,32 @@ import { setReservation, getReservationDetails } from '../firebase';
 
 function Dnd({ reservations, date }) {
 
-
     let source, destination, start, end, startPitchList, endPitchList;
 
-    const reservationDataToArray = (list) => {
-        const reservationsData = [];
-        let hourIndex = 16;
-        for (const key in list) {
-            const hour = hourIndex++;
-            const note = list[key].note;
-            const reservedUserName = list[key].reservedUserName;
-            reservationsData.push({ hour, note, reservedUserName });
-        }
+    const [firstPitchReservationData, setFirstPitchReservationData] = useState(reservations.firstPitch);
+    const [secondPitchReservationData, setSecondPitchReservationData] = useState(reservations.secondPitch);
 
-        return reservationsData;
+    const navigate = useNavigate();
+
+    const handleReservationClick = (pitch, index) => {
+        navigate('/reservationDetails', { state: { pitch, index, date } });
     };
 
 
 
-    const updateDatabaseOnDragEnd = async (pitchA, pitchB, hourA, hourB) => {
+
+
+    const updateDatabaseOnDragEnd = async (pitchA, pitchB, indexA, indexB, hourA, hourB) => {
         try {
             // Fetch reservation details for pitchA and pitchB
-            const itemA = await getReservationDetails(date, pitchA, hourA);
-            const itemB = await getReservationDetails(date, pitchB, hourB);
+            const itemA = await getReservationDetails(date, pitchA, indexA);
+            const itemB = await getReservationDetails(date, pitchB, indexB);
 
             // Check if data is available before updating reservations
-            if (itemA && itemB) {
+            if (itemA && itemB && itemA.hour === hourA && itemB.hour === hourB) {
                 // Update reservations for pitchA and pitchB
-                await setReservation(date, pitchA, hourA, itemB.reservedUserName, itemB.reservedUserPhone, 'approved', itemB.note);
-                await setReservation(date, pitchB, hourB, itemA.reservedUserName, itemA.reservedUserPhone, 'approved', itemA.note);
+                await setReservation(date, pitchA, indexA, itemB.reservedUserName, itemB.reservedUserPhone, 'approved', itemB.note);
+                await setReservation(date, pitchB, indexB, itemA.reservedUserName, itemA.reservedUserPhone, 'approved', itemA.note);
             }
         } catch (error) {
             // Handle errors here
@@ -43,24 +40,8 @@ function Dnd({ reservations, date }) {
         }
     };
 
-    const [firstPitchReservationData, setFirstPitchReservationData] = useState([]);
-    const [secondPitchReservationData, setSecondPitchReservationData] = useState([]);
-
-    useEffect(() => {
-        setFirstPitchReservationData(reservationDataToArray(reservations.firstPitch));
-        setSecondPitchReservationData(reservationDataToArray(reservations.secondPitch));
-    }, [reservations]);
-
-    const navigate = useNavigate();
-
-    const handleReservationClick = (pitch, hour) => {
-        navigate('/reservationDetails', { state: { pitch, hour, date } });
-    };
 
     const onDragEnd = (result) => {
-
-        // todo: update the database with the new order of the reservations
-
         destination = result.destination;
         source = result.source;
 
@@ -98,10 +79,6 @@ function Dnd({ reservations, date }) {
             updatedEndPitch.splice(destination.index, 0, startItem);
         }
 
-
-        updatedStartPitch = reservationDataToArray(updatedStartPitch);
-        updatedEndPitch = reservationDataToArray(updatedEndPitch);
-
         if (start === 'firstPitch') {
             setFirstPitchReservationData(updatedStartPitch);
             setSecondPitchReservationData(updatedEndPitch);
@@ -125,7 +102,7 @@ function Dnd({ reservations, date }) {
                                     <Draggable key={item.hour + ':00'} draggableId={item.hour + ':00'} index={index}>
                                         {(provided, snapshot) => (
                                             <a
-                                                onClick={() => handleReservationClick('firstPitch', item.hour)}
+                                                onClick={() => handleReservationClick('firstPitch', index)}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
@@ -154,7 +131,7 @@ function Dnd({ reservations, date }) {
                                     <Draggable key={item.hour + ':15'} draggableId={item.hour + ':15'} index={index}>
                                         {(provided, snapshot) => (
                                             <a
-                                                onClick={() => handleReservationClick('secondPitch', item.hour)}
+                                                onClick={() => handleReservationClick('secondPitch', index)}
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}

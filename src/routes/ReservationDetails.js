@@ -13,15 +13,17 @@ function ReservationDetails() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const { pitch, hour, date } = location.state;
+    const { pitch, index, date } = location.state;
+
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [note, setNote] = useState('');
+    const [hour, setHour] = useState();
 
     const [reservationDate, setReservationDate] = useState(date.replaceAll('-', '.'));
     const [reservationPitch, setReservationPitch] = useState(pitch);
     const [reservationHour, setReservationHour] = useState(hour);
 
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [note, setNote] = useState('');
 
 
 
@@ -31,7 +33,7 @@ function ReservationDetails() {
 
     const handleSave = () => {
         const stringDate = reservationDate.replaceAll('.', '-');
-        setReservation(stringDate, reservationPitch, reservationHour, name, phone, 'approved', note).then(() => {
+        setReservation(stringDate, reservationPitch, index, name, phone, 'approved', note).then(() => {
             alert('Rezervasyon kaydedildi');
             navigate('/reservation');
         }).catch((error) => {
@@ -43,11 +45,13 @@ function ReservationDetails() {
 
 
     useEffect(() => {
-        getReservationDetails(date, pitch, hour).then((data) => {
+        getReservationDetails(date, pitch, index).then((data) => {
             if (data) {
+                console.log(data)
                 setName(data.reservedUserName);
                 setPhone(data.reservedUserPhone);
                 setNote(data.note);
+                setHour(data.hour);
             }
         })
     }, [])
