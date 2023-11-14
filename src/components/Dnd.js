@@ -18,21 +18,24 @@ function Dnd({ reservations, date }) {
         navigate('/reservationDetails', { state: { pitch, index, date } });
     };
 
-
-
+    useEffect(() => {
+        setFirstPitchReservationData([...reservations.firstPitch]);
+        setSecondPitchReservationData([...reservations.secondPitch]);
+    }, [reservations]);
 
 
     const updateDatabaseOnDragEnd = async (pitchA, pitchB, indexA, indexB, hourA, hourB) => {
         try {
             // Fetch reservation details for pitchA and pitchB
-            const itemA = await getReservationDetails(date, pitchA, indexA);
-            const itemB = await getReservationDetails(date, pitchB, indexB);
+            const dateString = date.replaceAll('.', '-');
+            const itemA = await getReservationDetails(dateString, pitchA, indexA);
+            const itemB = await getReservationDetails(dateString, pitchB, indexB);
 
             // Check if data is available before updating reservations
             if (itemA && itemB && itemA.hour === hourA && itemB.hour === hourB) {
                 // Update reservations for pitchA and pitchB
-                await setReservation(date, pitchA, indexA, itemB.reservedUserName, itemB.reservedUserPhone, 'approved', itemB.note);
-                await setReservation(date, pitchB, indexB, itemA.reservedUserName, itemA.reservedUserPhone, 'approved', itemA.note);
+                await setReservation(dateString, pitchA, indexA, hourA, itemB.reservedUserName, itemB.reservedUserPhone, itemB.note);
+                await setReservation(dateString, pitchB, indexB, hourB, itemA.reservedUserName, itemA.reservedUserPhone, itemA.note);
             }
         } catch (error) {
             // Handle errors here
@@ -45,7 +48,10 @@ function Dnd({ reservations, date }) {
         destination = result.destination;
         source = result.source;
 
-        if (!destination) return; // If the item is dropped outside the list, do nothing
+        const hourA = source.droppableId === 'firstPitch' ? firstPitchReservationData[source.index].hour : secondPitchReservationData[source.index].hour;
+        const hourB = destination.droppableId === 'firstPitch' ? firstPitchReservationData[destination.index].hour : secondPitchReservationData[destination.index].hour;
+
+        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) return; // If the item is dropped outside the list or dropped at the same location, do nothing
 
         start = source.droppableId; // get the id of the start pitch
         end = destination.droppableId; // get the id of the end pitch
@@ -58,7 +64,6 @@ function Dnd({ reservations, date }) {
             endPitchList = firstPitchReservationData
         }
 
-
         // Initialize updatedStartPitch and updatedEndPitch as empty arrays
         let updatedStartPitch = [...startPitchList];
         let updatedEndPitch = [...endPitchList];
@@ -67,6 +72,11 @@ function Dnd({ reservations, date }) {
             const [startItem] = updatedStartPitch.slice(source.index, source.index + 1);
             const [endItem] = updatedStartPitch.slice(destination.index, destination.index + 1);
 
+            // keep the hour intact
+            const startHour = startItem.hour;
+            startItem.hour = endItem.hour;
+            endItem.hour = startHour;
+
             updatedStartPitch.splice(source.index, 1, endItem);
             updatedStartPitch.splice(destination.index, 1, startItem);
 
@@ -74,6 +84,10 @@ function Dnd({ reservations, date }) {
             const [startItem] = updatedStartPitch.splice(source.index, 1);
             const [endItem] = updatedEndPitch.splice(destination.index, 1);
 
+            // keep the hour intact
+            const startHour = startItem.hour;
+            startItem.hour = endItem.hour;
+            endItem.hour = startHour;
 
             updatedStartPitch.splice(source.index, 0, endItem);
             updatedEndPitch.splice(destination.index, 0, startItem);
@@ -87,7 +101,7 @@ function Dnd({ reservations, date }) {
             setSecondPitchReservationData(updatedStartPitch);
         }
 
-        updateDatabaseOnDragEnd(start, end, updatedStartPitch[source.index].hour, updatedEndPitch[destination.index].hour);
+        updateDatabaseOnDragEnd(start, end, source.index, destination.index, hourA, hourB);
 
     };
 
@@ -97,7 +111,7 @@ function Dnd({ reservations, date }) {
                 <Droppable droppableId='firstPitch'>
                     {(provided) => (
                         <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
-                            {firstPitchReservationData.map((item, index) => (
+                            {firstPitchReservationData.map((item, index) => (item.visible &&
                                 <li className="bg-slate-700 rounded shadow-md h-20" key={item.hour + ':00'}>
                                     <Draggable key={item.hour + ':00'} draggableId={item.hour + ':00'} index={index}>
                                         {(provided, snapshot) => (
@@ -126,7 +140,7 @@ function Dnd({ reservations, date }) {
                 <Droppable droppableId='secondPitch'>
                     {(provided) => (
                         <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
-                            {secondPitchReservationData.map((item, index) => (
+                            {secondPitchReservationData.map((item, index) => (item.visible &&
                                 <li className="bg-slate-700 rounded shadow-md h-20" key={item.hour + ':15'}>
                                     <Draggable key={item.hour + ':15'} draggableId={item.hour + ':15'} index={index}>
                                         {(provided, snapshot) => (

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getReservationDetails, setReservation } from '../firebase';
+import { getReservationDetails, getReservations, setReservation } from '../firebase';
 import DropDown from '../components/DropDown';
 
 
 import DatePicker from '../components/DatePicker';
 import DateIndicator from '../components/DateIndicator';
+
+
+
 
 
 function ReservationDetails() {
@@ -15,16 +18,16 @@ function ReservationDetails() {
     const navigate = useNavigate();
     const { pitch, index, date } = location.state;
 
+
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [note, setNote] = useState('');
     const [hour, setHour] = useState();
 
-    const [reservationDate, setReservationDate] = useState(date.replaceAll('-', '.'));
+    const [reservationDate, setReservationDate] = useState(date);
     const [reservationPitch, setReservationPitch] = useState(pitch);
     const [reservationHour, setReservationHour] = useState(hour);
-
-
+    const dateString = reservationDate.replaceAll('.', '-');
 
 
     const [showPicker, setShowPicker] = useState(false);
@@ -32,8 +35,26 @@ function ReservationDetails() {
 
 
     const handleSave = () => {
-        const stringDate = reservationDate.replaceAll('.', '-');
-        setReservation(stringDate, reservationPitch, index, name, phone, 'approved', note).then(() => {
+
+        if (date.replaceAll('.', '-') !== dateString) { // If date is changed to another day.
+            getReservations(dateString).then((data) => { // Get the reservations for the new date
+                if (data) { // If there are reservations for the new date
+                    const index = data[reservationPitch].findIndex((item) => item.hour === reservationHour);
+                    if (index !== -1 && data[reservationPitch][index].reservedUserName == '') { // If the new hour is not reserved
+                        setReservation(dateString, reservationPitch, index, reservationHour, name, phone, note);
+
+                    } else { // If the new hour is reserved
+                        alert('Bu saat rezerve edilmiş');
+
+                    }
+                }
+            })
+        }
+
+
+        setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
+
+        setReservation(dateString, reservationPitch, index, reservationHour, name, phone, note).then(() => {
             alert('Rezervasyon kaydedildi');
             navigate('/reservation');
         }).catch((error) => {
@@ -45,13 +66,13 @@ function ReservationDetails() {
 
 
     useEffect(() => {
-        getReservationDetails(date, pitch, index).then((data) => {
+        getReservationDetails(dateString, pitch, index).then((data) => {
             if (data) {
-                console.log(data)
                 setName(data.reservedUserName);
                 setPhone(data.reservedUserPhone);
                 setNote(data.note);
                 setHour(data.hour);
+                setReservationHour(data.hour);
             }
         })
     }, [])

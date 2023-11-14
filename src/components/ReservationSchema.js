@@ -1,67 +1,79 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
-import { setReservationSchema } from '../firebase';
+import { setReservationSchema, getReservationSchema } from '../firebase';
 import Navbar from './Navbar';
 
 function ReservationSchema() {
 
     const [schema, setSchema] = useState({
         firstPitch: [
-            { hour: '00', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '01', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '02', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '03', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '04', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '05', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '06', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '07', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '08', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '09', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '10', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '11', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '12', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '13', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '14', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '15', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '16', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '17', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '18', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '19', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '20', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '21', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '22', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '23', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
+            { hour: '00', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '01', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '02', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '03', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '04', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '05', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '06', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '07', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '08', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '09', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '10', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '11', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '12', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '13', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '14', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '15', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '16', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '17', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '18', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '19', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '20', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '21', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '22', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '23', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
 
         ],
         secondPitch: [
-            { hour: '00', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '01', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '02', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '03', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '04', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '05', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '06', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '07', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '08', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '09', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '10', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '11', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '12', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '13', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '14', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '15', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '16', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '17', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '18', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '19', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '20', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '21', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '22', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
-            { hour: '23', reservedUserName: '', reservedUserPhone: '', note: '', request: '', visible: true },
+            { hour: '00', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '01', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '02', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '03', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '04', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '05', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '06', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '07', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '08', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '09', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '10', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '11', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '12', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '13', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '14', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '15', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '16', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '17', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '18', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '19', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '20', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '21', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '22', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
+            { hour: '23', reservedUserName: '', reservedUserPhone: '', note: '', visible: true },
         ]
     });
+
+
+    useEffect(() => {
+        // Define the callback function
+        const handleReservationSchema = (data) => {
+            setSchema(data);
+        };
+
+        // Call getReservationSchema with the callback function
+        getReservationSchema(handleReservationSchema);
+    }, []);
+
 
     const updateVisible = (pitch, hour, visible) => {
         const items = schema[pitch];

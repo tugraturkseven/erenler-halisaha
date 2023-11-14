@@ -21,7 +21,8 @@ function Reservation() {
     }, []);
 
     useEffect(() => {
-        const updatedSchema = reservationSchema;
+        const updatedSchema = { firstPitch: [...reservationSchema.firstPitch], secondPitch: [...reservationSchema.secondPitch] };
+
         getReservations(selectedDayString)
             .then((data) => {
                 if (data) {
@@ -42,8 +43,9 @@ function Reservation() {
                     setReservations(updatedSchema);
                 } else {
                     // Handle the case when no data is found
-                    setAllReservations(selectedDayString, { firstPitch: reservationSchema.firstPitch, secondPitch: reservationSchema.secondPitch });
                     setReservations(reservationSchema);
+                    setAllReservations(selectedDayString, { firstPitch: reservationSchema.firstPitch, secondPitch: reservationSchema.secondPitch });
+
                 }
             })
             .catch((error) => {
@@ -73,7 +75,7 @@ function Reservation() {
                 <p>🏟️ Saha 1</p>
                 <p>🏟️ Saha 2</p>
             </div>
-            {isLoaded ? <Dnd reservations={reservations} selectedDay={selectedDay} /> : <p>Yükleniyor...</p>}
+            {isLoaded ? <Dnd reservations={reservations} date={selectedDay} /> : <p>Yükleniyor...</p>}
         </div>
     );
 }
