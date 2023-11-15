@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getReservationDetails, getReservations, setReservation } from '../firebase';
+import { getReservationDetails, getReservations, setReservation, getReservationSchema, setAllReservations } from '../firebase';
 import DropDown from '../components/DropDown';
 
 
 import DatePicker from '../components/DatePicker';
 import DateIndicator from '../components/DateIndicator';
-
-
-
-
 
 function ReservationDetails() {
 
@@ -28,9 +24,21 @@ function ReservationDetails() {
     const [reservationPitch, setReservationPitch] = useState(pitch);
     const [reservationHour, setReservationHour] = useState(hour);
     const dateString = reservationDate.replaceAll('.', '-');
-
+    const [isNewReservation, setIsNewReservation] = useState(true); // If the reservation is new, set it to true, otherwise false
 
     const [showPicker, setShowPicker] = useState(false);
+    const [reservationSchema, setReservationSchema] = useState({ firstPitch: [], secondPitch: [] });
+    const [schemaHours, setSchemaHours] = useState([]);
+
+
+
+    useEffect(() => { // Schema needed for the date picker, if day is not created, create one
+        getReservationSchema((data) => {
+            setReservationSchema(data);
+            const hours = data.firstPitch.map((item) => item.hour);
+            setSchemaHours(hours);
+        });
+    }, []);
 
 
 
@@ -40,27 +48,50 @@ function ReservationDetails() {
             getReservations(dateString).then((data) => { // Get the reservations for the new date
                 if (data) { // If there are reservations for the new date
                     const index = data[reservationPitch].findIndex((item) => item.hour === reservationHour);
+
                     if (index !== -1 && data[reservationPitch][index].reservedUserName == '') { // If the new hour is not reserved
                         setReservation(dateString, reservationPitch, index, reservationHour, name, phone, note);
-
+                        if (!isNewReservation) setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
+                        alert('Rezervasyon kaydedildi');
+                        navigate('/reservation')
                     } else { // If the new hour is reserved
-                        alert('Bu saat rezerve edilmiş');
+                        alert('Bu tarih ve saat rezerve edilmiş');
+                    }
+                } else {
+                    setAllReservations(dateString, reservationSchema);
+                    setReservation(dateString, reservationPitch, index, reservationHour, name, phone, note);
+                    if (!isNewReservation) setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
+                    alert('Rezervasyon kaydedildi');
+                    navigate('/reservation')
+                }
+            }).catch((error) => { // If there are no reservations for the new date
+                alert('Hata olustu:', error)
+            });
 
+        } else {
+            getReservations(dateString).then((data) => {
+                if (data) {
+
+                    const newIndex = data[reservationPitch].findIndex((item) => item.hour === reservationHour);
+                    console.log('burasi calisti newIndex:', newIndex)
+                    const reservedUserName = data[reservationPitch][newIndex].reservedUserName;
+                    if (newIndex !== -1 && ((hour === reservationHour && pitch === reservationPitch) || reservedUserName === '')) {
+                        // Since date is not changed, check if hour or pitch is changed, if not check if the hour is reserved or not
+                        // If hour or pitch is not changed, this means user is updating the reservation
+                        setReservation(dateString, reservationPitch, newIndex, reservationHour, name, phone, note);
+
+                        if (!isNewReservation && (hour !== reservationHour || pitch !== reservationPitch)) setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
+                        // Reservation is not new, and hour or pitch is changed, so delete the old reservation
+
+
+                        alert('Rezervasyon kaydedildi');
+                        navigate('/reservation')
+                    } else { // If the new hour is reserved
+                        alert('Bu tarih ve saat rezerve edilmiş');
                     }
                 }
-            })
+            });
         }
-
-
-        setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
-
-        setReservation(dateString, reservationPitch, index, reservationHour, name, phone, note).then(() => {
-            alert('Rezervasyon kaydedildi');
-            navigate('/reservation');
-        }).catch((error) => {
-            alert('Rezervasyon kaydedilemedi', error);
-        }
-        )
     }
 
 
@@ -73,12 +104,13 @@ function ReservationDetails() {
                 setNote(data.note);
                 setHour(data.hour);
                 setReservationHour(data.hour);
+                data.reservedUserName !== '' ? setIsNewReservation(false) : setIsNewReservation(true);
             }
         })
     }, [])
 
 
-    const hours = [16, 17, 18, 19, 20, 21, 22, 23, 24];
+
 
     const handlePitch = (option) => {
         if (option === 'Saha 1') {
@@ -120,7 +152,7 @@ function ReservationDetails() {
                 <DateIndicator selectedDay={reservationDate} setSelectedDay={setReservationDate} />
                 <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
                 <DropDown options={['Saha 1', 'Saha 2']} onSelect={handlePitch} selectedOption={reservationPitch === 'firstPitch' ? 'Saha 1' : 'Saha 2'} placeHolder={'🏟️ Saha'} />
-                <DropDown options={hours} onSelect={setReservationHour} selectedOption={reservationHour} placeHolder={'🕓 Saat'} />
+                <DropDown options={schemaHours} onSelect={setReservationHour} selectedOption={reservationHour} placeHolder={'🕓 Saat'} />
 
                 <input className='input input-bordered' type="text" placeholder='🏷️ İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
                 <input className='input input-bordered' type="text" placeholder='📞 Telefon' value={phone} onChange={(e) => setPhone(e.target.value)} />
