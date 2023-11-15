@@ -12,19 +12,18 @@ function Costumers() {
     const [searchResults, setSearchResults] = useState([])
 
     useEffect(() => {
-        const userArray = [];
         getAllCostumers()
             .then((userData) => {
                 if (userData) {
-                    userArray.push(...Object.entries(userData).map(([key, value]) => ({ id: key, ...value })));
-                    setCostumers(userArray)
-                    setSearchResults(userArray)
+                    const userArray = Object.entries(userData).map(([key, value]) => ({ id: key, ...value }));
+                    setCostumers(userArray);
+                    setSearchResults(userArray);
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
-    }, [])
+    }, []);
 
     const handleChange = (value) => {
 

@@ -1,18 +1,15 @@
 import React from 'react'
-import Card from '../components/Card'
 import Navbar from '../components/Navbar'
 
-function Settings() {
-
+function GeneralSettings() {
     return (
         <div>
             <Navbar />
             <div className='flex flex-col justify-between items-center md:flex-row lg:justify-around'>
-                <Card icon='⚙️' title='Genel' route='generalSettings' />
-                <Card icon='⛓️' title='Şema' route='schemaSettings' />
+                <h1>General Settings</h1>
             </div>
         </div>
     )
 }
 
-export default Settings
+export default GeneralSettings

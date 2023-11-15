@@ -7,6 +7,10 @@ import Message from './routes/Message';
 import CostumerDetails from './routes/CostumerDetails';
 import SignUp from './routes/SignUp';
 import Settings from './routes/Settings';
+import SchemaSettings from './routes/SchemaSettings';
+import GeneralSettings from './routes/GeneralSettings';
+
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -23,6 +27,8 @@ function App() {
           <Route path='/message' element={<Message />} />
           <Route path='/costumerDetails' element={<CostumerDetails />} />
           <Route path='/settings' element={<Settings />} />
+          <Route path='/schemaSettings' element={<SchemaSettings />} />
+          <Route path='/generalSettings' element={<GeneralSettings />} />
         </Routes>
       </BrowserRouter>
     </div>

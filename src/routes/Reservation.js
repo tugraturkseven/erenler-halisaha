@@ -21,6 +21,7 @@ function Reservation() {
     }, []);
 
     useEffect(() => {
+
         const updatedSchema = { firstPitch: [...reservationSchema.firstPitch], secondPitch: [...reservationSchema.secondPitch] };
 
         getReservations(selectedDayString)
@@ -29,15 +30,23 @@ function Reservation() {
                     // Data fetched successfully, update the 'firstPitch' in the new object
                     data.firstPitch.map((item) => {
                         const index = updatedSchema.firstPitch.findIndex((innerItem) => innerItem.hour === item.hour);
-                        if (index !== -1) {
-                            updatedSchema.firstPitch[index] = item;
+                        if (index !== -1) { // Visibility should be derived from the schema
+                            updatedSchema.firstPitch[index] = {
+                                ...updatedSchema.firstPitch[index],
+                                ...item,
+                                visible: updatedSchema.firstPitch[index].visible // maintains the existing 'visible' property
+                            };
                         }
                     })
                     data.secondPitch.map((item) => {
                         const hour = item.hour;
                         const index = updatedSchema.secondPitch.findIndex((item) => item.hour === hour);
                         if (index !== -1) {
-                            updatedSchema.secondPitch[index] = item;
+                            updatedSchema.secondPitch[index] = {
+                                ...updatedSchema.secondPitch[index],
+                                ...item,
+                                visible: updatedSchema.secondPitch[index].visible // maintains the existing 'visible' property
+                            };
                         }
                     })
                     setReservations(updatedSchema);
@@ -53,7 +62,7 @@ function Reservation() {
                 console.log('Error fetching data:', error);
             });
 
-    }, [selectedDay, isLoaded]);
+    }, [selectedDay, reservationSchema]);
 
     const handleDatePick = (date) => {
         setShowPicker(false);

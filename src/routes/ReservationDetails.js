@@ -73,7 +73,7 @@ function ReservationDetails() {
                 if (data) {
 
                     const newIndex = data[reservationPitch].findIndex((item) => item.hour === reservationHour);
-                    console.log('burasi calisti newIndex:', newIndex)
+
                     const reservedUserName = data[reservationPitch][newIndex].reservedUserName;
                     if (newIndex !== -1 && ((hour === reservationHour && pitch === reservationPitch) || reservedUserName === '')) {
                         // Since date is not changed, check if hour or pitch is changed, if not check if the hour is reserved or not
@@ -82,8 +82,6 @@ function ReservationDetails() {
 
                         if (!isNewReservation && (hour !== reservationHour || pitch !== reservationPitch)) setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
                         // Reservation is not new, and hour or pitch is changed, so delete the old reservation
-
-
                         alert('Rezervasyon kaydedildi');
                         navigate('/reservation')
                     } else { // If the new hour is reserved
