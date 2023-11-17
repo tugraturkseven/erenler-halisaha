@@ -48,10 +48,13 @@ function Dnd({ reservations, date }) {
         destination = result.destination;
         source = result.source;
 
+
+
+        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) return; // If the item is dropped outside the list or dropped at the same location, do nothing
+
         const hourA = source.droppableId === 'firstPitch' ? firstPitchReservationData[source.index].hour : secondPitchReservationData[source.index].hour;
         const hourB = destination.droppableId === 'firstPitch' ? firstPitchReservationData[destination.index].hour : secondPitchReservationData[destination.index].hour;
 
-        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) return; // If the item is dropped outside the list or dropped at the same location, do nothing
 
         start = source.droppableId; // get the id of the start pitch
         end = destination.droppableId; // get the id of the end pitch

@@ -135,10 +135,8 @@ function ReservationDetails() {
         setName('');
         setPhone('');
         setNote('');
-        setReservationHour(hour);
-        setReservationPitch(pitch);
-        setReservationDate(date);
-        handleSave();
+        setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
+        alert('Rezervasyon iptal edildi');
     }
 
 

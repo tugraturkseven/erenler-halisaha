@@ -9,7 +9,7 @@ import SignUp from './routes/SignUp';
 import Settings from './routes/Settings';
 import SchemaSettings from './routes/SchemaSettings';
 import GeneralSettings from './routes/GeneralSettings';
-
+import PitchSettings from './routes/PitchSettings';
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -29,6 +29,7 @@ function App() {
           <Route path='/settings' element={<Settings />} />
           <Route path='/schemaSettings' element={<SchemaSettings />} />
           <Route path='/generalSettings' element={<GeneralSettings />} />
+          <Route path='/pitchSettings' element={<PitchSettings />} />
         </Routes>
       </BrowserRouter>
     </div>

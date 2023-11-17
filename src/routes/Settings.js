@@ -10,6 +10,7 @@ function Settings() {
             <div className='flex flex-col justify-between items-center md:flex-row lg:justify-around'>
                 <Card icon='⚙️' title='Genel' route='generalSettings' />
                 <Card icon='⛓️' title='Şema' route='schemaSettings' />
+                <Card icon='🏟️' title='Saha' route='pitchSettings' />
             </div>
         </div>
     )

@@ -34,12 +34,13 @@ function Costumers() {
 
     }
 
+    const headings = { first: '🏷️ Isim', second: '📞 Telefon' }
 
     return (
         <div className='flex flex-col h-screen items-center gap-5'>
             <Navbar addCostumer={true} />
             <Search handleChange={handleChange} />
-            <Table data={searchResults} />
+            <Table data={searchResults} type={'customers'} headings={headings} />
         </div>
     )
 }
