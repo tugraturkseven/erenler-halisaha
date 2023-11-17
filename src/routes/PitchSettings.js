@@ -3,8 +3,9 @@ import Navbar from '../components/Navbar'
 import { getPitchList, setPitches } from '../firebase'
 import Table from '../components/Table'
 import DropDown from '../components/DropDown'
-
+import { useNavigate } from 'react-router-dom'
 function PitchSettings() {
+    const navigate = useNavigate();
     const [pitchList, setPitchList] = useState([{ id: 1, name: 'Saha 1', minute: '00' }])
     const [selectedMinute, setSelectedMinute] = useState('00');
 
@@ -46,10 +47,10 @@ function PitchSettings() {
         alert('Saha silindi.')
     }
 
-
     const handleEditPitch = (pitch) => {
-
+        navigate(`/pitchDetails`, { state: { pitch } });
     }
+
 
     return (
         <div className='text-center flex flex-col h-screen'>
