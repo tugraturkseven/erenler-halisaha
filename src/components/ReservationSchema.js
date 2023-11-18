@@ -40,18 +40,12 @@ function ReservationSchema() {
 
     useEffect(() => {
         // Define the callback function
-        const handleReservationSchema = (data) => {
-            console.log(data)
-            if (data) {
-                setSchema(data.firstPitch);
-            } else {
-                setReservationSchema({ firstPitch: schema, secondPitch: schema })
+        getReservationSchema().then((schema) => {
+            // Set the schema
+            if (schema) {
+                setSchema(schema);
             }
-
-        };
-
-        // Call getReservationSchema with the callback function
-        getReservationSchema(handleReservationSchema);
+        });
     }, []);
 
 
@@ -83,7 +77,7 @@ function ReservationSchema() {
 
     const handleSave = () => {
         // Call setSchema with the current state
-        setReservationSchema({ firstPitch: schema, secondPitch: schema })
+        setReservationSchema(schema)
     };
 
     const handleReset = () => {

@@ -4,6 +4,8 @@ import { getPitchList, setPitches } from '../firebase'
 import Table from '../components/Table'
 import DropDown from '../components/DropDown'
 import { useNavigate } from 'react-router-dom'
+
+
 function PitchSettings() {
     const navigate = useNavigate();
     const [pitchList, setPitchList] = useState([{ id: 1, name: 'Saha 1', minute: '00' }])

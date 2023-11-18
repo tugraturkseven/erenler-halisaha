@@ -2,67 +2,63 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Dnd from '../components/Dnd';
 import DatePicker from '../components/DatePicker';
-import { getReservations, setAllReservations, getReservationSchema } from '../firebase';
+import { getReservations, setAllReservations, getReservationSchema, getPitchList } from '../firebase';
 import DateIndicator from '../components/DateIndicator';
 
 function Reservation() {
     const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('tr'));
     const [showPicker, setShowPicker] = useState(false);
-    const [reservationSchema, setReservationSchema] = useState({ firstPitch: [], secondPitch: [] });
-    const selectedDayString = selectedDay.replaceAll('.', '-');
-    const [reservations, setReservations] = useState({ firstPitch: [], secondPitch: [] });
+    const [reservations, setReservations] = useState({}); // Object to store reservations for each pitch
     const [isLoaded, setIsLoaded] = useState(false);
+    const selectedDayString = selectedDay.replaceAll('.', '-');
 
     useEffect(() => {
-        getReservationSchema((data) => {
-            setReservationSchema(data);
-            setIsLoaded(true);
+        // Step 1: Fetch the pitches
+        getPitchList().then(fetchedPitches => {
+            // Step 2: Fetch the schema
+            getReservationSchema().then(schema => {
+                // Step 3 & 4: Apply the schema to each pitch and initialize reservations
+
+                let initialReservations = {};
+                fetchedPitches.forEach(pitch => {
+                    // Add the minute attribute from the pitch to each schema item
+                    initialReservations[pitch.name] = schema.map(schemaItem => ({
+                        ...schemaItem,
+                        minute: pitch.minute
+                    }));
+                });
+                setReservations(initialReservations);
+                setIsLoaded(true);
+            });
         });
     }, []);
 
     useEffect(() => {
+        // Step 5: Fetch and populate reservations for each pitch
+        Object.keys(reservations).forEach(pitchName => {
+            getReservations(selectedDayString, pitchName)
+                .then(pitchReservations => {
+                    if (pitchReservations) {
+                        setReservations(prevReservations => ({
+                            ...prevReservations,
+                            [pitchName]: prevReservations[pitchName].map(schemaItem => {
+                                let reservation = pitchReservations.find(r => r.hour === schemaItem.hour);
+                                return reservation ? { ...schemaItem, ...reservation } : schemaItem;
+                            })
+                        }));
+                        console.log('reservations: ', reservations)
+                    } else {
+                        setAllReservations(selectedDayString, reservations);
+                    }
 
-        const updatedSchema = { firstPitch: [...reservationSchema.firstPitch], secondPitch: [...reservationSchema.secondPitch] };
+                })
+                .catch(error => {
+                    console.log('Hata', error)
+                });
+        });
 
-        getReservations(selectedDayString)
-            .then((data) => {
-                if (data) {
-                    // Data fetched successfully, update the 'firstPitch' in the new object
-                    data.firstPitch.map((item) => {
-                        const index = updatedSchema.firstPitch.findIndex((innerItem) => innerItem.hour === item.hour);
-                        if (index !== -1) { // Visibility should be derived from the schema
-                            updatedSchema.firstPitch[index] = {
-                                ...updatedSchema.firstPitch[index],
-                                ...item,
-                                visible: updatedSchema.firstPitch[index].visible // maintains the existing 'visible' property
-                            };
-                        }
-                    })
-                    data.secondPitch.map((item) => {
-                        const hour = item.hour;
-                        const index = updatedSchema.secondPitch.findIndex((item) => item.hour === hour);
-                        if (index !== -1) {
-                            updatedSchema.secondPitch[index] = {
-                                ...updatedSchema.secondPitch[index],
-                                ...item,
-                                visible: updatedSchema.secondPitch[index].visible // maintains the existing 'visible' property
-                            };
-                        }
-                    })
-                    setReservations(updatedSchema);
-                } else {
-                    // Handle the case when no data is found
-                    setReservations(reservationSchema);
-                    setAllReservations(selectedDayString, { firstPitch: reservationSchema.firstPitch, secondPitch: reservationSchema.secondPitch });
+    }, [selectedDay, isLoaded]);
 
-                }
-            })
-            .catch((error) => {
-                // Handle any errors that occurred during data retrieval
-                console.log('Error fetching data:', error);
-            });
-
-    }, [selectedDay, reservationSchema]);
 
     const handleDatePick = (date) => {
         setShowPicker(false);
@@ -80,10 +76,7 @@ function Reservation() {
             <Navbar endButton={pickDateComponent} />
             <DateIndicator selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
             <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
-            <div className='flex flex-row justify-around w-96 mt-5'>
-                <p>🏟️ Saha 1</p>
-                <p>🏟️ Saha 2</p>
-            </div>
+
             {isLoaded ? <Dnd reservations={reservations} date={selectedDay} /> : <p>Yükleniyor...</p>}
         </div>
     );

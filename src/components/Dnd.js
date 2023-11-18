@@ -3,26 +3,19 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import { setReservation, getReservationDetails } from '../firebase';
 
-
-
 function Dnd({ reservations, date }) {
-
-    let source, destination, start, end, startPitchList, endPitchList;
-
-    const [firstPitchReservationData, setFirstPitchReservationData] = useState(reservations.firstPitch);
-    const [secondPitchReservationData, setSecondPitchReservationData] = useState(reservations.secondPitch);
-
     const navigate = useNavigate();
+
+    // Transforming the reservations object into an array for easier mapping
+    const [pitchReservations, setPitchReservations] = useState(Object.entries(reservations).map(([pitchName, reservations]) => ({ pitchName, reservations })));
+
+    useEffect(() => {
+        setPitchReservations(Object.entries(reservations).map(([pitchName, reservations]) => ({ pitchName, reservations })));
+    }, [reservations]);
 
     const handleReservationClick = (pitch, index) => {
         navigate('/reservationDetails', { state: { pitch, index, date } });
     };
-
-    useEffect(() => {
-        setFirstPitchReservationData([...reservations.firstPitch]);
-        setSecondPitchReservationData([...reservations.secondPitch]);
-    }, [reservations]);
-
 
     const updateDatabaseOnDragEnd = async (pitchA, pitchB, indexA, indexB, hourA, hourB) => {
         try {
@@ -43,134 +36,73 @@ function Dnd({ reservations, date }) {
         }
     };
 
-
     const onDragEnd = (result) => {
-        destination = result.destination;
-        source = result.source;
+        const { source, destination } = result;
 
+        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) return;
 
+        const sourcePitch = pitchReservations.find(pitch => pitch.pitchName === source.droppableId);
+        const destinationPitch = pitchReservations.find(pitch => pitch.pitchName === destination.droppableId);
 
-        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) return; // If the item is dropped outside the list or dropped at the same location, do nothing
+        const sourceItems = Array.from(sourcePitch.reservations);
+        const destItems = destination.droppableId === source.droppableId ? sourceItems : Array.from(destinationPitch.reservations);
 
-        const hourA = source.droppableId === 'firstPitch' ? firstPitchReservationData[source.index].hour : secondPitchReservationData[source.index].hour;
-        const hourB = destination.droppableId === 'firstPitch' ? firstPitchReservationData[destination.index].hour : secondPitchReservationData[destination.index].hour;
+        const [removed] = sourceItems.splice(source.index, 1);
+        destItems.splice(destination.index, 0, removed);
 
+        const newPitchReservations = pitchReservations.map(pitch => {
+            if (pitch.pitchName === source.droppableId) {
+                return { ...pitch, reservations: sourceItems };
+            } else if (pitch.pitchName === destination.droppableId) {
+                return { ...pitch, reservations: destItems };
+            }
+            return pitch;
+        });
 
-        start = source.droppableId; // get the id of the start pitch
-        end = destination.droppableId; // get the id of the end pitch
-
-        if (start === 'firstPitch') {
-            startPitchList = firstPitchReservationData
-            endPitchList = secondPitchReservationData
-        } else {
-            startPitchList = secondPitchReservationData
-            endPitchList = firstPitchReservationData
-        }
-
-        // Initialize updatedStartPitch and updatedEndPitch as empty arrays
-        let updatedStartPitch = [...startPitchList];
-        let updatedEndPitch = [...endPitchList];
-
-        if (start === end) {
-            const [startItem] = updatedStartPitch.slice(source.index, source.index + 1);
-            const [endItem] = updatedStartPitch.slice(destination.index, destination.index + 1);
-
-            // keep the hour intact
-            const startHour = startItem.hour;
-            startItem.hour = endItem.hour;
-            endItem.hour = startHour;
-
-            updatedStartPitch.splice(source.index, 1, endItem);
-            updatedStartPitch.splice(destination.index, 1, startItem);
-
-        } else {
-            const [startItem] = updatedStartPitch.splice(source.index, 1);
-            const [endItem] = updatedEndPitch.splice(destination.index, 1);
-
-            // keep the hour intact
-            const startHour = startItem.hour;
-            startItem.hour = endItem.hour;
-            endItem.hour = startHour;
-
-            updatedStartPitch.splice(source.index, 0, endItem);
-            updatedEndPitch.splice(destination.index, 0, startItem);
-        }
-
-        if (start === 'firstPitch') {
-            setFirstPitchReservationData(updatedStartPitch);
-            setSecondPitchReservationData(updatedEndPitch);
-        } else {
-            setFirstPitchReservationData(updatedEndPitch);
-            setSecondPitchReservationData(updatedStartPitch);
-        }
-
-        updateDatabaseOnDragEnd(start, end, source.index, destination.index, hourA, hourB);
+        setPitchReservations(newPitchReservations);
 
     };
 
     return (
-        <div className='flex flex-row w-96 p-5 justify-between md:w-2/3 md:justify-around lg:w-2/3 lg:justify-around xl:w-1/3'>
+        <div className='flex flex-row gap-2 p-2 justify-between md:w-2/3 md:justify-around lg:w-2/3 lg:justify-around xl:w-1/3'>
             <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId='firstPitch'>
-                    {(provided) => (
-                        <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
-                            {firstPitchReservationData.map((item, index) => (item.visible &&
-                                <li className="bg-slate-700 rounded shadow-md h-20" key={item.hour + ':00'}>
-                                    <Draggable key={item.hour + ':00'} draggableId={item.hour + ':00'} index={index}>
-                                        {(provided, snapshot) => (
-                                            <a
-                                                onClick={() => handleReservationClick('firstPitch', index)}
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                            >
-                                                <div className='flex flex-col text-center w-40 md:w-52 p-4'>
-                                                    <div className='flex flex-row justify-between'>
-                                                        <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour + ':00'}</p>
-                                                        <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
-                                                    </div>
-                                                    <p className="text-lg font-bold truncate">{item.reservedUserName}</p>
-                                                </div>
-                                            </a>
-                                        )}
-                                    </Draggable>
-                                </li>
-                            ))}
-                            {provided.placeholder}
-                        </ul>
-                    )}
-                </Droppable>
-                <Droppable droppableId='secondPitch'>
-                    {(provided) => (
-                        <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
-                            {secondPitchReservationData.map((item, index) => (item.visible &&
-                                <li className="bg-slate-700 rounded shadow-md h-20" key={item.hour + ':15'}>
-                                    <Draggable key={item.hour + ':15'} draggableId={item.hour + ':15'} index={index}>
-                                        {(provided, snapshot) => (
-                                            <a
-                                                onClick={() => handleReservationClick('secondPitch', index)}
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                            >
-                                                <div className='flex flex-col text-center w-40 md:w-52 p-4'>
-                                                    <div className='flex flex-row justify-between'>
-                                                        <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour + ':15'}</p>
-                                                        <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
-                                                    </div>
-                                                    <p className="text-lg font-bold truncate">{item.reservedUserName}</p>
-                                                </div>
-                                            </a>
-                                        )}
-                                    </Draggable>
-                                </li>
-                            ))}
-                            {provided.placeholder}
-                        </ul>
-                    )}
-                </Droppable>
+                {pitchReservations.map((pitch, index) => (
+                    <div key={`${pitch.pitchName}-${index}`}>
+                        <h1 className="text-lg font-semibold text-center mb-2" key={pitch.pitchName}>{pitch.pitchName}</h1>
+                        <Droppable droppableId={pitch.pitchName}>
+                            {(provided) => (
+                                <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
+                                    {pitch.reservations.map((item, index) => item.visible && (
+                                        <li className="bg-slate-700 rounded shadow-md h-20" key={item.hour}>
+                                            <Draggable key={item.hour} draggableId={item.hour} index={index}>
+                                                {(provided, snapshot) => (
+                                                    <a
+                                                        onClick={() => handleReservationClick(pitch.pitchName, index)}
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                    >
+                                                        <div className='flex flex-col text-center w-28 md:w-52 p-4'>
+                                                            <div className='flex flex-row justify-between'>
+                                                                <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour + ':' + item.minute}</p>
+                                                                <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
+                                                            </div>
+                                                            <p className="text-lg font-bold truncate">{item.reservedUserName}</p>
+                                                        </div>
+                                                    </a>
+                                                )}
+                                            </Draggable>
+                                        </li>
+                                    ))}
+                                    {provided.placeholder}
+                                </ul>
+                            )}
+                        </Droppable>
+                    </div>
+                ))}
             </DragDropContext>
         </div>
+
     );
 }
 
