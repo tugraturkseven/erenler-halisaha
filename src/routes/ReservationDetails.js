@@ -35,7 +35,8 @@ function ReservationDetails() {
         getReservationSchema().then((data) => {
             if (data) {
                 setReservationSchema(data);
-                setSchemaHours(data.map((item) => item.hour));
+                // Add hours if visible to the schemaHours array
+                setSchemaHours(data.filter(schemaItem => schemaItem.visible).map(schemaItem => schemaItem.hour));
             }
         }).catch((error) => {
             console.log('Hata', error)
@@ -60,7 +61,7 @@ function ReservationDetails() {
 
 
     function checkReservationExists(reservations) {
-        if (reservationHour === hour && reservationPitch === pitch && date.replaceAll('.', '-') === reservationDate) return false;
+        if (reservationHour === hour && reservationPitch === pitch && date === reservationDate) return false;
         if (!reservations) {
             // No reservations for this pitch or date, so the slot is available
             let initialReservations = {};
@@ -71,7 +72,9 @@ function ReservationDetails() {
                     minute: pitch.minute
                 }));
             });
-            clearReservation();
+
+            setAllReservations(dateString, initialReservations);
+
             return false;
         }
 
@@ -79,13 +82,13 @@ function ReservationDetails() {
         const reservationIndex = reservations.findIndex(reservation => reservation.hour === reservationHour);
         if (reservationIndex === -1) {
             // No reservation found for the given hour, so the slot is available
-            clearReservation();
+
             return false;
         }
 
         // Check if the reservation slot is already occupied
         const isReserved = reservations[reservationIndex].reservedUserName !== '';
-        clearReservation();
+
         return isReserved;
     }
 
@@ -94,10 +97,13 @@ function ReservationDetails() {
             const newDateString = reservationDate.replaceAll('.', '-');
             const reservations = await getReservations(newDateString, reservationPitch).then((data) => data);
             const reservationExists = checkReservationExists(reservations);
+            const minute = pitches.find(pitch => pitch.name === reservationPitch).minute;
+            const index = reservationSchema.findIndex(schemaItem => schemaItem.hour === reservationHour);
 
             if (!reservationExists) { // Check reservation exists or user updating the reservation
-                await setReservation(newDateString, reservationPitch, index, reservationHour, name, phone, note);
+                await setReservation(newDateString, reservationPitch, index, reservationHour, minute, name, phone, note);
                 alert('Rezervasyon kaydedildi');
+                if (reservationHour !== hour || reservationPitch !== pitch || date !== reservationDate) clearReservation(false);
                 navigate('/reservation');
             } else {
                 alert('Bu tarih ve saat rezerve edilmiş');
@@ -129,11 +135,16 @@ function ReservationDetails() {
 
 
 
-    const clearReservation = () => {
+    const clearReservation = (notify) => {
+        const minute = pitches.find(p => p.name === pitch).minute;
         setName('');
         setPhone('');
         setNote('');
-        setReservation(date.replaceAll('.', '-'), pitch, index, hour, '', '', '');
+        setReservation(date.replaceAll('.', '-'), pitch, index, hour, minute, '', '', '');
+        if (notify) {
+            alert('Rezervasyon iptal edildi')
+            navigate('/reservation');
+        }
     }
 
 
@@ -152,8 +163,8 @@ function ReservationDetails() {
                 <input className='input input-bordered' type="text" placeholder='🗒️ Not' value={note} onChange={(e) => setNote(e.target.value)} />
 
                 <div className='flex flex-col gap-5 w-52'>
-                    <button className='btn btn-info' onClick={() => handleSave()}>💾 Kaydet</button>
-                    <button className='btn btn-secondary' onClick={() => clearReservation()}>❌ Iptal Et</button>
+                    <button className='btn btn-info' onClick={() => handleSave(true)}>💾 Kaydet</button>
+                    <button className='btn btn-secondary' onClick={() => clearReservation(true)}>❌ Iptal Et</button>
                     <button className='btn btn-accent' onClick={() => navigate('/reservation')}>🚪 Geri Dön</button>
                 </div>
             </div>

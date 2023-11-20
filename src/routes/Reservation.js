@@ -46,7 +46,6 @@ function Reservation() {
                                 return reservation ? { ...schemaItem, ...reservation } : schemaItem;
                             })
                         }));
-                        console.log('reservations: ', reservations)
                     } else {
                         setAllReservations(selectedDayString, reservations);
                     }
