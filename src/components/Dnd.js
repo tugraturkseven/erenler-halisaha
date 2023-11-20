@@ -27,8 +27,8 @@ function Dnd({ reservations, date }) {
             // Check if data is available before updating reservations
             if (itemA && itemB && itemA.hour === hourA && itemB.hour === hourB) {
                 // Update reservations for pitchA and pitchB
-                await setReservation(dateString, pitchA, indexA, hourA, itemB.reservedUserName, itemB.reservedUserPhone, itemB.note);
-                await setReservation(dateString, pitchB, indexB, hourB, itemA.reservedUserName, itemA.reservedUserPhone, itemA.note);
+                await setReservation(dateString, pitchA, indexA, hourA, itemA.minute, itemB.reservedUserName, itemB.reservedUserPhone, itemB.note);
+                await setReservation(dateString, pitchB, indexB, hourB, itemB.minute, itemA.reservedUserName, itemA.reservedUserPhone, itemA.note);
             }
         } catch (error) {
             // Handle errors here
@@ -47,8 +47,30 @@ function Dnd({ reservations, date }) {
         const sourceItems = Array.from(sourcePitch.reservations);
         const destItems = destination.droppableId === source.droppableId ? sourceItems : Array.from(destinationPitch.reservations);
 
-        const [removed] = sourceItems.splice(source.index, 1);
-        destItems.splice(destination.index, 0, removed);
+
+
+        if (source.droppableId === destination.droppableId) {
+            // Drag and drop in the same list
+            const [itemA] = sourceItems.slice(source.index, source.index + 1);
+            const [itemB] = destItems.slice(destination.index, destination.index + 1);
+
+            [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
+            [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
+
+            sourceItems.splice(source.index, 1, itemB);
+            destItems.splice(destination.index, 1, itemA);
+
+        } else {
+            // Drag and drop between different lists
+            const [itemA] = sourceItems.splice(source.index, 1);
+            const [itemB] = destItems.splice(destination.index, 1);
+
+            [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
+            [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
+
+            sourceItems.splice(source.index, 0, itemB);
+            destItems.splice(destination.index, 0, itemA);
+        }
 
         const newPitchReservations = pitchReservations.map(pitch => {
             if (pitch.pitchName === source.droppableId) {
@@ -60,7 +82,7 @@ function Dnd({ reservations, date }) {
         });
 
         setPitchReservations(newPitchReservations);
-
+        updateDatabaseOnDragEnd(source.droppableId, destination.droppableId, source.index, destination.index, sourceItems[source.index].hour, destItems[destination.index].hour);
     };
 
     return (
@@ -74,7 +96,7 @@ function Dnd({ reservations, date }) {
                                 <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
                                     {pitch.reservations.map((item, index) => item.visible && (
                                         <li className="bg-slate-700 rounded shadow-md h-20" key={item.hour}>
-                                            <Draggable key={item.hour} draggableId={item.hour} index={index}>
+                                            <Draggable key={pitch.pitchName + '-' + item.hour} draggableId={pitch.pitchName + '-' + item.hour} index={index}>
                                                 {(provided, snapshot) => (
                                                     <a
                                                         onClick={() => handleReservationClick(pitch.pitchName, index)}
