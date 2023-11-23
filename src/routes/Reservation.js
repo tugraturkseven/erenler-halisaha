@@ -6,6 +6,7 @@ import { getReservations, setAllReservations, getReservationSchema, getPitchList
 import DateIndicator from '../components/DateIndicator';
 
 function Reservation() {
+
     const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('tr'));
     const [showPicker, setShowPicker] = useState(false);
     const [reservations, setReservations] = useState({}); // Object to store reservations for each pitch
@@ -14,6 +15,7 @@ function Reservation() {
 
     useEffect(() => {
         // Step 1: Fetch the pitches
+        console.log('useEffect')
         getPitchList().then(fetchedPitches => {
             // Step 2: Fetch the schema
             getReservationSchema().then(schema => {
@@ -31,10 +33,11 @@ function Reservation() {
                 setIsLoaded(true);
             });
         });
-    }, []);
+    }, [selectedDay]);
 
     useEffect(() => {
         // Step 5: Fetch and populate reservations for each pitch
+        console.log('useEffect2')
         Object.keys(reservations).forEach(pitchName => {
             getReservations(selectedDayString, pitchName)
                 .then(pitchReservations => {

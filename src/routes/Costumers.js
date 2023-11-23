@@ -3,11 +3,11 @@ import Navbar from '../components/Navbar'
 import Table from '../components/Table'
 import Search from '../components/Search'
 import { getAllCostumers } from '../firebase'
-
+import { useNavigate } from 'react-router-dom'
 
 
 function Costumers() {
-
+    const navigate = useNavigate();
     const [costumers, setCostumers] = useState([])
     const [searchResults, setSearchResults] = useState([])
 
@@ -26,12 +26,14 @@ function Costumers() {
     }, []);
 
     const handleChange = (value) => {
+        // If value is name search for name if value is phone search for phone
+        const searchResults = costumers.filter((costumer) => costumer.name.toLowerCase().includes(value.toLowerCase()) || costumer.phone.includes(value));
+        setSearchResults(searchResults);
 
-        const results = costumers.filter((costumer) => {
-            return costumer.name.toLowerCase().includes(value.toLowerCase())
-        })
-        setSearchResults(results)
+    }
 
+    const handleEdit = (costumer) => {
+        navigate('/costumerDetails', { state: { costumer: costumer } })
     }
 
     const headings = { first: '🏷️ Isim', second: '📞 Telefon' }
@@ -40,7 +42,7 @@ function Costumers() {
         <div className='flex flex-col h-screen items-center gap-5'>
             <Navbar addCostumer={true} />
             <Search handleChange={handleChange} />
-            <Table data={searchResults} type={'customers'} headings={headings} />
+            <Table data={searchResults} type={'customers'} headings={headings} handleEdit={handleEdit} />
         </div>
     )
 }

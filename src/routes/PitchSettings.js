@@ -38,15 +38,20 @@ function PitchSettings() {
     }
 
     const handleDeletePitch = (pitch) => {
-        const newPitchList = pitchList.filter(item => item.id !== pitch.id);
-        // Here we need to reorder the ids and pitch names
-        newPitchList.forEach((item, index) => {
-            item.id = index + 1;
-            item.name = `Saha ${index + 1}`;
-        })
-        setPitchList(newPitchList);
-        setPitches(newPitchList);
-        alert('Saha silindi.')
+        if (pitchList.length > 1) {
+            const newPitchList = pitchList.filter(item => item.id !== pitch.id);
+            // Here we need to reorder the ids and pitch names
+            newPitchList.forEach((item, index) => {
+                item.id = index + 1;
+                item.name = `Saha ${index + 1}`;
+            })
+            setPitchList(newPitchList);
+            setPitches(newPitchList);
+            alert('Saha silindi.')
+        } else {
+            alert('Saha silinemez.')
+        }
+
     }
 
     const handleEditPitch = (pitch) => {

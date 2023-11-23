@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getReservationDetails, getReservations, setReservation, getReservationSchema, setAllReservations, getPitchList } from '../firebase';
+import { auth, getReservationDetails, getReservations, setReservation, getReservationSchema, setAllReservations, getPitchList, getAllCostumers, createCostumer } from '../firebase';
 import DropDown from '../components/DropDown';
-
-
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import DatePicker from '../components/DatePicker';
 import DateIndicator from '../components/DateIndicator';
+import PhoneNumberInput from '../components/PhoneNumberInput';
 
 function ReservationDetails() {
-
     const location = useLocation();
     const navigate = useNavigate();
     const { pitch, index, date } = location.state;
@@ -29,7 +28,7 @@ function ReservationDetails() {
     const [reservationSchema, setReservationSchema] = useState([]);
     const [schemaHours, setSchemaHours] = useState([]);
     const [pitches, setPitches] = useState([]);
-
+    const [costumers, setCostumers] = useState([]);
 
     useEffect(() => {
         getReservationSchema().then((data) => {
@@ -56,9 +55,25 @@ function ReservationDetails() {
                 setReservationHour(data.hour);
             }
         })
+        getAllCostumers().then((data) => {
+            if (data) {
+                // Data is an object, convert it to an array
+                const costumerArray = Object.keys(data).map(key => data[key]);
+                setCostumers([...costumerArray]);
+            }
+        })
     }, []);
 
 
+    useEffect(() => {
+        // find user details by phone number
+        const costumer = costumers.find(costumer => costumer.phone === phone);
+        if (costumer) {
+            setName(costumer.name);
+        } else {
+            setName('');
+        }
+    }, [phone]);
 
     function checkReservationExists(reservations) {
         if (reservationHour === hour && reservationPitch === pitch && date === reservationDate) return false;
@@ -99,10 +114,27 @@ function ReservationDetails() {
             const reservationExists = checkReservationExists(reservations);
             const minute = pitches.find(pitch => pitch.name === reservationPitch).minute;
             const index = reservationSchema.findIndex(schemaItem => schemaItem.hour === reservationHour);
-
+            const costumer = costumers.find(costumer => costumer.phone === phone);
             if (!reservationExists) { // Check reservation exists or user updating the reservation
                 await setReservation(newDateString, reservationPitch, index, reservationHour, minute, name, phone, note);
                 alert('Rezervasyon kaydedildi');
+                if (!costumer) {
+                    const email = phone + '@efelerpark.com';
+
+                    await createUserWithEmailAndPassword(auth, email, 'efelerpark')
+                        .then((userCredential) => {
+                            // Signed in
+                            const user = userCredential.user;
+                            const userID = phone + '-' + user.uid;
+                            createCostumer(userID, name, phone, 'customer');
+                            alert('Yeni kullanici olusturuldu!')
+                        })
+                        .catch((error) => {
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            alert(errorCode, errorMessage);
+                        });
+                }
                 if (reservationHour !== hour || reservationPitch !== pitch || date !== reservationDate) clearReservation(false);
                 navigate('/reservation');
             } else {
@@ -149,18 +181,18 @@ function ReservationDetails() {
 
 
     return (
-        <div>
+        <div className='flex flex-col items-center'>
             <Navbar endButton={pickDateComponent} />
-            <div className='flex flex-col gap-5 items-center'>
+            <div className='flex flex-col w-52 gap-5 items-center'>
                 <p className='titleMedium font-bold text-center'>Rezervasyon Bilgileri</p>
                 <DateIndicator selectedDay={reservationDate} setSelectedDay={setReservationDate} />
                 <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
                 <DropDown options={pitches.map(pitch => pitch.name)} onSelect={handlePitch} selectedOption={reservationPitch} placeHolder={'🏟️ Saha'} />
                 <DropDown options={schemaHours} onSelect={setReservationHour} selectedOption={reservationHour} placeHolder={'🕓 Saat'} />
 
-                <input className='input input-bordered' type="text" placeholder='🏷️ İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
-                <input className='input input-bordered' type="text" placeholder='📞 Telefon' value={phone} onChange={(e) => setPhone(e.target.value)} />
-                <input className='input input-bordered' type="text" placeholder='🗒️ Not' value={note} onChange={(e) => setNote(e.target.value)} />
+                <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} />
+                <input className='input w-full max-w-sm input-bordered' type="text" placeholder='🏷️ İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
+                <input className='input w-full max-w-sm input-bordered' type="text" placeholder='🗒️ Not' value={note} onChange={(e) => setNote(e.target.value)} />
 
                 <div className='flex flex-col gap-5 w-52'>
                     <button className='btn btn-info' onClick={() => handleSave(true)}>💾 Kaydet</button>

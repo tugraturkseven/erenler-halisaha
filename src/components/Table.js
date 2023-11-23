@@ -9,7 +9,6 @@ function Table({ data, type, headings, handleDelete, handleEdit }) {
 
     const navigate = useNavigate();
 
-
     const renderTableData = () => {
         if (type === 'customers') {
             return data.map((user, index) => {

@@ -3,37 +3,36 @@ import Navbar from '../components/Navbar'
 import RadioGroup from '../components/RadioGroup'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { updateCostumer } from '../firebase'
-
+import PhoneNumberInput from '../components/PhoneNumberInput'
 
 
 function CostumerDetails() {
     const navigate = useNavigate();
     const location = useLocation();
-    const user = location.state.user;
+    const costumer = location.state.costumer;
 
-
-
-    const [name, setName] = useState(user.name)
-    const [phone, setPhone] = useState(user.phone)
-    const [type, setType] = useState(user.type)
+    const [name, setName] = useState(costumer.name)
+    const [phone, setPhone] = useState(costumer.phone)
+    const [type, setType] = useState(costumer.type)
 
     const handleSave = () => {
-        updateCostumer(user.id, name, user.email, phone, type).then(() => {
+        updateCostumer(costumer.id, name, phone, type).then(() => {
             alert('Müşteri bilgileri güncellendi');
-            navigate('/costumers');
+            navigate('/customers');
         }).catch((error) => {
             alert('Müşteri bilgileri güncellenemedi', error);
         }
         );
+
     }
 
     return (
-        <div>
+        <div className='flex flex-col items-center'>
             <Navbar />
-            <div className='flex flex-col gap-5 items-center'>
+            <div className='flex flex-col gap-5 w-52 justify-center items-center'>
                 <p className='titleMedium font-bold text-center'>Müşteri Bilgileri</p>
                 <input className='input input-bordered' type="text" placeholder='İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
-                <input className='input input-bordered' type="number" placeholder='Telefon' value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} />
                 <RadioGroup type={type} setType={setType} />
                 <div className='flex flex-row gap-5'>
                     <button className='btn btn-primary' onClick={handleSave}>Kaydet</button>
