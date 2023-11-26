@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import { setReservation, getReservationDetails } from '../firebase';
-
+import { UserContext } from '../contexts/UserContext';
 function Dnd({ reservations, date }) {
     const navigate = useNavigate();
+    const user = useContext(UserContext);
 
     // Transforming the reservations object into an array for easier mapping
     const [pitchReservations, setPitchReservations] = useState(Object.entries(reservations).map(([pitchName, reservations]) => ({ pitchName, reservations })));
@@ -13,9 +14,7 @@ function Dnd({ reservations, date }) {
         setPitchReservations(Object.entries(reservations).map(([pitchName, reservations]) => ({ pitchName, reservations })));
     }, [reservations]);
 
-    const handleReservationClick = (pitch, index) => {
-        navigate('/reservationDetails', { state: { pitch, index, date } });
-    };
+
 
     const updateDatabaseOnDragEnd = async (pitchA, pitchB, indexA, indexB, hourA, hourB) => {
         try {
@@ -85,12 +84,42 @@ function Dnd({ reservations, date }) {
         updateDatabaseOnDragEnd(source.droppableId, destination.droppableId, source.index, destination.index, sourceItems[source.index].hour, destItems[destination.index].hour);
     };
 
+
+    const handleWidth = () => {
+        if (pitchReservations.length === 1) {
+            return 'w-80';
+        } else if (pitchReservations.length === 2) {
+            return 'w-40';
+        } else {
+            return 'w-28';
+        }
+    }
+    const showReservedOrNot = (item) => {
+        if (user.type === 'admin') {
+            return item.reservedUserName;
+        } else if (user.type !== 'admin' && item.reservedUserName !== '') {
+            return 'Rezerve';
+        } else if (user.type !== 'admin' && item.reservedUserName === '') {
+            return 'Boş';
+        }
+    }
+
+    const handleReservationClick = (pitch, index, item) => {
+        const isReserved = item.reservedUserName !== '';
+        if (user.type === 'admin') {
+            navigate('/reservationDetails', { state: { pitch, index, date } });
+        } else if (user.type !== 'admin' && !isReserved) {
+            navigate('/reservationForm', { state: { pitch, index, date } });
+        }
+
+    };
+
     return (
         <div className='flex flex-row gap-2 p-2 justify-between md:w-2/3 md:justify-around lg:w-2/3 lg:justify-around xl:w-1/3'>
             <DragDropContext onDragEnd={onDragEnd}>
                 {pitchReservations.map((pitch, index) => (
                     <div key={`${pitch.pitchName}-${index}`}>
-                        <h1 className="text-lg font-semibold text-center mb-2" key={pitch.pitchName}>{pitch.pitchName}</h1>
+
                         <Droppable droppableId={pitch.pitchName}>
                             {(provided) => (
                                 <ul className="space-y-4" {...provided.droppableProps} ref={provided.innerRef}>
@@ -99,17 +128,17 @@ function Dnd({ reservations, date }) {
                                             <Draggable key={pitch.pitchName + '-' + item.hour} draggableId={pitch.pitchName + '-' + item.hour} index={index}>
                                                 {(provided, snapshot) => (
                                                     <a
-                                                        onClick={() => handleReservationClick(pitch.pitchName, index)}
+                                                        onClick={() => handleReservationClick(pitch.pitchName, index, item)}
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
                                                         {...provided.dragHandleProps}
                                                     >
-                                                        <div className='flex flex-col text-center w-28 md:w-52 p-4'>
+                                                        <div className={`flex flex-col text-center md:w-52 p-4 ${handleWidth()}`}>
                                                             <div className='flex flex-row justify-between'>
                                                                 <p className={`text-lg flex-1 font-bold ${snapshot.isDragging ? 'text-transparent' : ''}`}>{item.hour + ':' + item.minute}</p>
-                                                                <p className="text-sm flex-1 font-semibold truncate">{item.note}</p>
+                                                                <p className="text-sm flex-1 font-semibold truncate">{user.type === 'admin' ? item.note : ''}</p>
                                                             </div>
-                                                            <p className="text-lg font-bold truncate">{item.reservedUserName}</p>
+                                                            <p className="text-lg font-bold truncate">{showReservedOrNot(item)}</p>
                                                         </div>
                                                     </a>
                                                 )}

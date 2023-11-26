@@ -10,7 +10,6 @@ function CostumerDetails() {
     const navigate = useNavigate();
     const location = useLocation();
     const costumer = location.state.costumer;
-
     const [name, setName] = useState(costumer.name)
     const [phone, setPhone] = useState(costumer.phone)
     const [type, setType] = useState(costumer.type)
@@ -31,12 +30,12 @@ function CostumerDetails() {
             <Navbar />
             <div className='flex flex-col gap-5 w-52 justify-center items-center'>
                 <p className='titleMedium font-bold text-center'>Müşteri Bilgileri</p>
-                <input className='input input-bordered' type="text" placeholder='İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
+                <input className='input w-full max-w-sm input-bordered' type="text" placeholder='İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
                 <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} />
-                <RadioGroup type={type} setType={setType} />
+                <RadioGroup options={['customer', 'admin']} selected={type} setSelected={setType} />
                 <div className='flex flex-row gap-5'>
                     <button className='btn btn-primary' onClick={handleSave}>Kaydet</button>
-                    <button className='btn btn-secondary' onClick={() => navigate('/costumers')}>
+                    <button className='btn btn-secondary' onClick={() => navigate('/customers')}>
                         İptal</button>
                 </div>
             </div>

@@ -13,7 +13,8 @@ function PhoneNumberInput({ phoneNumber, setPhoneNumber }) {
             value={phoneNumber}
             onChange={setPhoneNumber}
             className='input input-bordered w-full max-w-xs'
-            numberInputProps={{ className: 'bg-transparent' }}
+            numberInputProps={{ className: 'bg-transparent', }}
+            disabled={setPhoneNumber ? false : true}
         />
     )
 }

@@ -7,6 +7,7 @@ import { signOut } from 'firebase/auth'
 
 function Settings() {
     const navigate = useNavigate();
+
     const logOutHandler = async () => {
         await signOut(auth).then(() => {
             navigate("/")
