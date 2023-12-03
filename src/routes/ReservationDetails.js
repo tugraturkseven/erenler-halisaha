@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { auth, getReservationDetails, getReservations, setReservation, getReservationSchema, setAllReservations, getPitchList, getAllCostumers, createCostumer } from '../firebase';
+import { auth, getReservationDetails, getReservations, setReservation, getReservationSchema, setAllReservations, getPitchList, getAllCostumers, createCostumer, getTomorrowNightVisibility } from '../firebase';
 import DropDown from '../components/DropDown';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import DatePicker from '../components/DatePicker';
@@ -40,6 +40,13 @@ function ReservationDetails() {
         }).catch((error) => {
             console.log('Hata', error)
         });
+
+        getTomorrowNightVisibility().then(data => {
+            if (data) {
+                setSchemaHours(prevSchemaHours => [...prevSchemaHours, '01', '02', '03', '04']);
+            }
+        });
+
         getPitchList().then(fetchedPitches => {
             setPitches(fetchedPitches);
         }).catch(error => {
@@ -48,11 +55,11 @@ function ReservationDetails() {
 
         getReservationDetails(dateString, pitch, index).then((data) => {
             if (data) {
-                setName(data.reservedUserName);
                 setPhone(data.reservedUserPhone);
                 setNote(data.note);
                 setHour(data.hour);
                 setReservationHour(data.hour);
+                setName(data.reservedUserName);
             }
         })
         getAllCostumers().then((data) => {
@@ -67,6 +74,7 @@ function ReservationDetails() {
 
     useEffect(() => {
         // find user details by phone number
+        if (!phone || name.length !== 0) return;
         const costumer = costumers.find(costumer => costumer.phone === phone);
         if (costumer) {
             setName(costumer.name);
@@ -115,6 +123,7 @@ function ReservationDetails() {
             const minute = pitches.find(pitch => pitch.name === reservationPitch).minute;
             const index = reservationSchema.findIndex(schemaItem => schemaItem.hour === reservationHour);
             const costumer = costumers.find(costumer => costumer.phone === phone);
+
             if (!reservationExists) { // Check reservation exists or user updating the reservation
                 await setReservation(newDateString, reservationPitch, index, reservationHour, minute, name, phone, note);
                 alert('Rezervasyon kaydedildi');
@@ -135,7 +144,7 @@ function ReservationDetails() {
                             alert(errorCode, errorMessage);
                         });
                 }
-                if (reservationHour !== hour || reservationPitch !== pitch || date !== reservationDate) clearReservation(false);
+
                 navigate('/reservation');
             } else {
                 alert('Bu tarih ve saat rezerve edilmiş');
@@ -144,6 +153,7 @@ function ReservationDetails() {
             console.error('Hata olustu:', error);
             alert('Bir hata oluştu, lütfen tekrar deneyin');
         }
+        if (reservationHour !== hour || reservationPitch !== pitch || date !== reservationDate) clearReservation(false);
     };
 
 

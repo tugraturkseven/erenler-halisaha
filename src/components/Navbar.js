@@ -18,7 +18,7 @@ function Navbar(props) {
 
     if (user && user.type === 'admin') {
         return (
-            <div className="navbar bg-base-100 shadow-sm">
+            <div className="navbar bg-base-100 shadow-sm min-h-0 h-14">
                 <div className='navbar-start'>
                     <button onClick={() => navigate('/reservation')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>⚽</button>
                 </div>

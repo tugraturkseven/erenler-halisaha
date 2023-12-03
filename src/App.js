@@ -13,33 +13,34 @@ import PitchSettings from './routes/PitchSettings';
 import PitchDetails from './routes/PitchDetails';
 import ReservationForm from './routes/ReservationForm';
 
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
-
+import { ReservationSchemaProvider } from './contexts/ReservationSchemaContext';
 
 function App() {
   return (
     <div data-theme='night' className="h-screen ">
       <UserProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/signin" element={<SignUp />} />
-            <Route path="/home" element={<Home />} />
-            <Route path='/reservation' element={<Reservation />} />
-            <Route path='/customers' element={<Costumers />} />
-            <Route path='/reservationDetails' element={<ReservationDetails />} />
-            <Route path='/reservationForm' element={<ReservationForm />} />
-            <Route path='/message' element={<Message />} />
-            <Route path='/costumerDetails' element={<CostumerDetails />} />
-            <Route path='/settings' element={<Settings />} />
-            <Route path='/schemaSettings' element={<SchemaSettings />} />
-            <Route path='/generalSettings' element={<GeneralSettings />} />
-            <Route path='/pitchSettings' element={<PitchSettings />} />
-            <Route path='/pitchDetails' element={<PitchDetails />} />
-          </Routes>
-        </BrowserRouter>
+        <ReservationSchemaProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/signin" element={<SignUp />} />
+              <Route path="/home" element={<Home />} />
+              <Route path='/reservation' element={<Reservation />} />
+              <Route path='/customers' element={<Costumers />} />
+              <Route path='/reservationDetails' element={<ReservationDetails />} />
+              <Route path='/reservationForm' element={<ReservationForm />} />
+              <Route path='/message' element={<Message />} />
+              <Route path='/costumerDetails' element={<CostumerDetails />} />
+              <Route path='/settings' element={<Settings />} />
+              <Route path='/schemaSettings' element={<SchemaSettings />} />
+              <Route path='/generalSettings' element={<GeneralSettings />} />
+              <Route path='/pitchSettings' element={<PitchSettings />} />
+              <Route path='/pitchDetails' element={<PitchDetails />} />
+            </Routes>
+          </BrowserRouter>
+        </ReservationSchemaProvider>
       </UserProvider>
     </div>
   );

@@ -17,9 +17,7 @@ function GeneralSettings() {
         getPrice().then((data) => {
             setFees({ ...data })
         })
-        getTomorrowNightVisibility().then((data) => {
-            setVisibility(data)
-        })
+        getTomorrowNightVisibility().then((data) => setVisibility(data.visibility))
     }, [])
 
     const handleSave = () => {
