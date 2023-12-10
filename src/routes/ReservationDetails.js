@@ -178,13 +178,14 @@ function ReservationDetails() {
 
 
     const clearReservation = (notify) => {
+        if(notify && !window.confirm('Bu rezervasyonu iptal etmek istediğinize emin misiniz?')) return;
         const minute = pitches.find(p => p.name === pitch).minute;
         setName('');
         setPhone('');
         setNote('');
         setReservation(date.replaceAll('.', '-'), pitch, index, hour, minute, '', '', '');
         if (notify) {
-            alert('Rezervasyon iptal edildi')
+            alert('Rezervasyon iptal edildi');
             navigate('/reservation');
         }
     }

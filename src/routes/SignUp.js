@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth, createCostumer } from '../firebase'
 import PhoneNumberInput from '../components/PhoneNumberInput'
+import { isValidPhoneNumber } from 'react-phone-number-input'
+
 function SignUp() {
     const navigate = useNavigate();
 
@@ -12,6 +14,10 @@ function SignUp() {
 
     const onSubmit = async (e) => {
         e.preventDefault()
+        if(!isValidPhoneNumber(phone)){
+            alert('Lütfen geçerli bir telefon numarası giriniz.')
+            return;
+        }
         const email = phone + '@efelerpark.com';
 
         await createUserWithEmailAndPassword(auth, email, password)

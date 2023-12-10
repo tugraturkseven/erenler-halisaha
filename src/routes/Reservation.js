@@ -1,163 +1,199 @@
-import React, { useState, useEffect, useContext } from 'react';
-import Navbar from '../components/Navbar';
-import Dnd from '../components/Dnd';
-import DatePicker from '../components/DatePicker';
-import { getReservations, setAllReservations, getReservationSchema, getPitchList, getTomorrowNightVisibility } from '../firebase';
-import DateIndicator from '../components/DateIndicator';
-import { UserContext } from '../contexts/UserContext';
-
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import Navbar from "../components/Navbar";
+import Dnd from "../components/Dnd";
+import DatePicker from "../components/DatePicker";
+import {
+  getReservations,
+  setAllReservations,
+  getPitchList,
+  getTomorrowNightVisibility,
+} from "../firebase";
+import DateIndicator from "../components/DateIndicator";
+import { UserContext } from "../contexts/UserContext";
+import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
 
 function Reservation() {
+  const user = useContext(UserContext);
+  const schema = useContext(ReservationSchemaContext);
 
-    const user = useContext(UserContext);
+  const [selectedDay, setSelectedDay] = useState(
+    new Date().toLocaleDateString("tr")
+  );
+  const [showPicker, setShowPicker] = useState(false);
 
+  const [reservationInfos, setReservationInfos] = useState({
+    reservationTemplate: {},
+    reservations: {},
+    tomorrowNightVisibility: false,
+  });
 
-    const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('tr'));
-    const [showPicker, setShowPicker] = useState(false);
-    const [reservations, setReservations] = useState({}); // Object to store reservations for each pitch
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [reservationSchema, setReservationSchema] = useState([]);
-    const [tomorrowNightVisibility, setTomorrowNightVisibility] = useState();
-    const [tomorrowNightReservations, setTomorrowNightReservations] = useState([]);
-    const selectedDayString = selectedDay.replaceAll('.', '-');
+  const [isActualLoaded, setIsActualLoaded] = useState(false);
+  const [isNightLoaded, setIsNightLoaded] = useState(false);
+  const [isTemplateLoaded, setIsTemplateLoaded] = useState(false);
+  const selectedDayString = selectedDay.replaceAll(".", "-");
 
-    useEffect(() => {
-        getTomorrowNightVisibility().then(data => setTomorrowNightVisibility(data?.visibility));
+  useEffect(() => {
+    // This code runs after the component mounts
+    getTomorrowNightVisibility().then((data) =>
+      setReservationInfos((prevInfos) => ({
+        ...prevInfos,
+        tomorrowNightVisibility: data?.visibility,
+      }))
+    );
 
-        getPitchList().then(fetchedPitches => {
-            // Step 2: Fetch the schema
-            getReservationSchema().then(schema => {
-                // Step 3 & 4: Apply the schema to each pitch and initialize reservations
-                let initialReservations = {};
-                fetchedPitches.forEach(pitch => {
-                    // Add the minute attribute from the pitch to each schema item
-                    initialReservations[pitch.name] = schema.map(schemaItem => ({
-                        ...schemaItem,
-                        minute: pitch.minute
-                    }));
-                });
-                setReservations({ ...initialReservations });
-                setTomorrowNightReservations({ ...initialReservations });
-                setReservationSchema({ ...initialReservations });
-                setIsLoaded(true);
-            });
-        });
+    getPitchList().then((fetchedPitches) => {
+      let initialReservations = {};
 
-    }, []);
+      fetchedPitches.forEach((pitch) => {
+        initialReservations[pitch.name] = schema.map((schemaItem) => ({
+          ...schemaItem,
+          minute: pitch.minute,
+        }));
+      });
 
-    useEffect(() => {
-        // Step 5: Fetch and populate reservations for each pitch
-        Object.keys(reservations).forEach(pitchName => {
-            getReservations(selectedDayString, pitchName)
-                .then(pitchReservations => {
-                    if (pitchReservations) {
-                        setReservations(prevReservations => ({
-                            ...prevReservations,
-                            [pitchName]: prevReservations[pitchName].map(schemaItem => {
-                                let reservation = pitchReservations.find(r => r.hour === schemaItem.hour);
-                                return reservation ? { ...schemaItem, ...reservation, ...{ date: selectedDay } } : { ...schemaItem, ...{ date: selectedDay } };
-                            })
-                        }));
+      setReservationInfos((prevInfos) => ({
+        ...prevInfos,
+        reservationTemplate: initialReservations,
+      }));
+      setIsTemplateLoaded(true);
+    });
+  }, [schema]);
 
-                    } else {
-                        setAllReservations(selectedDayString, reservationSchema);
-                        setReservations(reservationSchema)
-                    }
+  const fetchReservationData = async (dateStr, date) => {
+    let results = [];
 
-                })
-                .catch(error => {
-                    console.log('Hata', error)
-                });
-
-        });
-
-    }, [selectedDay, isLoaded]);
-
-    useEffect(() => {
-        if (tomorrowNightVisibility) {
-            fetchTomorrowNightReservations();
+    try {
+      const reservationPromises = Object.keys(
+        reservationInfos.reservationTemplate
+      ).map(async (pitchName) => {
+        const pitchReservations = await getReservations(dateStr, pitchName);
+        if (pitchReservations) {
+          const updatedPitch = reservationInfos.reservationTemplate[
+            pitchName
+          ].map((schemaItem) => {
+            const reservation = pitchReservations.find(
+              (r) => r.hour === schemaItem.hour
+            );
+            return { ...schemaItem, ...reservation, ...{ date: date } };
+          });
+          return { [pitchName]: updatedPitch };
+        } else {
+          // This part depends on how you want to handle the absence of reservations
+          // add date to schema item and return it
+          setAllReservations(dateStr, reservationInfos.reservationTemplate);
+          const updatedPitch = reservationInfos.reservationTemplate[
+            pitchName
+          ].map((schemaItem) => ({
+            ...schemaItem,
+            ...{ date: date },
+          }));
+          return { [pitchName]: updatedPitch };
         }
-    }, [tomorrowNightVisibility, selectedDay]);
-
-    const getTomorrowDate = () => {
-        // Get tomorrow's date from selected day. Selected date is in dd.mm.yyyy format
-
-        const parts = selectedDay.split('.');
-        const dateString = `${parts[1]}/${parts[0]}/${parts[2]}`;
-        const date = new Date(dateString);
-        date.setDate(date.getDate() + 1);
-        return date.toLocaleDateString('tr');
+      });
+      results = await Promise.all(reservationPromises);
+    } catch (error) {
+      console.error("Error updating reservations:", error);
+      // Consider throwing the error or handling it as per your application's needs
     }
+    return results;
+  };
 
-
-    const fetchTomorrowNightReservations = () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let actualResults = await fetchReservationData(
+          selectedDayString,
+          selectedDay
+        );
         const tomorrowDate = getTomorrowDate();
-        const tomorrowString = tomorrowDate.replaceAll('.', '-');
+        const tomorrowString = tomorrowDate.replaceAll(".", "-");
+        console.log("date", tomorrowDate, "string", tomorrowString);
+        let tomorrowResults = await fetchReservationData(
+          tomorrowString,
+          tomorrowDate
+        );
 
+        tomorrowResults = { ...tomorrowResults[0], ...tomorrowResults[1] };
+        actualResults = { ...actualResults[0], ...actualResults[1] };
 
-        Object.keys(reservationSchema).forEach(pitchName => {
-            getReservations(tomorrowString, pitchName)
-                .then(pitchReservations => {
-                    if (pitchReservations) {
-                        setTomorrowNightReservations(prevReservations => ({
-                            ...prevReservations,
-                            [pitchName]: prevReservations[pitchName].map(schemaItem => {
-                                let reservation = pitchReservations.find(r => r.hour === schemaItem.hour);
-                                if (schemaItem.hour >= 1 && schemaItem.hour <= 4) {
-                                    schemaItem.visible = true;
-                                } else {
-                                    schemaItem.visible = false;
-                                }
-
-                                return reservation ? { ...schemaItem, ...reservation, ...{ date: selectedDay } } : { ...schemaItem, ...{ date: selectedDay } };
-                            })
-                        }));
-
-                    } else {
-                        setAllReservations(selectedDayString, reservationSchema);
-
-                    }
-
-                })
-                .catch(error => {
-                    console.log('Hata', error)
-                });
-
+        Object.values(tomorrowResults).forEach((pitch) => {
+          pitch.forEach((reservation) => {
+            if (reservation.hour >= 1 && reservation.hour <= 4) {
+              reservation.visible = true;
+            } else {
+              reservation.visible = false;
+            }
+          });
         });
+
+        setReservationInfos((prevInfos) => ({
+          ...prevInfos,
+          reservations: actualResults,
+          tomorrowNightReservations: tomorrowResults,
+        }));
+
+        setIsActualLoaded(true);
+        setIsNightLoaded(true);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // Handle the error as needed, e.g., show an error message to the user
+      }
     };
 
-    console.log(tomorrowNightReservations)
+    fetchData();
+  }, [selectedDay, user, isTemplateLoaded]);
 
-    const handleDatePick = (date) => {
-        setShowPicker(false);
-        setSelectedDay(date.toLocaleDateString('tr'));
-    };
+  const getTomorrowDate = () => {
+    // Get tomorrow's date from selected day. Selected date is in dd.mm.yyyy format
 
-    const pickDateComponent = (
-        <button onClick={() => setShowPicker(!showPicker)} className='btn btn-ghost normal-case text-xl xl:text-3xl'>
-            📅
-        </button>
-    );
+    const parts = selectedDay.split(".");
+    const dateString = `${parts[1]}/${parts[0]}/${parts[2]}`;
+    const date = new Date(dateString);
+    date.setDate(date.getDate() + 1);
+    return date.toLocaleDateString("tr");
+  };
 
+  const handleDatePick = (date) => {
+    setShowPicker(false);
+    setSelectedDay(date.toLocaleDateString("tr"));
+  };
 
-    console.log('before render', tomorrowNightReservations);
+  const pickDateComponent = (
+    <button
+      onClick={() => setShowPicker(!showPicker)}
+      className="btn btn-ghost normal-case text-xl xl:text-3xl"
+    >
+      📅
+    </button>
+  );
 
-    if (!user) return (
-        <div className='flex flex-col items-center'>
-            <p>Kullanici bilgileri yukleniyor..</p>
-        </div>
-    );
+  if (!user || !isActualLoaded || !isNightLoaded) {
     return (
-        <div className='flex flex-col items-center'>
-            <Navbar endButton={pickDateComponent} />
-            <DateIndicator selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
-            <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
-
-            {isLoaded ? <Dnd reservations={reservations} date={selectedDay} tomorrowNight={tomorrowNightVisibility ? tomorrowNightReservations : null} /> : <p>Yükleniyor...</p>}
-
-
-        </div>
+      <div className="flex flex-col items-center">
+        <p>Lütfen giriş yapınız.</p>
+      </div>
     );
+  }
+  return (
+    <div className="flex flex-col items-center">
+      <Navbar endButton={pickDateComponent} />
+      <DateIndicator
+        selectedDay={selectedDay}
+        setSelectedDay={setSelectedDay}
+      />
+      <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
+
+      {isActualLoaded && isNightLoaded ? (
+        <Dnd
+          reservations={reservationInfos.reservations}
+          date={selectedDay}
+          tomorrowNight={reservationInfos.tomorrowNightReservations}
+        />
+      ) : (
+        <p>Yükleniyor...</p>
+      )}
+    </div>
+  );
 }
 
 export default Reservation;
