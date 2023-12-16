@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { setReservation, getReservationDetails } from "../firebase";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
-function Dnd({ reservations, tomorrowNight }) {
-  console.log("tmrw", tomorrowNight);
 
+function Dnd({ reservations, tomorrowNight }) {
   const navigate = useNavigate();
   const user = useContext(UserContext);
   const schema = useContext(ReservationSchemaContext);

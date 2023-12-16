@@ -5,6 +5,7 @@ import DatePicker from "../components/DatePicker";
 import {
   getReservations,
   setAllReservations,
+  checkDateExist,
   getPitchList,
   getTomorrowNightVisibility,
 } from "../firebase";
@@ -59,6 +60,14 @@ function Reservation() {
     });
   }, [schema]);
 
+  const createNewDate = async (date) => {
+    if (!date || reservationInfos.reservationTemplate == {}) return;
+    const dateExists = await checkDateExist(date);
+    if (!dateExists) {
+      setAllReservations(date, reservationInfos.reservationTemplate);
+    }
+  };
+
   const fetchReservationData = async (dateStr, date) => {
     let results = [];
 
@@ -78,9 +87,7 @@ function Reservation() {
           });
           return { [pitchName]: updatedPitch };
         } else {
-          // This part depends on how you want to handle the absence of reservations
-          // add date to schema item and return it
-          setAllReservations(dateStr, reservationInfos.reservationTemplate);
+          createNewDate(dateStr);
           const updatedPitch = reservationInfos.reservationTemplate[
             pitchName
           ].map((schemaItem) => ({
@@ -107,14 +114,14 @@ function Reservation() {
         );
         const tomorrowDate = getTomorrowDate();
         const tomorrowString = tomorrowDate.replaceAll(".", "-");
-        console.log("date", tomorrowDate, "string", tomorrowString);
+
         let tomorrowResults = await fetchReservationData(
           tomorrowString,
           tomorrowDate
         );
 
-        tomorrowResults = { ...tomorrowResults[0], ...tomorrowResults[1] };
-        actualResults = { ...actualResults[0], ...actualResults[1] };
+        actualResults = Object.assign({}, ...actualResults);
+        tomorrowResults = Object.assign({}, ...tomorrowResults);
 
         Object.values(tomorrowResults).forEach((pitch) => {
           pitch.forEach((reservation) => {
@@ -141,6 +148,20 @@ function Reservation() {
     };
 
     fetchData();
+
+    return () => {
+      // This code runs when the component unmounts
+      // e.g., when the user navigates away from the page
+      setIsActualLoaded(false);
+      setIsNightLoaded(false);
+      setIsTemplateLoaded(false);
+      setReservationInfos({
+        reservationTemplate: {},
+        reservations: {},
+        tomorrowNightVisibility: false,
+      });
+      setSelectedDay(new Date().toLocaleDateString("tr"));
+    };
   }, [selectedDay, user, isTemplateLoaded]);
 
   const getTomorrowDate = () => {
@@ -166,7 +187,7 @@ function Reservation() {
       📅
     </button>
   );
-
+  console.log();
   if (!user || !isActualLoaded || !isNightLoaded) {
     return (
       <div className="flex flex-col items-center">
@@ -182,16 +203,15 @@ function Reservation() {
         setSelectedDay={setSelectedDay}
       />
       <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
-
-      {isActualLoaded && isNightLoaded ? (
-        <Dnd
-          reservations={reservationInfos.reservations}
-          date={selectedDay}
-          tomorrowNight={reservationInfos.tomorrowNightReservations}
-        />
-      ) : (
-        <p>Yükleniyor...</p>
-      )}
+      <Dnd
+        reservations={reservationInfos.reservations}
+        date={selectedDay}
+        tomorrowNight={
+          reservationInfos.tomorrowNightVisibility
+            ? reservationInfos.tomorrowNightReservations
+            : null
+        }
+      />
     </div>
   );
 }
