@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import Dnd from "../components/Dnd";
 import DatePicker from "../components/DatePicker";
@@ -6,6 +6,7 @@ import {
   getReservations,
   setAllReservations,
   checkDateExist,
+  addPitchToDate,
   getPitchList,
   getTomorrowNightVisibility,
 } from "../firebase";
@@ -58,13 +59,27 @@ function Reservation() {
       }));
       setIsTemplateLoaded(true);
     });
+
+    return () => {
+      // This code runs when the component unmounts
+      // e.g., when the user navigates away from the page
+      setIsTemplateLoaded(false);
+      setReservationInfos({
+        reservationTemplate: {},
+        reservations: {},
+        tomorrowNightVisibility: false,
+      });
+      setSelectedDay(new Date().toLocaleDateString("tr"));
+    };
   }, [schema]);
 
-  const createNewDate = async (date) => {
+  const createNewDate = async (date, pitch) => {
     if (!date || reservationInfos.reservationTemplate == {}) return;
     const dateExists = await checkDateExist(date);
     if (!dateExists) {
       setAllReservations(date, reservationInfos.reservationTemplate);
+    } else {
+      addPitchToDate(date, pitch, reservationInfos.reservationTemplate[pitch]);
     }
   };
 
@@ -77,9 +92,7 @@ function Reservation() {
       ).map(async (pitchName) => {
         const pitchReservations = await getReservations(dateStr, pitchName);
         if (pitchReservations) {
-          const updatedPitch = reservationInfos.reservationTemplate[
-            pitchName
-          ].map((schemaItem) => {
+          const updatedPitch = reservationInfos.reservationTemplate[pitchName].map((schemaItem) => {
             const reservation = pitchReservations.find(
               (r) => r.hour === schemaItem.hour
             );
@@ -87,7 +100,7 @@ function Reservation() {
           });
           return { [pitchName]: updatedPitch };
         } else {
-          createNewDate(dateStr);
+          createNewDate(dateStr, pitchName);
           const updatedPitch = reservationInfos.reservationTemplate[
             pitchName
           ].map((schemaItem) => ({
@@ -148,20 +161,6 @@ function Reservation() {
     };
 
     fetchData();
-
-    return () => {
-      // This code runs when the component unmounts
-      // e.g., when the user navigates away from the page
-      setIsActualLoaded(false);
-      setIsNightLoaded(false);
-      setIsTemplateLoaded(false);
-      setReservationInfos({
-        reservationTemplate: {},
-        reservations: {},
-        tomorrowNightVisibility: false,
-      });
-      setSelectedDay(new Date().toLocaleDateString("tr"));
-    };
   }, [selectedDay, user, isTemplateLoaded]);
 
   const getTomorrowDate = () => {
@@ -187,7 +186,7 @@ function Reservation() {
       📅
     </button>
   );
-  console.log();
+
   if (!user || !isActualLoaded || !isNightLoaded) {
     return (
       <div className="flex flex-col items-center">
