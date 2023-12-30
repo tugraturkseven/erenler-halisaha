@@ -361,10 +361,8 @@ function Dnd({ reservations, tomorrowNight }) {
     )
       return;
 
-    const isSourceActual =
-      source.index < pitchReservations[0].reservations.length;
-    const isDestinationActual =
-      destination.index < pitchReservations[0].reservations.length;
+    const isSourceActual = source.index < pitchReservations[0].reservations.length;
+    const isDestinationActual = destination.index < pitchReservations[0].reservations.length;
 
     if (isSourceActual && isDestinationActual) {
       reservationsOnDragEnd(source, destination);
@@ -400,7 +398,7 @@ function Dnd({ reservations, tomorrowNight }) {
     const index = determineDBIndexOfItem(item.hour);
 
     if (user.type === "admin") {
-      navigate("/reservationDetails", { state: { pitch, index, date } });
+      navigate("/chooseCustomer", { state: { pitch, index, date } });
     } else if (user.type !== "admin" && !isReserved) {
       navigate("/reservationForm", { state: { pitch, index, date } });
     }
@@ -446,11 +444,10 @@ function Dnd({ reservations, tomorrowNight }) {
                                 >
                                   <div className="flex flex-row justify-between align-baseline items-baseline">
                                     <p
-                                      className={`mr-2 text-lg text-left font-bold ${
-                                        snapshot.isDragging
-                                          ? "text-transparent"
-                                          : ""
-                                      }`}
+                                      className={`mr-2 text-lg text-left font-bold ${snapshot.isDragging
+                                        ? "text-transparent"
+                                        : ""
+                                        }`}
                                     >
                                       {item.hour + ":" + item.minute}
                                     </p>
@@ -506,11 +503,10 @@ function Dnd({ reservations, tomorrowNight }) {
                                   >
                                     <div className="flex flex-row justify-between align-baseline items-baseline">
                                       <p
-                                        className={`mr-2 text-lg text-left font-bold ${
-                                          snapshot.isDragging
-                                            ? "text-transparent"
-                                            : ""
-                                        }`}
+                                        className={`mr-2 text-lg text-left font-bold ${snapshot.isDragging
+                                          ? "text-transparent"
+                                          : ""
+                                          }`}
                                       >
                                         {item.hour + ":" + item.minute}
                                       </p>
