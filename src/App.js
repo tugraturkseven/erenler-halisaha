@@ -13,6 +13,7 @@ import PitchSettings from './routes/PitchSettings';
 import PitchDetails from './routes/PitchDetails';
 import ReservationForm from './routes/ReservationForm';
 import ChooseCustomer from './routes/ChooseCustomer';
+import CreateCustomer from './routes/CreateCustomer';
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
@@ -31,6 +32,7 @@ function App() {
               <Route path='/reservation' element={<Reservation />} />
               <Route path='/customers' element={<Costumers />} />
               <Route path='/chooseCustomer' element={<ChooseCustomer />} />
+              <Route path='/createCustomer' element={<CreateCustomer />} />
               <Route path='/reservationDetails' element={<ReservationDetails />} />
               <Route path='/reservationForm' element={<ReservationForm />} />
               <Route path='/message' element={<Message />} />

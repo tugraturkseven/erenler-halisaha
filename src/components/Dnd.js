@@ -47,14 +47,7 @@ function Dnd({ reservations, tomorrowNight }) {
       );
   }, [tomorrowNight]);
 
-  const updateDatabaseOnDragEnd = async (
-    pitchA,
-    pitchB,
-    hourA,
-    hourB,
-    dateA,
-    dateB
-  ) => {
+  const updateDatabaseOnDragEnd = async (pitchA, pitchB, hourA, hourB, dateA, dateB) => {
     try {
       // Fetch reservation details for pitchA and pitchB
       const dateAString = dateA.replaceAll(".", "-");
@@ -69,26 +62,8 @@ function Dnd({ reservations, tomorrowNight }) {
       // Check if data is available before updating reservations
       if (itemA && itemB && itemA.hour === hourA && itemB.hour === hourB) {
         // Update reservations for pitchA and pitchB
-        await setReservation(
-          dateAString,
-          pitchA,
-          indexA,
-          hourA,
-          itemA.minute,
-          itemB.reservedUserName,
-          itemB.reservedUserPhone,
-          itemB.note
-        );
-        await setReservation(
-          dateBString,
-          pitchB,
-          indexB,
-          hourB,
-          itemB.minute,
-          itemA.reservedUserName,
-          itemA.reservedUserPhone,
-          itemA.note
-        );
+        await setReservation(dateAString, pitchA, indexA, hourA, itemA.minute, itemB.reservedUserName, itemB.reservedUserPhone, itemB.note);
+        await setReservation(dateBString, pitchB, indexB, hourB, itemB.minute, itemA.reservedUserName, itemA.reservedUserPhone, itemA.note);
       }
     } catch (error) {
       // Handle errors here
@@ -202,12 +177,8 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const nightReservationsOnDragEnd = (source, destination) => {
-    const sourcePitch = tomorrowNightReservations.find(
-      (pitch) => pitch.pitchName === source.droppableId
-    );
-    const destinationPitch = tomorrowNightReservations.find(
-      (pitch) => pitch.pitchName === destination.droppableId
-    );
+    const sourcePitch = tomorrowNightReservations.find((pitch) => pitch.pitchName === source.droppableId);
+    const destinationPitch = tomorrowNightReservations.find((pitch) => pitch.pitchName === destination.droppableId);
 
     const sourceIndex = determineSourceIndex(source);
     const destinationIndex = determineDestinationIndex(destination);
@@ -256,10 +227,10 @@ function Dnd({ reservations, tomorrowNight }) {
     updateDatabaseOnDragEnd(
       source.droppableId,
       destination.droppableId,
-      sourceItems[source.index].hour,
-      destItems[destination.index].hour,
-      sourceItems[source.index].date,
-      destItems[destination.index].date
+      sourceItems[sourceIndex].hour,
+      destItems[destinationIndex].hour,
+      sourceItems[sourceIndex].date,
+      destItems[destinationIndex].date
     );
   };
 
@@ -398,7 +369,11 @@ function Dnd({ reservations, tomorrowNight }) {
     const index = determineDBIndexOfItem(item.hour);
 
     if (user.type === "admin") {
-      navigate("/chooseCustomer", { state: { pitch, index, date } });
+      if (isReserved) {
+        navigate("/reservationDetails", { state: { pitch, item, index, date } });
+      } else {
+        navigate("/chooseCustomer", { state: { pitch, index, date } });
+      }
     } else if (user.type !== "admin" && !isReserved) {
       navigate("/reservationForm", { state: { pitch, index, date } });
     }

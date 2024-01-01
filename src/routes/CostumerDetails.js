@@ -4,7 +4,7 @@ import RadioGroup from '../components/RadioGroup'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { updateCostumer } from '../firebase'
 import PhoneNumberInput from '../components/PhoneNumberInput'
-
+import { deleteCostumer } from '../firebase'
 
 function CostumerDetails() {
     const navigate = useNavigate();
@@ -13,6 +13,9 @@ function CostumerDetails() {
     const [name, setName] = useState(costumer.name)
     const [phone, setPhone] = useState(costumer.phone)
     const [type, setType] = useState(costumer.type)
+
+    // Costumer id consist of phone number and uid seperated by - . We need to split it to get uid.
+    const uid = costumer.id.split('-')[1];
 
     const handleSave = () => {
         updateCostumer(costumer.id, name, phone, type).then(() => {
@@ -25,18 +28,43 @@ function CostumerDetails() {
 
     }
 
+    const handleDelete = () => {
+        if (window.confirm('Müşteriyi silmek istediğinize emin misiniz?')) {
+            fetch('https://efelerparkhalisaha.cyclic.app/delete-user', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: uid })
+            }).then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    return res.json().then(data => Promise.reject(data));
+                }
+            }).then(data => {
+                deleteCostumer(phone, uid);
+                alert("Müşteri başarıyla silindi.");
+                navigate("/reservation");
+            }).catch(err => {
+                alert(`Müşteri silinemedi. ${err.message}`);
+            });
+        }
+    }
+
     return (
         <div className='flex flex-col items-center'>
             <Navbar />
             <div className='flex flex-col gap-5 w-52 justify-center items-center'>
                 <p className='titleMedium font-bold text-center'>Müşteri Bilgileri</p>
-                <input className='input w-full max-w-sm input-bordered' type="text" placeholder='İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
                 <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} />
+                <input className='input w-full max-w-xs input-bordered' type="text" placeholder='İsim Soyisim' value={name} onChange={(e) => setName(e.target.value)} />
+                <p className='titleMedium font-bold text-center'>Kullanıcı Tipi</p>
                 <RadioGroup options={['customer', 'admin']} selected={type} setSelected={setType} />
-                <div className='flex flex-row gap-5'>
-                    <button className='btn btn-primary' onClick={handleSave}>Kaydet</button>
-                    <button className='btn btn-secondary' onClick={() => navigate('/customers')}>
-                        İptal</button>
+                <p className='titleMedium font-bold text-center'>İşlemler</p>
+                <div className='flex flex-col gap-5 w-full'>
+                    <button className='btn btn-info' onClick={handleSave}>💾 Kaydet</button>
+                    <button className='btn btn-warning' onClick={handleDelete}>🗑️ Sil</button>
+                    <button className='btn btn-secondary' onClick={() => navigate('/customers')}>❌ İptal</button>
+
                 </div>
             </div>
         </div>

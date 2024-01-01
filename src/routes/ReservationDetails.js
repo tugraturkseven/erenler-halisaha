@@ -22,7 +22,7 @@ import PhoneNumberInput from "../components/PhoneNumberInput";
 function ReservationDetails() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { pitch, index, date } = location.state;
+  const { user, pitch, index, date } = location.state;
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -79,11 +79,11 @@ function ReservationDetails() {
 
     getReservationDetails(dateString, pitch, index).then((data) => {
       if (data) {
-        setPhone(data.reservedUserPhone);
+        setPhone(user ? user.phone : data.reservedUserPhone);
         setNote(data.note);
         setHour(data.hour);
         setReservationHour(data.hour);
-        setName(data.reservedUserName);
+        setName(user ? user.name : data.reservedUserName);
       }
     });
     getAllCostumers().then((data) => {
@@ -94,17 +94,6 @@ function ReservationDetails() {
       }
     });
   }, []);
-
-  useEffect(() => {
-    // find user details by phone number
-    if (!phone || name.length !== 0) return;
-    const costumer = costumers.find((costumer) => costumer.phone === phone);
-    if (costumer) {
-      setName(costumer.name);
-    } else {
-      setName("");
-    }
-  }, [phone]);
 
   function checkReservationExists(reservations) {
     if (

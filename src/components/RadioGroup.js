@@ -6,7 +6,6 @@ function RadioGroup({ options, selected, setSelected }) {
     const handleRadioChange = (e) => {
         setSelected(e.target.value);
     };
-    console.log(selected)
 
     return (
         <div className="flex flex-row gap-10">

@@ -14,7 +14,7 @@ function SignUp() {
 
     const onSubmit = async (e) => {
         e.preventDefault()
-        if(!isValidPhoneNumber(phone)){
+        if (!isValidPhoneNumber(phone)) {
             alert('Lütfen geçerli bir telefon numarası giriniz.')
             return;
         }
@@ -24,8 +24,7 @@ function SignUp() {
             .then((userCredential) => {
                 // Signed in
                 const user = userCredential.user;
-                const userID = phone + '-' + user.uid;
-                createCostumer(userID, name, phone, 'customer');
+                createCostumer(user.uid, name, phone, 'customer');
                 alert('Kayit Basarili')
                 navigate("/")
 

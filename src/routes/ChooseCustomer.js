@@ -3,14 +3,13 @@ import Navbar from '../components/Navbar'
 import CustomerSelector from '../components/CustomerSelector'
 import Search from '../components/Search'
 import { getAllCostumers } from '../firebase'
-import { useNavigate } from 'react-router-dom'
-import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 function ChooseCustomer() {
-    const navigate = useNavigate();
     const [costumers, setCostumers] = useState([])
     const [searchResults, setSearchResults] = useState([])
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         getAllCostumers()
@@ -33,13 +32,10 @@ function ChooseCustomer() {
 
     }
 
-    const handleEdit = (costumer) => {
-        navigate('/costumerDetails', { state: { costumer: costumer } })
-    }
-
     const createCustomerButton = (
-        <button onClick={() => navigate('/createCustomer')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>
-            <FontAwesomeIcon icon={faUserPlus} color='lightgreen' />
+        <button onClick={() => navigate('/createCustomer', { state: location.state })} className='btn btn-ghost normal-case text-xl xl:text-3xl'>
+            <p>👱</p>
+            <p className='absolute rotate-45 text-xs top-3 right-3'>❌</p>
         </button>
     )
 
