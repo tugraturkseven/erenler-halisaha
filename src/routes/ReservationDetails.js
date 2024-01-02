@@ -2,19 +2,15 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  auth,
   getReservationDetails,
   getReservations,
   setReservation,
   getReservationSchema,
   setAllReservations,
   getPitchList,
-  getAllCostumers,
-  createCostumer,
   getTomorrowNightVisibility,
 } from "../firebase";
 import DropDown from "../components/DropDown";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import DatePicker from "../components/DatePicker";
 import DateIndicator from "../components/DateIndicator";
 import PhoneNumberInput from "../components/PhoneNumberInput";
@@ -38,7 +34,6 @@ function ReservationDetails() {
   const [reservationSchema, setReservationSchema] = useState([]);
   const [schemaHours, setSchemaHours] = useState([]);
   const [pitches, setPitches] = useState([]);
-  const [costumers, setCostumers] = useState([]);
 
   useEffect(() => {
     getReservationSchema()
@@ -84,13 +79,6 @@ function ReservationDetails() {
         setHour(data.hour);
         setReservationHour(data.hour);
         setName(user ? user.name : data.reservedUserName);
-      }
-    });
-    getAllCostumers().then((data) => {
-      if (data) {
-        // Data is an object, convert it to an array
-        const costumerArray = Object.keys(data).map((key) => data[key]);
-        setCostumers([...costumerArray]);
       }
     });
   }, []);
@@ -148,7 +136,6 @@ function ReservationDetails() {
       const index = reservationSchema.findIndex(
         (schemaItem) => schemaItem.hour === reservationHour
       );
-      const costumer = costumers.find((costumer) => costumer.phone === phone);
 
       if (!reservationExists) {
         // Check reservation exists or user updating the reservation
@@ -163,25 +150,7 @@ function ReservationDetails() {
           note
         );
         alert("Rezervasyon kaydedildi");
-        if (!costumer) {
-          const email = phone + "@efelerpark.com";
-
-          await createUserWithEmailAndPassword(auth, email, "efelerpark")
-            .then((userCredential) => {
-              // Signed in
-              const user = userCredential.user;
-              const userID = phone + "-" + user.uid;
-              createCostumer(userID, name, phone, "customer");
-              alert("Yeni kullanici olusturuldu!");
-            })
-            .catch((error) => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              alert(errorCode, errorMessage);
-            });
-        }
-
-        navigate("/reservation");
+        navigate("/reservation", { state: { date: reservationDate } });
       } else {
         alert("Bu tarih ve saat rezerve edilmiş");
       }
@@ -240,7 +209,7 @@ function ReservationDetails() {
     );
     if (notify) {
       alert("Rezervasyon iptal edildi");
-      navigate("/reservation");
+      navigate("/reservation", { state: { date: reservationDate } });
     }
   };
 

@@ -13,14 +13,14 @@ import {
 import DateIndicator from "../components/DateIndicator";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
+import { useLocation } from "react-router-dom";
 
 function Reservation() {
     const user = useContext(UserContext);
     const schema = useContext(ReservationSchemaContext);
+    const location = useLocation();
 
-    const [selectedDay, setSelectedDay] = useState(
-        new Date().toLocaleDateString("tr")
-    );
+    const [selectedDay, setSelectedDay] = useState(location.state?.date || new Date().toLocaleDateString("tr"));
     const [showPicker, setShowPicker] = useState(false);
 
     const [reservationInfos, setReservationInfos] = useState({

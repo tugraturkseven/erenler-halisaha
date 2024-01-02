@@ -1,6 +1,21 @@
 import React from 'react'
 
 function DateIndicator({ selectedDay, setSelectedDay }) {
+    const getTurkishDayName = (dateString) => {
+        // Split the dateString by '.'
+        const parts = dateString.split('.');
+
+        // Reformat the date to YYYY-MM-DD
+        const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+
+        // Create a new date object
+        const date = new Date(formattedDate);
+
+        // Get the day name in Turkish
+        return date.toLocaleDateString('tr', { weekday: 'short' }) + ' ';
+    }
+
+    const turkishDayName = getTurkishDayName(selectedDay);
 
     const handleDateChange = (date, target) => {
 
@@ -59,7 +74,7 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
         <div className='flex flex-row items-center h-8 m-1'>
             {prevWeekButton}
             {prevDayButton}
-            <p className='text-xl font-semibold underline' onClick={() => setSelectedDay(new Date().toLocaleDateString('tr'))} >{selectedDay}</p>
+            <p className='text-xl font-semibold underline' onClick={() => setSelectedDay(new Date().toLocaleDateString('tr'))} >{turkishDayName}{selectedDay}</p>
             {nextDayButton}
             {nextWeekButton}
         </div>
