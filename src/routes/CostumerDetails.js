@@ -30,7 +30,7 @@ function CostumerDetails() {
 
     const handleDelete = () => {
         if (window.confirm('Müşteriyi silmek istediğinize emin misiniz?')) {
-            fetch('https://efelerparkhalisaha.cyclic.app/delete-user', {
+            fetch('https://efelerpark-halisaha-backend.cyclic.app/delete-user', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid: uid })

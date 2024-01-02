@@ -22,7 +22,7 @@ function CreateCustomer() {
             return;
         }
 
-        fetch('https://efelerparkhalisaha.cyclic.app/create-user', {
+        fetch('https://efelerpark-halisaha-backend.cyclic.app/create-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone })
