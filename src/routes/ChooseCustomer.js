@@ -14,6 +14,7 @@ function ChooseCustomer() {
     const location = useLocation();
 
     useEffect(() => {
+        if (costumers.length > 0) return;
         getAllCostumers()
             .then((userData) => {
                 if (userData) {

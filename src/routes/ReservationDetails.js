@@ -36,51 +36,61 @@ function ReservationDetails() {
   const [pitches, setPitches] = useState([]);
 
   useEffect(() => {
-    getReservationSchema()
-      .then((data) => {
+    if (schemaHours.length === 0) {
+      getReservationSchema()
+        .then((data) => {
+          if (data) {
+            setReservationSchema(data);
+            // Add hours if visible to the schemaHours array
+            setSchemaHours(
+              data
+                .filter((schemaItem) => schemaItem.visible)
+                .map((schemaItem) => schemaItem.hour)
+            );
+          }
+        })
+        .catch((error) => {
+          console.log("Hata", error);
+        });
+
+
+    }
+    if (schemaHours.length > 0) {
+      getTomorrowNightVisibility().then((data) => {
         if (data) {
-          setReservationSchema(data);
-          // Add hours if visible to the schemaHours array
-          setSchemaHours(
-            data
-              .filter((schemaItem) => schemaItem.visible)
-              .map((schemaItem) => schemaItem.hour)
-          );
+          setSchemaHours((prevSchemaHours) => [
+            ...prevSchemaHours,
+            "01",
+            "02",
+            "03",
+            "04",
+          ]);
         }
-      })
-      .catch((error) => {
-        console.log("Hata", error);
       });
 
-    getTomorrowNightVisibility().then((data) => {
-      if (data) {
-        setSchemaHours((prevSchemaHours) => [
-          ...prevSchemaHours,
-          "01",
-          "02",
-          "03",
-          "04",
-        ]);
-      }
-    });
+    }
+    if (pitches.length === 0) {
+      getPitchList()
+        .then((fetchedPitches) => {
+          setPitches(fetchedPitches);
+        })
+        .catch((error) => {
+          console.log("Error fetching pitches:", error);
+        });
+    }
 
-    getPitchList()
-      .then((fetchedPitches) => {
-        setPitches(fetchedPitches);
-      })
-      .catch((error) => {
-        console.log("Error fetching pitches:", error);
+
+    if (!reservationHour) {
+      getReservationDetails(dateString, pitch, index).then((data) => {
+        if (data) {
+          setPhone(user ? user.phone : data.reservedUserPhone);
+          setNote(data.note);
+          setHour(data.hour);
+          setReservationHour(data.hour);
+          setName(user ? user.name : data.reservedUserName);
+        }
       });
-
-    getReservationDetails(dateString, pitch, index).then((data) => {
-      if (data) {
-        setPhone(user ? user.phone : data.reservedUserPhone);
-        setNote(data.note);
-        setHour(data.hour);
-        setReservationHour(data.hour);
-        setName(user ? user.name : data.reservedUserName);
-      }
-    });
+    }
   }, []);
 
   function checkReservationExists(reservations) {
@@ -216,7 +226,7 @@ function ReservationDetails() {
   return (
     <div className="flex flex-col items-center">
       <Navbar endButton={pickDateComponent} />
-      <div className="flex flex-col w-52 gap-5 items-center">
+      <div className="flex flex-col gap-5 items-center">
         <p className="titleMedium font-bold text-center">
           Rezervasyon Bilgileri
         </p>
@@ -238,16 +248,16 @@ function ReservationDetails() {
           placeHolder={"🕓 Saat"}
         />
 
-        <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} />
+        <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} width={'w-52'} />
         <input
-          className="input w-full max-w-sm input-bordered"
+          className="input  w-52 max-w-sm input-bordered"
           type="text"
           placeholder="🏷️ İsim Soyisim"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
-          className="input w-full max-w-sm input-bordered"
+          className="input w-52 max-w-sm input-bordered"
           type="text"
           placeholder="🗒️ Not"
           value={note}

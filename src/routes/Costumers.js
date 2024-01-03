@@ -13,6 +13,7 @@ function Costumers() {
     const [searchInput, setSearchInput] = useState('');
 
     useEffect(() => {
+        if (costumers.length > 0) return;
         getAllCostumers()
             .then((userData) => {
                 if (userData) {

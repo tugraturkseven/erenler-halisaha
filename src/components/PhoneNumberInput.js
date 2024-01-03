@@ -2,7 +2,7 @@ import React from 'react'
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 
-function PhoneNumberInput({ phoneNumber, setPhoneNumber }) {
+function PhoneNumberInput({ phoneNumber, setPhoneNumber, width }) {
     return (
         <PhoneInput
             placeholder="Telefon Numarasi"
@@ -12,7 +12,7 @@ function PhoneNumberInput({ phoneNumber, setPhoneNumber }) {
             countries={['TR']}
             value={phoneNumber}
             onChange={setPhoneNumber}
-            className='input input-bordered w-full max-w-xs'
+            className={`input input-bordered ${width ? width : 'w-full'} max-w-xs`}
             numberInputProps={{ className: 'bg-transparent', }}
             disabled={setPhoneNumber ? false : true}
         />

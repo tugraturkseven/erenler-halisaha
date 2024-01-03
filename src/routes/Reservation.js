@@ -15,12 +15,15 @@ import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
 import { useLocation } from "react-router-dom";
 
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+
 function Reservation() {
     const user = useContext(UserContext);
     const schema = useContext(ReservationSchemaContext);
     const location = useLocation();
 
-    const [selectedDay, setSelectedDay] = useState(location.state?.date || new Date().toLocaleDateString("tr"));
+    const [selectedDay, setSelectedDay] = useState(location.state?.date || format(new Date(), "dd.MM.yyyy", { locale: tr }));
     const [showPicker, setShowPicker] = useState(false);
 
     const [reservationInfos, setReservationInfos] = useState({
@@ -36,29 +39,34 @@ function Reservation() {
 
     useEffect(() => {
         // This code runs after the component mounts
-        getTomorrowNightVisibility().then((data) =>
-            setReservationInfos((prevInfos) => ({
-                ...prevInfos,
-                tomorrowNightVisibility: data?.visibility,
-            }))
-        );
 
-        getPitchList().then((fetchedPitches) => {
-            let initialReservations = {};
+        if (!isNightLoaded) {
+            getTomorrowNightVisibility().then((data) =>
+                setReservationInfos((prevInfos) => ({
+                    ...prevInfos,
+                    tomorrowNightVisibility: data?.visibility,
+                }))
+            );
+        }
 
-            fetchedPitches.forEach((pitch) => {
-                initialReservations[pitch.name] = schema.map((schemaItem) => ({
-                    ...schemaItem,
-                    minute: pitch.minute,
+        if (!isTemplateLoaded) {
+            getPitchList().then((fetchedPitches) => {
+                let initialReservations = {};
+
+                fetchedPitches.forEach((pitch) => {
+                    initialReservations[pitch.name] = schema.map((schemaItem) => ({
+                        ...schemaItem,
+                        minute: pitch.minute,
+                    }));
+                });
+
+                setReservationInfos((prevInfos) => ({
+                    ...prevInfos,
+                    reservationTemplate: initialReservations,
                 }));
+                setIsTemplateLoaded(true);
             });
-
-            setReservationInfos((prevInfos) => ({
-                ...prevInfos,
-                reservationTemplate: initialReservations,
-            }));
-            setIsTemplateLoaded(true);
-        });
+        }
 
         return () => {
             // This code runs when the component unmounts
