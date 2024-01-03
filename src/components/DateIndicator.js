@@ -1,4 +1,6 @@
 import React from 'react'
+import { format } from 'date-fns'
+import { tr } from 'date-fns/locale'
 
 function DateIndicator({ selectedDay, setSelectedDay }) {
     const getTurkishDayName = (dateString) => {
@@ -9,24 +11,22 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
         const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
         // Create a new date object
-        const date = new Date(formattedDate);
+        const date = new Date(format(new Date(formattedDate), 'yyyy-MM-dd'));
 
         // Get the day name in Turkish
-        return date.toLocaleDateString('tr', { weekday: 'short' }) + ' ';
+        return format(date, 'EEE', { locale: tr }) + ' ';
     }
 
     const turkishDayName = getTurkishDayName(selectedDay);
 
     const handleDateChange = (date, target) => {
-
-        // Split the date string into day, month, and year components
         const dateComponents = date.split('.');
         const day = parseInt(dateComponents[0], 10);
-        const month = parseInt(dateComponents[1], 10);
+        const month = parseInt(dateComponents[1], 10) - 1; // Adjust for zero-index month
         const year = parseInt(dateComponents[2], 10);
 
-        // Create a JavaScript Date object
-        const dateObject = new Date(year, month - 1, day); // Month is 0-based in JavaScript Date, so subtract 1
+        // Create a JavaScript Date object in a Safari-compatible way
+        const dateObject = new Date(year, month, day);
 
         if (target === 'prevDay') {
             dateObject.setDate(dateObject.getDate() - 1);
@@ -38,10 +38,11 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
             dateObject.setDate(dateObject.getDate() + 7);
         }
 
-        // Update the selectedDay state variable
-        setSelectedDay(dateObject.toLocaleDateString('tr'));
-
+        // Format the date for display
+        const formattedDate = format(dateObject, 'dd.MM.yyyy');
+        setSelectedDay(formattedDate);
     }
+
 
     const prevDayButton = (
         <button onClick={() => handleDateChange(selectedDay, 'prevDay')} className='btn btn-ghost normal-case text-xl'>
