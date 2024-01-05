@@ -1,31 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useContext } from 'react'
 import Navbar from '../components/Navbar'
 import Table from '../components/Table'
 import Search from '../components/Search'
-import { getAllCostumers } from '../firebase'
 import { useNavigate } from 'react-router-dom'
-
+import { CustomersContext } from '../contexts/CustomersContext'
 
 function Costumers() {
     const navigate = useNavigate();
-    const [costumers, setCostumers] = useState([])
-    const [searchResults, setSearchResults] = useState([])
+    const costumersContext = useContext(CustomersContext);
+    const costumers = [...costumersContext.customers]
+    const [searchResults, setSearchResults] = useState(costumers)
     const [searchInput, setSearchInput] = useState('');
-
-    useEffect(() => {
-        if (costumers.length > 0) return;
-        getAllCostumers()
-            .then((userData) => {
-                if (userData) {
-                    const userArray = Object.entries(userData).map(([key, value]) => ({ id: key, ...value }));
-                    setCostumers(userArray);
-                    setSearchResults(userArray);
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    }, []);
 
     const formatPhoneNumber = (phoneNumber) => {
         // Remove all non-digit characters for consistency
