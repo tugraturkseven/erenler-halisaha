@@ -23,23 +23,28 @@ function Table({ data, type, headings, handleDelete, handleEdit }) {
         return (
           <tr key={id}>
             <th>{index + 1}</th>
-            <td className="truncate w-5 max-w-0 md:w-24 lg:whitespace-pre-wrap" >{name}</td>
+            <td style={{
+              display: '-webkit-box',
+              WebkitLineClamp: '3',
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxHeight: '3em', // Adjust as needed based on your line height
+            }} className="py-0">{name}</td>
             <td className="px-0">
               <Input
                 value={phone}
-                className="bg-transparent w-full max-w-xs"
+                className="bg-transparent w-full"
                 disabled={true}
               />
             </td>
-            <td>
-              <div className="flex flex-row ">
-                <button
-                  className="btn btn-info mr-5"
-                  onClick={() => handleEdit(user)}
-                >
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-              </div>
+            <td className="flex justify-center">
+              <button
+                className="btn btn-info mr-5"
+                onClick={() => handleEdit(user)}
+              >
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
             </td>
           </tr>
         );
@@ -109,8 +114,8 @@ function Table({ data, type, headings, handleDelete, handleEdit }) {
         <thead>
           <tr>
             <th></th>
-            <th className="w-28 md:w-32">{headings.first}</th>
-            <th>{headings.second}</th>
+            <th className="w-24 md:w-32">{headings.first}</th>
+            <th style={{ minWidth: '125px' }}>{headings.second}</th>
             <th>⚙️ Duzenle</th>
           </tr>
         </thead>

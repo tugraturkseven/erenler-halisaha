@@ -13,7 +13,7 @@ import {
 import DateIndicator from "../components/DateIndicator";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -22,7 +22,7 @@ function Reservation() {
     const user = useContext(UserContext);
     const schema = useContext(ReservationSchemaContext);
     const location = useLocation();
-
+    const navigate = useNavigate();
     const [selectedDay, setSelectedDay] = useState(location.state?.date || format(new Date(), "dd.MM.yyyy", { locale: tr }));
     const [showPicker, setShowPicker] = useState(false);
 
@@ -197,8 +197,11 @@ function Reservation() {
 
     if (!user || !isActualLoaded || !isNightLoaded) {
         return (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center mt-52 gap-10">
                 <p>Lütfen giriş yapınız.</p>
+                <button onClick={() => navigate("/")} className="btn btn-square w-52">
+                    Giriş Yap
+                </button>
             </div>
         );
     }

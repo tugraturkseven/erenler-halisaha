@@ -23,32 +23,39 @@ function Table({ data }) {
 
   const renderTableData = () => {
     return currentItems.map((user, index) => {
-      const { id, name, phone } = user; //destructuring
+      const { id, name, phone } = user;
       return (
         <tr key={id}>
           <th>{index + 1}</th>
-          <td className="truncate w-5 max-w-0 md:w-24 lg:whitespace-pre-wrap">{name}</td>
+          {/* Set a fixed height and allow for scrolling if content overflows */}
+          <td style={{
+            display: '-webkit-box',
+            WebkitLineClamp: '3',
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxHeight: '3em', // Adjust as needed based on your line height
+          }} className="py-0">{name}</td>
+          {/* Ensure input has enough space to display the phone number */}
           <td className="px-0">
             <Input
               value={phone}
-              className="bg-transparent w-full max-w-xs"
+              className="bg-transparent w-full"
               disabled={true}
             />
           </td>
-          <td>
-            <div className="flex flex-row justify-center">
-              <button
-                className="btn btn-success p-3"
-                onClick={() => handleChoose(user)}
-              >
-                <FontAwesomeIcon icon={faCheck} />
-              </button>
-            </div>
+          {/* Use flex and justify-end to align the button to the right */}
+          <td className="flex justify-center" >
+            <button
+              className="btn btn-success p-3"
+              onClick={() => handleChoose(user)}
+            >
+              <FontAwesomeIcon icon={faCheck} />
+            </button>
           </td>
         </tr>
       );
     });
-
   };
 
   // Logic to change page
@@ -91,8 +98,8 @@ function Table({ data }) {
           <tr>
             <th></th>
             <th className="w-24 md:w-32">🏷️ Isim</th>
-            <th>📞 Telefon</th>
-            <th>🧲 Müşteri Seç</th>
+            <th style={{ minWidth: '115px' }}>📞 Telefon</th>
+            <th >🧲 Müşteri Seç</th>
           </tr>
         </thead>
         <tbody>{renderTableData()}</tbody>

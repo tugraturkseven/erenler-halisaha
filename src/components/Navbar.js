@@ -48,7 +48,14 @@ function Navbar(props) {
             </div >
         )
     } else if (!user) {
-        navigate('/')
+        return (
+            <div className="flex flex-col items-center mt-52 gap-10">
+                <p>Lütfen giriş yapınız.</p>
+                <button onClick={() => navigate("/")} className="btn btn-square w-52">
+                    Giriş Yap
+                </button>
+            </div>
+        )
     }
 
 }
