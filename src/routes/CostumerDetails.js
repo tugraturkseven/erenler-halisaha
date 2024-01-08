@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Navbar from '../components/Navbar'
 import RadioGroup from '../components/RadioGroup'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { updateCostumer } from '../firebase'
 import PhoneNumberInput from '../components/PhoneNumberInput'
 import { deleteCostumer } from '../firebase'
+import { CustomersContext } from '../contexts/CustomersContext'
 
 function CostumerDetails() {
     const navigate = useNavigate();
@@ -13,13 +14,16 @@ function CostumerDetails() {
     const [name, setName] = useState(costumer.name)
     const [phone, setPhone] = useState(costumer.phone)
     const [type, setType] = useState(costumer.type)
+    const { deleteCustomer, updateCustomer } = useContext(CustomersContext);
 
     // Costumer id consist of phone number and uid seperated by - . We need to split it to get uid.
-    const uid = costumer.id.split('-')[1];
+    const uid = costumer.id.split('-')[1] || costumer.id;
+
 
     const handleSave = () => {
         updateCostumer(costumer.id, name, phone, type).then(() => {
             alert('Müşteri bilgileri güncellendi');
+            updateCustomer({ id: costumer.id, name: name, phone: phone, type: type });
             navigate('/customers');
         }).catch((error) => {
             alert('Müşteri bilgileri güncellenemedi', error);
@@ -43,6 +47,7 @@ function CostumerDetails() {
             }).then(data => {
                 deleteCostumer(phone, uid);
                 alert("Müşteri başarıyla silindi.");
+                deleteCustomer(costumer.id);
                 navigate("/reservation");
             }).catch(err => {
                 alert(`Müşteri silinemedi. ${err.message}`);

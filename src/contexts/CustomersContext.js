@@ -6,8 +6,8 @@ export const CustomersContext = createContext();
 export const CustomersProvider = ({ children }) => {
     const [customers, setCustomers] = useState([]);
     // Fetch customers only once at the start of the application
-    useEffect(() => {
-        if (customers.length > 0) return;
+
+    const fetchCustomers = () => {
         getAllCostumers()
             .then((userData) => {
                 if (userData) {
@@ -18,10 +18,32 @@ export const CustomersProvider = ({ children }) => {
             .catch((error) => {
                 console.error('Error:', error);
             });
+    };
+
+    useEffect(() => {
+        if (customers.length > 0) return;
+        fetchCustomers();
     }, []);
 
+    const addCustomer = (customer) => {
+        setCustomers([...customers, customer]);
+    };
+
+    const updateCustomer = (customer) => {
+        const index = customers.findIndex((c) => c.id === customer.id);
+        const updatedCustomers = [...customers];
+        updatedCustomers[index] = customer;
+        setCustomers(updatedCustomers);
+    }
+
+    const deleteCustomer = (id) => {
+        const updatedCustomers = customers.filter((c) => c.id !== id);
+        setCustomers(updatedCustomers);
+    }
+
+
     return (
-        <CustomersContext.Provider value={{ customers }}>
+        <CustomersContext.Provider value={{ customers, addCustomer, updateCustomer, deleteCustomer }}>
             {children}
         </CustomersContext.Provider>
     );

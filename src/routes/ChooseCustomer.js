@@ -44,17 +44,19 @@ function ChooseCustomer() {
         // Regular expression to test if the value is numerical (phone number)
         const isPhoneNumber = /^[\d\s\+\-]+$/.test(value);
 
+        let formattedValue = value;
+
         if (isPhoneNumber) {
-            // Format the phone number for display
-            const formattedValue = formatPhoneNumber(value.replace(/\s+/g, ''));
-            setSearchInput(formattedValue); // Update the search bar's display value
-        } else {
-            setSearchInput(value); // Update the search input state for non-phone number inputs
+            // Format the phone number for display, removing spaces
+            formattedValue = formatPhoneNumber(value.replace(/\s+/g, ''));
         }
 
-        // Use the original, unformatted value for filtering
-        handleChange(value.replace(/\s+/g, ''));
+        setSearchInput(formattedValue); // Update the search input state
+
+        // Use the original value for phone numbers (with spaces removed) and the unmodified value for names
+        handleChange(isPhoneNumber ? formattedValue : value);
     }
+
 
     const handleChange = (value) => {
         // Regular expression to test if the value is numerical (phone number)

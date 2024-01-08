@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Navbar from '../components/Navbar'
 import PhoneNumberInput from '../components/PhoneNumberInput'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { createCostumer } from '../firebase'
 import { isValidPhoneNumber } from 'react-phone-number-input'
+import { CustomersContext } from '../contexts/CustomersContext'
 
 function CreateCustomer() {
     const [phone, setPhone] = useState("")
     const [name, setName] = useState("")
-
+    const addCustomer = useContext(CustomersContext).addCustomer;
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -42,6 +43,7 @@ function CreateCustomer() {
                     type: 'customer'
                 }
                 alert("Müşteri başarıyla oluşturuldu.");
+                addCustomer(user);
                 navigate("/reservationDetails", { state: { ...location.state, user } });
             })
             .catch(err => {

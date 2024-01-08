@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import Input from "react-phone-number-input/input";
@@ -20,6 +20,10 @@ function Table({ data }) {
   // Slice the data to only include items for the current page
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  useEffect(() => { // Reset page number when data changes
+    setCurrentPage(1);
+  }, [data]);
 
   const renderTableData = () => {
     return currentItems.map((user, index) => {
