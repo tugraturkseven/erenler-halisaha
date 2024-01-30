@@ -24,6 +24,7 @@ function Settings() {
                 <Card icon='⚙️' title='Genel' route='generalSettings' />
                 <Card icon='⛓️' title='Şema' route='schemaSettings' />
                 <Card icon='🏟️' title='Saha' route='pitchSettings' />
+                <Card icon="📱" title="SMS" route="smsSettings" />
             </div>
         </div>
     )
