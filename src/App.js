@@ -15,6 +15,8 @@ import ReservationForm from './routes/ReservationForm';
 import ChooseCustomer from './routes/ChooseCustomer';
 import CreateCustomer from './routes/CreateCustomer';
 import SmsSettings from './routes/SmsSettings';
+import SMSTemplateDetails from './routes/SMSTemplateDetails';
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { CustomersProvider } from './contexts/CustomersContext';
@@ -45,6 +47,7 @@ function App() {
                 <Route path='/pitchSettings' element={<PitchSettings />} />
                 <Route path='/pitchDetails' element={<PitchDetails />} />
                 <Route path='/smsSettings' element={<SmsSettings />} />
+                <Route path='/smsTemplateDetails' element={<SMSTemplateDetails />} />
               </Routes>
             </BrowserRouter>
           </ReservationSchemaProvider>

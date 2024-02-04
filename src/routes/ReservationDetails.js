@@ -132,6 +132,12 @@ function ReservationDetails() {
     return isReserved;
   }
 
+  const sendWhatsAppMessage = (minute) => {
+    const message = encodeURIComponent(`Sayın Müşterimiz EFFELERPARK'ta ${reservationHour}:${minute} saat; ${reservationDate} tarihinde ${reservationPitch} saha rezervasyonunuz onaylanmıştır. İyi eğlenceler dileriz.`);
+    const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+  }
+
   const handleSave = async () => {
     try {
       const newDateString = reservationDate.replaceAll(".", "-");
@@ -160,6 +166,9 @@ function ReservationDetails() {
           note
         );
         alert("Rezervasyon kaydedildi");
+        if (window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")) {
+          sendWhatsAppMessage(minute);
+        }
         navigate("/reservation", { state: { date: reservationDate } });
       } else {
         alert("Bu tarih ve saat rezerve edilmiş");
