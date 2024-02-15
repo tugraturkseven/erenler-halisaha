@@ -379,6 +379,12 @@ function Dnd({ reservations, tomorrowNight }) {
     }
   };
 
+  const handleBackground = (item) => {
+    if (item.reservationType === "Ön Rez.") return "bg-yellow-600";
+    if (item.reservationType === "Kesin Rez.") return "bg-green-600";
+    return "bg-slate-700";
+  }
+
   return (
     <div className="flex flex-row gap-2 p-1 justify-around md:w-2/3  lg:w-2/3  xl:w-1/3">
       <DragDropContext onDragEnd={onDragEnd}>
@@ -395,7 +401,7 @@ function Dnd({ reservations, tomorrowNight }) {
                     (item, index) =>
                       item.visible && (
                         <li
-                          className="bg-slate-700 rounded shadow-md h-20"
+                          className={`${handleBackground(item)} rounded shadow-md h-20`}
                           key={item.hour}
                         >
                           <Draggable

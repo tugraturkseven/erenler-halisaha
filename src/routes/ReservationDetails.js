@@ -14,6 +14,7 @@ import DropDown from "../components/DropDown";
 import DatePicker from "../components/DatePicker";
 import DateIndicator from "../components/DateIndicator";
 import PhoneNumberInput from "../components/PhoneNumberInput";
+import RadioGroup from "../components/RadioGroup";
 
 function ReservationDetails() {
   const location = useLocation();
@@ -28,6 +29,7 @@ function ReservationDetails() {
   const [reservationDate, setReservationDate] = useState(date);
   const [reservationPitch, setReservationPitch] = useState(pitch);
   const [reservationHour, setReservationHour] = useState(hour);
+  const [reservationType, setReservationType] = useState("");
   const dateString = reservationDate.replaceAll(".", "-");
 
   const [showPicker, setShowPicker] = useState(false);
@@ -84,10 +86,11 @@ function ReservationDetails() {
       getReservationDetails(dateString, pitch, index).then((data) => {
         if (data) {
           setPhone(user ? user.phone : data.reservedUserPhone);
-          setNote(data.note);
-          setHour(data.hour);
-          setReservationHour(data.hour);
-          setName(user ? user.name : data.reservedUserName);
+          setNote(data?.note);
+          setHour(data?.hour);
+          setReservationHour(data?.hour);
+          setName(user ? user?.name : data?.reservedUserName);
+          setReservationType(data?.reservationType || "Ön Rez.");
         }
       });
     }
@@ -132,11 +135,70 @@ function ReservationDetails() {
     return isReserved;
   }
 
-  const sendWhatsAppMessage = (minute) => {
-    const message = encodeURIComponent(`Sayın Müşterimiz EFFELERPARK'ta ${reservationHour}:${minute} saat; ${reservationDate} tarihinde ${reservationPitch} saha rezervasyonunuz onaylanmıştır. İyi eğlenceler dileriz.`);
-    const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+  const sendWhatsAppMessage = (minute, msgType) => {
+    const preReservationMessage = `
+      Gün: ${reservationDate}
+      Saat: ${reservationHour}:${minute} 
+      Saha No: ${reservationPitch}
+
+      *ÖN REZERVASYONUNUZ* YAPILMIŞTIR.
+
+      Lütfen iki saat içinde
+
+      *700 TL CAYMA BEDELİ*
+
+      ödeme yapınız.
+
+      Ödeme yapmaz iseniz ön rezervasyonunuz otomatik olarak iptal edilecektir.
+
+      NOT: MAÇ OYNANDIKTAN SONRA YAPTIĞINIZ ÖDEME BAKİYEDEN DÜŞÜLECEKTİR.
+
+      Nazlı AK
+
+      Halkbank
+
+      71 0001 2001 2700 0001 1173 80
+
+      Ödeme yapınca mutlaka bilgilendirme yapınız.`;
+
+    const reservationMessage = ` 
+    Gün: ${reservationDate}
+    Saat: ${reservationHour}:${minute} 
+    Saha No: ${reservationPitch}
+    
+    *REZERVASYONUNUZ YAPILMIŞTIR*
+
+    Lütfen tarihi ve saati kontrol ediniz.
+
+    ÖNEMLİ NOT;
+
+    MAÇIN OLACAĞI GÜN LÜTFEN SABAHTAN HAVA DURUMUNA BAKIP, YAĞMUR YAĞACAK DİYE MAÇI İPTAL ETTİRMEYİNİZ. MAÇ SAATİNDEN BİR SAAT ÖNCE HAVA KOŞULLARI UYGUN OLMAZSA DURUM DEĞERLENDİRMESİ YAPILIP, MAÇINIZ İPTAL EDİLEBİLİR VEYA ERTELEYEBİLİRİZ.
+
+    Bir saat önceden iptal ve erteleme şartı sadece
+
+    YAĞMURLU HAVA KOŞULLARI İÇİN GEÇERLİDİR.
+    `;
+
+
+    const cancelMsg = `
+    Gün: ${reservationDate}
+    Saat: ${reservationHour}:${minute}
+    Saha No: ${reservationPitch}
+
+    *REZERVASYONUNUZ İPTAL EDİLMİŞTİR*
+
+    İyi günler dileriz.`;
+
+    const message = msgType === "cancel" ? cancelMsg : (reservationType === "Ön Rez." ? preReservationMessage : reservationMessage);
+
+    // Replace line breaks with a special character sequence
+    const encodedMessage = encodeURIComponent(message);
+
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
-  }
+  };
+
+
 
   const handleSave = async () => {
     try {
@@ -163,11 +225,12 @@ function ReservationDetails() {
           minute,
           name,
           phone,
-          note
+          note,
+          reservationType
         );
         alert("Rezervasyon kaydedildi");
         if (window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")) {
-          sendWhatsAppMessage(minute);
+          sendWhatsAppMessage(minute, "reservation");
         }
         navigate("/reservation", { state: { date: reservationDate } });
       } else {
@@ -228,6 +291,9 @@ function ReservationDetails() {
     );
     if (notify) {
       alert("Rezervasyon iptal edildi");
+      if (window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")) {
+        sendWhatsAppMessage(minute, "cancel");
+      }
       navigate("/reservation", { state: { date: reservationDate } });
     }
   };
@@ -272,22 +338,24 @@ function ReservationDetails() {
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
-
-        <div className="flex flex-col gap-5 w-52">
+        <div className="flex flex-row items-center justify-center gap-5 w-52">
+          <RadioGroup options={["Ön Rez.", "Kesin Rez."]} selected={reservationType} setSelected={setReservationType} />
+        </div>
+        <div className="flex flex-row gap-5 w-52">
           <button className="btn btn-info" onClick={() => handleSave(true)}>
-            💾 Kaydet
+            💾
           </button>
           <button
             className="btn btn-secondary"
             onClick={() => clearReservation(true)}
           >
-            ❌ Iptal Et
+            ❌
           </button>
           <button
             className="btn btn-accent"
             onClick={() => navigate("/reservation")}
           >
-            🚪 Geri Dön
+            🚪
           </button>
         </div>
       </div>
