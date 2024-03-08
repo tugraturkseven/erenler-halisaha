@@ -47,7 +47,14 @@ function Dnd({ reservations, tomorrowNight }) {
       );
   }, [tomorrowNight]);
 
-  const updateDatabaseOnDragEnd = async (pitchA, pitchB, hourA, hourB, dateA, dateB) => {
+  const updateDatabaseOnDragEnd = async (
+    pitchA,
+    pitchB,
+    hourA,
+    hourB,
+    dateA,
+    dateB
+  ) => {
     try {
       // Fetch reservation details for pitchA and pitchB
       const dateAString = dateA.replaceAll(".", "-");
@@ -62,8 +69,26 @@ function Dnd({ reservations, tomorrowNight }) {
       // Check if data is available before updating reservations
       if (itemA && itemB && itemA.hour === hourA && itemB.hour === hourB) {
         // Update reservations for pitchA and pitchB
-        await setReservation(dateAString, pitchA, indexA, hourA, itemA.minute, itemB.reservedUserName, itemB.reservedUserPhone, itemB.note);
-        await setReservation(dateBString, pitchB, indexB, hourB, itemB.minute, itemA.reservedUserName, itemA.reservedUserPhone, itemA.note);
+        await setReservation(
+          dateAString,
+          pitchA,
+          indexA,
+          hourA,
+          itemA.minute,
+          itemB.reservedUserName,
+          itemB.reservedUserPhone,
+          itemB.note
+        );
+        await setReservation(
+          dateBString,
+          pitchB,
+          indexB,
+          hourB,
+          itemB.minute,
+          itemA.reservedUserName,
+          itemA.reservedUserPhone,
+          itemA.note
+        );
       }
     } catch (error) {
       // Handle errors here
@@ -177,8 +202,12 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const nightReservationsOnDragEnd = (source, destination) => {
-    const sourcePitch = tomorrowNightReservations.find((pitch) => pitch.pitchName === source.droppableId);
-    const destinationPitch = tomorrowNightReservations.find((pitch) => pitch.pitchName === destination.droppableId);
+    const sourcePitch = tomorrowNightReservations.find(
+      (pitch) => pitch.pitchName === source.droppableId
+    );
+    const destinationPitch = tomorrowNightReservations.find(
+      (pitch) => pitch.pitchName === destination.droppableId
+    );
 
     const sourceIndex = determineSourceIndex(source);
     const destinationIndex = determineDestinationIndex(destination);
@@ -323,6 +352,8 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const onDragEnd = (result) => {
+    if (!window.confirm("Rezervasyonu taşımak istediğinize emin misiniz?"))
+      return;
     const { source, destination } = result;
 
     if (
@@ -332,8 +363,10 @@ function Dnd({ reservations, tomorrowNight }) {
     )
       return;
 
-    const isSourceActual = source.index < pitchReservations[0].reservations.length;
-    const isDestinationActual = destination.index < pitchReservations[0].reservations.length;
+    const isSourceActual =
+      source.index < pitchReservations[0].reservations.length;
+    const isDestinationActual =
+      destination.index < pitchReservations[0].reservations.length;
 
     if (isSourceActual && isDestinationActual) {
       reservationsOnDragEnd(source, destination);
@@ -370,7 +403,9 @@ function Dnd({ reservations, tomorrowNight }) {
 
     if (user.type === "admin") {
       if (isReserved) {
-        navigate("/reservationDetails", { state: { pitch, item, index, date } });
+        navigate("/reservationDetails", {
+          state: { pitch, item, index, date },
+        });
       } else {
         navigate("/chooseCustomer", { state: { pitch, index, date } });
       }
@@ -383,17 +418,21 @@ function Dnd({ reservations, tomorrowNight }) {
     if (item.reservationType === "Ön Rez.") return "bg-yellow-600";
     if (item.reservationType === "Kesin Rez.") return "bg-green-600";
     return "bg-slate-700";
-  }
+  };
 
   return (
-    <div className="flex flex-row gap-2 p-1 justify-around md:w-2/3  lg:w-2/3  xl:w-1/3">
+    <div className="flex flex-row gap-2  justify-around w-full px-5 sm:px-10">
       <DragDropContext onDragEnd={onDragEnd}>
         {pitchReservations.map((pitch, index) => (
-          <div key={`${pitch.pitchName}-${index}`}>
+          <div
+            key={`${pitch.pitchName}-${index}`}
+            className="flex-1"
+            style={{ minWidth: "50%" }}
+          >
             <Droppable droppableId={pitch.pitchName}>
               {(provided) => (
                 <ul
-                  className="space-y-2"
+                  className="space-y-1 w-full"
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                 >
@@ -401,7 +440,9 @@ function Dnd({ reservations, tomorrowNight }) {
                     (item, index) =>
                       item.visible && (
                         <li
-                          className={`${handleBackground(item)} rounded shadow-md h-20`}
+                          className={`${handleBackground(
+                            item
+                          )} rounded shadow-md h-20`}
                           key={item.hour}
                         >
                           <Draggable
@@ -421,7 +462,7 @@ function Dnd({ reservations, tomorrowNight }) {
                                 {...provided.dragHandleProps}
                               >
                                 <div
-                                  className={`flex flex-col text-center md:w-52 py-2 px-2 ${handleWidth()}`}
+                                  className={`flex flex-col text-center  py-2 px-2`}
                                 >
                                   <div className="flex flex-row justify-between align-baseline items-baseline">
                                     <p
@@ -432,7 +473,7 @@ function Dnd({ reservations, tomorrowNight }) {
                                     >
                                       {item.hour + ":" + item.minute}
                                     </p>
-                                    <p className="text-sm flex-1 font-semibold truncate">
+                                    <p className="text-sm flex-1 font-semibold truncate text-right md:text-base xl:text-lg">
                                       {showReservedOrNot(item)}
                                     </p>
                                   </div>

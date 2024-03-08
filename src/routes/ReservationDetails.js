@@ -37,6 +37,21 @@ function ReservationDetails() {
   const [schemaHours, setSchemaHours] = useState([]);
   const [pitches, setPitches] = useState([]);
 
+  const monthNames = [
+    "Ocak",
+    "Şubat",
+    "Mart",
+    "Nisan",
+    "Mayıs",
+    "Haziran",
+    "Temmuz",
+    "Ağustos",
+    "Eylül",
+    "Ekim",
+    "Kasım",
+    "Aralık",
+  ];
+
   useEffect(() => {
     if (schemaHours.length === 0) {
       getReservationSchema()
@@ -135,9 +150,23 @@ function ReservationDetails() {
     return isReserved;
   }
 
+  const turkishDateFormatter = (date) => {
+    const [day, month, year] = date.split(".");
+    // The output should be in the format of 22 Şubat
+    return `${day} ${monthNames[month - 1]}`;
+  };
+
+  const getTurkishDayName = (date) => {
+    const [day, month, year] = date.split(".");
+    const dateObj = new Date(year, month - 1, day);
+    const dayName = dateObj.toLocaleDateString("tr", { weekday: "long" });
+    return dayName;
+  };
+
   const sendWhatsAppMessage = (minute, msgType) => {
     const preReservationMessage = `
-      Gün: ${reservationDate}
+      Tarih: ${turkishDateFormatter(reservationDate)}
+      Gün: ${getTurkishDayName(reservationDate)}
       Saat: ${reservationHour}:${minute} 
       Saha No: ${reservationPitch}
 
@@ -162,7 +191,8 @@ function ReservationDetails() {
       Ödeme yapınca mutlaka bilgilendirme yapınız.`;
 
     const reservationMessage = ` 
-    Gün: ${reservationDate}
+    Tarih: ${turkishDateFormatter(reservationDate)}
+    Gün: ${getTurkishDayName(reservationDate)}
     Saat: ${reservationHour}:${minute} 
     Saha No: ${reservationPitch}
     
@@ -181,7 +211,8 @@ function ReservationDetails() {
 
 
     const cancelMsg = `
-    Gün: ${reservationDate}
+    Tarih: ${turkishDateFormatter(reservationDate)}
+    Gün: ${getTurkishDayName(reservationDate)}
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
 
@@ -198,7 +229,27 @@ function ReservationDetails() {
     window.open(whatsappUrl, "_blank");
   };
 
+  const sendReminderMessage = () => {
+    const minute = pitches.find(
+      (pitch) => pitch.name === reservationPitch
+    ).minute;
 
+    const reminderMessage = `
+    Tarih: ${turkishDateFormatter(reservationDate)}
+    Gün: ${getTurkishDayName(reservationDate)}
+    Saat: ${reservationHour}:${minute}
+    Saha No: ${reservationPitch}
+
+    *MAÇINIZ VARDIR UNUTMAYINIZ*
+
+    Lütfen tarih ve maç saatinizi kontrol ediniz.
+
+    İyi eğlenceler dileriz.`;
+
+    const encodedMessage = encodeURIComponent(reminderMessage);
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   const handleSave = async () => {
     try {
@@ -341,7 +392,7 @@ function ReservationDetails() {
         <div className="flex flex-row items-center justify-center gap-5 w-52">
           <RadioGroup options={["Ön Rez.", "Kesin Rez."]} selected={reservationType} setSelected={setReservationType} />
         </div>
-        <div className="flex flex-row gap-5 w-52">
+        <div className="flex flex-row gap-5 w-52 justify-center">
           <button className="btn btn-info" onClick={() => handleSave(true)}>
             💾
           </button>
@@ -350,6 +401,12 @@ function ReservationDetails() {
             onClick={() => clearReservation(true)}
           >
             ❌
+          </button>
+          <button
+            className="btn btn-neutral"
+            onClick={() => sendReminderMessage()}
+          >
+            🔔
           </button>
           <button
             className="btn btn-accent"

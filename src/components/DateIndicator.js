@@ -72,10 +72,10 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
 
 
     return (
-        <div className='flex flex-row items-center h-8 m-1 gap-2'>
+        <div className='flex flex-row items-center  m-1 gap-2'>
             {prevWeekButton}
             {prevDayButton}
-            <p className='text-md font-semibold underline' onClick={() => setSelectedDay(new Date().toLocaleDateString('tr'))} >{turkishDayName}{selectedDay}</p>
+            <p className='text-base font-semibold underline' onClick={() => setSelectedDay(new Date().toLocaleDateString('tr'))} >{turkishDayName}{selectedDay}</p>
             {nextDayButton}
             {nextWeekButton}
         </div>
