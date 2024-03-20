@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../contexts/UserContext'
 import { auth } from '../firebase'
 import { signOut } from 'firebase/auth'
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import CountIndicator from './CountIndicator'
 
 function Navbar(props) {
     const navigate = useNavigate();
@@ -16,6 +19,21 @@ function Navbar(props) {
         });
     }
 
+    const showToast = () => {
+        toast(<CountIndicator />, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+        })
+    }
+        ;
+
     if (user && user.type === 'admin') {
         return (
             <div className="navbar bg-base-100 shadow-sm min-h-0 h-14">
@@ -25,8 +43,11 @@ function Navbar(props) {
                 <div className='navbar-center'>
 
                     {/*<button onClick={() => navigate('/message')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>✉️</button> */}
+                    <button onClick={showToast} className='lg:hidden btn btn-ghost normal-case text-xl xl:text-3xl'>⭐</button>
                     <button onClick={() => navigate('/customers')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>👱</button>
                     <button onClick={() => navigate('/settings')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>⚙️</button>
+                    <ToastContainer />
+
                 </div>
                 <div className='navbar-end'>
                     {props.endButton ? props.endButton : null}

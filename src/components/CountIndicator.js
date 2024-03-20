@@ -33,11 +33,18 @@ function CountIndicator(props) {
     }, [dateObject]);
 
     return (
-        <div className='flex flex-row gap-5'>
-            <span className="text-2xl">⚪: {counts.activeReservation + counts.preReservation}</span>
-            <span className="text-2xl">🟢: {counts.activeReservation}</span>
-            <span className="text-2xl">🟠: {counts.preReservation}</span>
-        </div>
+        <>
+            <div className='hidden invisible flex-row gap-5 lg:flex lg:visible'>
+                <span className="text-2xl">⚪: {counts.activeReservation + counts.preReservation}</span>
+                <span className="text-2xl">🟢: {counts.activeReservation}</span>
+                <span className="text-2xl">🟠: {counts.preReservation}</span>
+            </div>
+            <div className='flex flex-col gap-5 lg:hidden'>
+                <span className="text-lg">⚪ Toplam Rez.: {counts.activeReservation + counts.preReservation}</span>
+                <span className="text-lg">🟢 Aktif Rez.: {counts.activeReservation}</span>
+                <span className="text-lg">🟠 Ön Rez.: {counts.preReservation}</span>
+            </div>
+        </>
     )
 }
 

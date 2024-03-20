@@ -73,7 +73,7 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
 
     return (
         <div className='flex flex-row justify-center items-center w-full m-1 gap-2'>
-            <div className='absolute left-10'>
+            <div className='absolute left-10 hidden lg:flex'>
                 <CountIndicator selectedDay={selectedDay} />
             </div>
             {prevWeekButton}
