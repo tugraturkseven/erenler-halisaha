@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { getAllCostumers } from '../firebase'
 
 export const CustomersContext = createContext();
@@ -7,7 +7,7 @@ export const CustomersProvider = ({ children }) => {
     const [customers, setCustomers] = useState([]);
     // Fetch customers only once at the start of the application
 
-    const fetchCustomers = () => {
+    const fetchCustomers = useMemo(() => () => {
         getAllCostumers()
             .then((userData) => {
                 if (userData) {
@@ -18,7 +18,7 @@ export const CustomersProvider = ({ children }) => {
             .catch((error) => {
                 console.error('Error:', error);
             });
-    };
+    }, []);
 
     useEffect(() => {
         if (customers.length > 0) return;

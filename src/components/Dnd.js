@@ -20,9 +20,7 @@ function Dnd({ reservations, tomorrowNight }) {
     }))
   );
 
-  const [tomorrowNightReservations, setTomorrowNightReservations] = useState(
-    []
-  );
+  const [tomorrowNightReservations, setTomorrowNightReservations] = useState([]);
 
   useEffect(() => {
     setPitchReservations(
@@ -33,6 +31,10 @@ function Dnd({ reservations, tomorrowNight }) {
         ),
       }))
     );
+
+    return () => {
+      setPitchReservations([]);
+    };
   }, [reservations]);
 
   useEffect(() => {
@@ -45,6 +47,10 @@ function Dnd({ reservations, tomorrowNight }) {
           ),
         }))
       );
+
+    return () => {
+      setTomorrowNightReservations([]);
+    };
   }, [tomorrowNight]);
 
   const updateDatabaseOnDragEnd = async (
@@ -274,15 +280,16 @@ function Dnd({ reservations, tomorrowNight }) {
     const sourceItems = Array.from(sourcePitch.reservations);
     const destItems = Array.from(destinationPitch.reservations);
 
-    const [itemA] = sourceItems.splice(sourceIndex, 1);
-    const [itemB] = destItems.splice(destinationIndex, 1);
+    const [itemA] = sourceItems.splice(sourceIndex, 1); // Kaynak rezervasyonu listeden çıkarır
+    const [itemB] = destItems.splice(destinationIndex, 1); // Destinasyon rezervasyonu listeden çıkarır
 
+    // Kaynak ve destinasyon rezervasyonlarının saat, dakika ve tarih bilgilerini çaprazlar
     [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
     [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
     [itemA.date, itemB.date] = [itemB.date, itemA.date];
 
-    sourceItems.splice(sourceIndex, 0, itemB);
-    destItems.splice(destinationIndex, 0, itemA);
+    sourceItems.splice(sourceIndex, 0, itemB); // Kaynak rezervasyonunu destinasyon rezervasyonunun bulunduğu indexe ekler
+    destItems.splice(destinationIndex, 0, itemA); // Destinasyon rezervasyonunu kaynak rezervasyonunun bulunduğu indexe ekler
 
     updateSourcePitchReservations(source, sourceItems);
     updateDestinationPitchReservations(destination, destItems);
@@ -298,9 +305,11 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const updateSourcePitchReservations = (source, sourceItems) => {
-    const sourcePitch = determineSourcePitch(source);
+    // Kaynak pitch'in rezervasyonlarını günceller
+    const sourcePitch = determineSourcePitch(source); // Kaynak pitch'in rezervasyonlarını bulur
 
     if (
+      // Kaynak pitch'in rezervasyon sayısı gece rezervasyonlarından fazlaysa, gün içerisindeki rezervasyonları günceller
       sourcePitch.reservations.length >
       tomorrowNightReservations[0].reservations.length
     ) {
@@ -313,6 +322,7 @@ function Dnd({ reservations, tomorrowNight }) {
         })
       );
     } else {
+      // Kaynak pitch'in rezervasyon sayısı gün içerisindeki rezervasyonlardan fazlaysa, gece rezervasyonlarını günceller
       setTomorrowNightReservations((prevReservations) =>
         prevReservations.map((pitch) => {
           if (pitch.pitchName === source.droppableId) {
@@ -325,6 +335,7 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const updateDestinationPitchReservations = (destination, destItems) => {
+    // Destinasyon pitch'in rezervasyonlarını günceller
     const destinationPitch = determineDestinationPitch(destination);
 
     if (
@@ -353,26 +364,31 @@ function Dnd({ reservations, tomorrowNight }) {
 
   const onDragEnd = (result) => {
     if (!window.confirm("Rezervasyonu taşımak istediğinize emin misiniz?"))
+      // Rezervasyonu kabul etmezse taşıma işlemi gerçekleşmez
       return;
     const { source, destination } = result;
 
     if (
+      // Destinasyon yoksa, kaynak ve destinasyon aynıysa, kaynak ve destinasyon indexleri aynıysa taşıma işlemi gerçekleşmez
       !destination ||
       (source.droppableId === destination.droppableId &&
         source.index === destination.index)
     )
       return;
 
-    const isSourceActual =
+    const isSourceActual = // Kaynak indexi pitchReservations[0].reservations.length'den küçükse gün içerisindeki rezervasyondur
       source.index < pitchReservations[0].reservations.length;
-    const isDestinationActual =
+    const isDestinationActual = // Destinasyon indexi pitchReservations[0].reservations.length'den küçükse gün içerisindeki rezervasyondur
       destination.index < pitchReservations[0].reservations.length;
 
     if (isSourceActual && isDestinationActual) {
+      // Gün içerisindeki rezervasyonlar kaydırılıyorsa
       reservationsOnDragEnd(source, destination);
     } else if (!isSourceActual && !isDestinationActual) {
+      // Gece rezervasyonları kaydırılıyorsa
       nightReservationsOnDragEnd(source, destination);
     } else {
+      // Gün içerisindeki rezervasyonlar gece rezervasyonlarına, gece rezervasyonları gün içerisindeki rezervasyonlara kaydırılıyorsa
       crossReservationsOnDragEnd(source, destination);
     }
   };

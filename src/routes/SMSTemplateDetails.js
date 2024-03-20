@@ -56,13 +56,13 @@ const SMSTemplateDetails = () => {
     };
 
     return (
-        <div>
+        <div className='text-center items-center justify-start flex flex-col gap-5'>
             <Navbar />
-            <div className='flex flex-col items-center gap-5'>
+            <div className='w-full max-w-xl px-10 md:px-5 lg:px-0'>
                 <h1 className='text-lg font-semibold'>SMS Sablon Detayları</h1>
-                <div className='text-center flex flex-col items-center justify-between min-h-min  '>
-                    <div className='text-center items-center justify-center'>
-                        <div className="form-control w-full max-w-xs">
+                <div>
+                    <div className='w-full flex items-center flex-col'>
+                        <div className="form-control w-full max-w-xl">
                             <label className="label">
                                 <span className="label-text"></span>
                                 <span className="label-text">📝 Sablon Adı</span>
@@ -70,13 +70,13 @@ const SMSTemplateDetails = () => {
                             </label>
                             <p className='text-xl font-semibold underline underline-offset-4 text-green-600'>{smsTemplate.description}</p>
                         </div>
-                        <div className="form-control w-full max-w-md mt-5 h-fit">
+                        <div className="form-control w-full max-w-xl mt-5 h-fit">
                             <label className="label">
                                 <span className="label-text"></span>
                                 <span className="label-text">📄 Sablon Metni</span>
                                 <span className="label-text"></span>
                             </label>
-                            <textarea placeholder="Sablon Metni" value={smsTemplate.message} className="textarea textarea-bordered textarea-lg w-full max-w-md text-center " onChange={(e) => handleTemplateChange(e)} style={{ minHeight: '40vh' }} />
+                            <textarea placeholder="Sablon Metni" value={smsTemplate.message} className="textarea textarea-bordered textarea-lg w-full text-center " onChange={(e) => handleTemplateChange(e)} style={{ minHeight: '40vh' }} />
                             <div className='flex flex-row justify-center items-center gap-5 mt-5'>
                                 <button className='btn btn-outline btn-square text-xl' onClick={() => handleGoBack()}>🚪</button>
                                 <button className='btn btn-outline btn-square text-xl' onClick={() => handleSave()}>💾</button>

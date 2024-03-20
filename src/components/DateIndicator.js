@@ -1,7 +1,7 @@
 import React from 'react'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
-
+import CountIndicator from './CountIndicator'
 function DateIndicator({ selectedDay, setSelectedDay }) {
     const getTurkishDayName = (dateString) => {
         // Split the dateString by '.'
@@ -72,12 +72,16 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
 
 
     return (
-        <div className='flex flex-row items-center  m-1 gap-2'>
+        <div className='flex flex-row justify-center items-center w-full m-1 gap-2'>
+            <div className='absolute left-10'>
+                <CountIndicator selectedDay={selectedDay} />
+            </div>
             {prevWeekButton}
             {prevDayButton}
             <p className='text-base font-semibold underline' onClick={() => setSelectedDay(new Date().toLocaleDateString('tr'))} >{turkishDayName}{selectedDay}</p>
             {nextDayButton}
             {nextWeekButton}
+
         </div>
     )
 }

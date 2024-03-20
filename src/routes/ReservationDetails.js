@@ -9,6 +9,7 @@ import {
   setAllReservations,
   getPitchList,
   getTomorrowNightVisibility,
+  getSMSTemplates
 } from "../firebase";
 import DropDown from "../components/DropDown";
 import DatePicker from "../components/DatePicker";
@@ -36,6 +37,7 @@ function ReservationDetails() {
   const [reservationSchema, setReservationSchema] = useState([]);
   const [schemaHours, setSchemaHours] = useState([]);
   const [pitches, setPitches] = useState([]);
+  const [smsTemplates, setSmsTemplates] = useState(null);
 
   const monthNames = [
     "Ocak",
@@ -69,8 +71,6 @@ function ReservationDetails() {
         .catch((error) => {
           console.log("Hata", error);
         });
-
-
     }
     if (schemaHours.length > 0) {
       getTomorrowNightVisibility().then((data) => {
@@ -84,7 +84,6 @@ function ReservationDetails() {
           ]);
         }
       });
-
     }
     if (pitches.length === 0) {
       getPitchList()
@@ -96,7 +95,6 @@ function ReservationDetails() {
         });
     }
 
-
     if (!reservationHour) {
       getReservationDetails(dateString, pitch, index).then((data) => {
         if (data) {
@@ -107,6 +105,14 @@ function ReservationDetails() {
           setName(user ? user?.name : data?.reservedUserName);
           setReservationType(data?.reservationType || "Ön Rez.");
         }
+      });
+    }
+
+    if (!smsTemplates) {
+      getSMSTemplates().then((data) => {
+        setSmsTemplates(data);
+      }).catch((error) => {
+        console.error("Error fetching sms templates:", error);
       });
     }
   }, []);
@@ -170,57 +176,33 @@ function ReservationDetails() {
       Saat: ${reservationHour}:${minute} 
       Saha No: ${reservationPitch}
 
-      *ÖN REZERVASYONUNUZ* YAPILMIŞTIR.
-
-      Lütfen iki saat içinde
-
-      *700 TL CAYMA BEDELİ*
-
-      ödeme yapınız.
-
-      Ödeme yapmaz iseniz ön rezervasyonunuz otomatik olarak iptal edilecektir.
-
-      NOT: MAÇ OYNANDIKTAN SONRA YAPTIĞINIZ ÖDEME BAKİYEDEN DÜŞÜLECEKTİR.
-
-      Nazlı AK
-
-      Halkbank
-
-      71 0001 2001 2700 0001 1173 80
-
-      Ödeme yapınca mutlaka bilgilendirme yapınız.`;
+      ${smsTemplates.find((template) => template?.description === "Ön Rezervasyon Mesajı")?.message}
+    `;
 
     const reservationMessage = ` 
     Tarih: ${turkishDateFormatter(reservationDate)}
     Gün: ${getTurkishDayName(reservationDate)}
     Saat: ${reservationHour}:${minute} 
     Saha No: ${reservationPitch}
-    
-    *REZERVASYONUNUZ YAPILMIŞTIR*
 
-    Lütfen tarihi ve saati kontrol ediniz.
-
-    ÖNEMLİ NOT;
-
-    MAÇIN OLACAĞI GÜN LÜTFEN SABAHTAN HAVA DURUMUNA BAKIP, YAĞMUR YAĞACAK DİYE MAÇI İPTAL ETTİRMEYİNİZ. MAÇ SAATİNDEN BİR SAAT ÖNCE HAVA KOŞULLARI UYGUN OLMAZSA DURUM DEĞERLENDİRMESİ YAPILIP, MAÇINIZ İPTAL EDİLEBİLİR VEYA ERTELEYEBİLİRİZ.
-
-    Bir saat önceden iptal ve erteleme şartı sadece
-
-    YAĞMURLU HAVA KOŞULLARI İÇİN GEÇERLİDİR.
+    ${smsTemplates.find((template) => template?.description === "Rezervasyon Onay Mesajı")?.message}
     `;
-
 
     const cancelMsg = `
     Tarih: ${turkishDateFormatter(reservationDate)}
     Gün: ${getTurkishDayName(reservationDate)}
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
+    
+    ${smsTemplates.find((template) => template?.description === "Üye Rezervasyon İptal Mesajı")?.message}
+    `;
 
-    *REZERVASYONUNUZ İPTAL EDİLMİŞTİR*
-
-    İyi günler dileriz.`;
-
-    const message = msgType === "cancel" ? cancelMsg : (reservationType === "Ön Rez." ? preReservationMessage : reservationMessage);
+    const message =
+      msgType === "cancel"
+        ? cancelMsg
+        : reservationType === "Ön Rez."
+          ? preReservationMessage
+          : reservationMessage;
 
     // Replace line breaks with a special character sequence
     const encodedMessage = encodeURIComponent(message);
@@ -240,11 +222,8 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
 
-    *MAÇINIZ VARDIR UNUTMAYINIZ*
-
-    Lütfen tarih ve maç saatinizi kontrol ediniz.
-
-    İyi eğlenceler dileriz.`;
+    ${smsTemplates.find((template) => template?.description === "Rezervasyon Hatırlatma Mesajı")?.message}
+`;
 
     const encodedMessage = encodeURIComponent(reminderMessage);
     const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
@@ -280,7 +259,9 @@ function ReservationDetails() {
           reservationType
         );
         alert("Rezervasyon kaydedildi");
-        if (window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")) {
+        if (
+          window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")
+        ) {
           sendWhatsAppMessage(minute, "reservation");
         }
         navigate("/reservation", { state: { date: reservationDate } });
@@ -374,7 +355,11 @@ function ReservationDetails() {
           placeHolder={"🕓 Saat"}
         />
 
-        <PhoneNumberInput phoneNumber={phone} setPhoneNumber={setPhone} width={'w-52'} />
+        <PhoneNumberInput
+          phoneNumber={phone}
+          setPhoneNumber={setPhone}
+          width={"w-52"}
+        />
         <input
           className="input  w-52 max-w-sm input-bordered"
           type="text"
@@ -390,7 +375,11 @@ function ReservationDetails() {
           onChange={(e) => setNote(e.target.value)}
         />
         <div className="flex flex-row items-center justify-center gap-5 w-52">
-          <RadioGroup options={["Ön Rez.", "Kesin Rez."]} selected={reservationType} setSelected={setReservationType} />
+          <RadioGroup
+            options={["Ön Rez.", "Kesin Rez."]}
+            selected={reservationType}
+            setSelected={setReservationType}
+          />
         </div>
         <div className="flex flex-row gap-5 w-52 justify-center">
           <button className="btn btn-info" onClick={() => handleSave(true)}>

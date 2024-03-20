@@ -24,7 +24,7 @@ function Navbar(props) {
                 </div>
                 <div className='navbar-center'>
 
-                    <button onClick={() => navigate('/message')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>✉️</button>
+                    {/*<button onClick={() => navigate('/message')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>✉️</button> */}
                     <button onClick={() => navigate('/customers')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>👱</button>
                     <button onClick={() => navigate('/settings')} className='btn btn-ghost normal-case text-xl xl:text-3xl'>⚙️</button>
                 </div>
