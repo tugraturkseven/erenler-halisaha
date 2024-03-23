@@ -28,7 +28,7 @@ function Navbar(props) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            theme: "dark",
+            theme: "light",
             transition: Bounce,
         })
     }

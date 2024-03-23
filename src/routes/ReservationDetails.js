@@ -9,7 +9,8 @@ import {
   setAllReservations,
   getPitchList,
   getTomorrowNightVisibility,
-  getSMSTemplates
+  getSMSTemplates,
+  setReservationUpdateFlag,
 } from "../firebase";
 import DropDown from "../components/DropDown";
 import DatePicker from "../components/DatePicker";
@@ -109,11 +110,13 @@ function ReservationDetails() {
     }
 
     if (!smsTemplates) {
-      getSMSTemplates().then((data) => {
-        setSmsTemplates(data);
-      }).catch((error) => {
-        console.error("Error fetching sms templates:", error);
-      });
+      getSMSTemplates()
+        .then((data) => {
+          setSmsTemplates(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching sms templates:", error);
+        });
     }
   }, []);
 
@@ -176,7 +179,10 @@ function ReservationDetails() {
       Saat: ${reservationHour}:${minute} 
       Saha No: ${reservationPitch}
 
-      ${smsTemplates.find((template) => template?.description === "Ön Rezervasyon Mesajı")?.message}
+      ${smsTemplates.find(
+      (template) => template?.description === "Ön Rezervasyon Mesajı"
+    )?.message
+      }
     `;
 
     const reservationMessage = ` 
@@ -185,7 +191,10 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute} 
     Saha No: ${reservationPitch}
 
-    ${smsTemplates.find((template) => template?.description === "Rezervasyon Onay Mesajı")?.message}
+    ${smsTemplates.find(
+      (template) => template?.description === "Rezervasyon Onay Mesajı"
+    )?.message
+      }
     `;
 
     const cancelMsg = `
@@ -194,7 +203,10 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
     
-    ${smsTemplates.find((template) => template?.description === "Üye Rezervasyon İptal Mesajı")?.message}
+    ${smsTemplates.find(
+      (template) => template?.description === "Üye Rezervasyon İptal Mesajı"
+    )?.message
+      }
     `;
 
     const message =
@@ -222,7 +234,10 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
 
-    ${smsTemplates.find((template) => template?.description === "Rezervasyon Hatırlatma Mesajı")?.message}
+    ${smsTemplates.find(
+      (template) => template?.description === "Rezervasyon Hatırlatma Mesajı"
+    )?.message
+      }
 `;
 
     const encodedMessage = encodeURIComponent(reminderMessage);
@@ -258,6 +273,7 @@ function ReservationDetails() {
           note,
           reservationType
         );
+        await setReservationUpdateFlag();
         alert("Rezervasyon kaydedildi");
         if (
           window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")
@@ -321,6 +337,11 @@ function ReservationDetails() {
       "",
       ""
     );
+
+    setReservationUpdateFlag().then(() => {
+      return;
+    });
+
     if (notify) {
       alert("Rezervasyon iptal edildi");
       if (window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")) {
