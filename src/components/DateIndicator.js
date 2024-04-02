@@ -1,8 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import CountIndicator from './CountIndicator'
-function DateIndicator({ selectedDay, setSelectedDay }) {
+import { formatDateFourHoursEarlier } from '../utils/FormattedEarlierDateHook'
+import { DateContext } from '../contexts/DateContext'
+
+function DateIndicator() {
+    const { selectedDay, setSelectedDay } = useContext(DateContext);
     const getTurkishDayName = (dateString) => {
         // Split the dateString by '.'
         const parts = dateString.split('.');
@@ -74,11 +78,11 @@ function DateIndicator({ selectedDay, setSelectedDay }) {
     return (
         <div className='flex flex-row justify-center items-center w-full m-1 gap-2'>
             <div className='absolute left-10 hidden lg:flex'>
-                <CountIndicator selectedDay={selectedDay} />
+                <CountIndicator />
             </div>
             {prevWeekButton}
             {prevDayButton}
-            <p className='text-base font-semibold underline' onClick={() => setSelectedDay(new Date().toLocaleDateString('tr'))} >{turkishDayName}{selectedDay}</p>
+            <p className='text-base font-semibold underline' onClick={() => setSelectedDay(formatDateFourHoursEarlier())} >{turkishDayName}{selectedDay}</p>
             {nextDayButton}
             {nextWeekButton}
 

@@ -14,17 +14,16 @@ import DateIndicator from "../components/DateIndicator";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { formatDateFourHoursEarlier } from "../utils/FormattedEarlierDateHook";
+import { DateContext } from "../contexts/DateContext";
 
 function Reservation() {
     const user = useContext(UserContext);
     const schema = useContext(ReservationSchemaContext);
     const location = useLocation();
     const navigate = useNavigate();
-    const [selectedDay, setSelectedDay] = useState(
-        location.state?.date || format(new Date(), "dd.MM.yyyy", { locale: pt })
-    );
+    const { selectedDay, setSelectedDay } = useContext(DateContext);
+
     const [showPicker, setShowPicker] = useState(false);
 
     const [reservationInfos, setReservationInfos] = useState({
@@ -35,7 +34,7 @@ function Reservation() {
     const [isActualLoaded, setIsActualLoaded] = useState(false);
     const [isNightLoaded, setIsNightLoaded] = useState(false);
     const [isTemplateLoaded, setIsTemplateLoaded] = useState(false);
-    const selectedDayString = selectedDay.replaceAll(".", "-");
+    const selectedDayString = selectedDay?.replaceAll(".", "-");
 
     useEffect(() => {
         if (!isNightLoaded) {
@@ -66,18 +65,6 @@ function Reservation() {
             });
         }
 
-
-        return () => {
-            // This code runs when the component unmounts
-            // e.g., when the user navigates away from the page
-            setIsTemplateLoaded(false);
-            setReservationInfos({
-                reservationTemplate: {},
-                reservations: {},
-                tomorrowNightVisibility: false,
-            });
-            setSelectedDay(format(new Date(), "dd.MM.yyyy", { locale: pt }));
-        };
     }, [schema]);
 
     const createNewDate = async (date, pitch) => {
@@ -169,6 +156,9 @@ function Reservation() {
     }, [selectedDay, user, isTemplateLoaded]);
 
     useEffect(() => {
+        if (!selectedDay) {
+            setSelectedDay(formatDateFourHoursEarlier())
+        }
         fetchData();
     }, [selectedDay, user, isTemplateLoaded]);
 

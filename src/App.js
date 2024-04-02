@@ -21,35 +21,37 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { CustomersProvider } from './contexts/CustomersContext';
 import { ReservationSchemaProvider } from './contexts/ReservationSchemaContext';
-
+import { DateProvider } from "./contexts/DateContext";
 function App() {
   return (
     <div data-theme='night' className="h-screen ">
       <UserProvider>
         <CustomersProvider>
           <ReservationSchemaProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/signin" element={<SignUp />} />
-                <Route path="/home" element={<Home />} />
-                <Route path='/reservation' element={<Reservation />} />
-                <Route path='/customers' element={<Costumers />} />
-                <Route path='/chooseCustomer' element={<ChooseCustomer />} />
-                <Route path='/createCustomer' element={<CreateCustomer />} />
-                <Route path='/reservationDetails' element={<ReservationDetails />} />
-                <Route path='/reservationForm' element={<ReservationForm />} />
-                <Route path='/message' element={<Message />} />
-                <Route path='/costumerDetails' element={<CostumerDetails />} />
-                <Route path='/settings' element={<Settings />} />
-                <Route path='/schemaSettings' element={<SchemaSettings />} />
-                <Route path='/generalSettings' element={<GeneralSettings />} />
-                <Route path='/pitchSettings' element={<PitchSettings />} />
-                <Route path='/pitchDetails' element={<PitchDetails />} />
-                <Route path='/smsSettings' element={<SmsSettings />} />
-                <Route path='/smsTemplateDetails' element={<SMSTemplateDetails />} />
-              </Routes>
-            </BrowserRouter>
+            <DateProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Login />} />
+                  <Route path="/signin" element={<SignUp />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path='/reservation' element={<Reservation />} />
+                  <Route path='/customers' element={<Costumers />} />
+                  <Route path='/chooseCustomer' element={<ChooseCustomer />} />
+                  <Route path='/createCustomer' element={<CreateCustomer />} />
+                  <Route path='/reservationDetails' element={<ReservationDetails />} />
+                  <Route path='/reservationForm' element={<ReservationForm />} />
+                  <Route path='/message' element={<Message />} />
+                  <Route path='/costumerDetails' element={<CostumerDetails />} />
+                  <Route path='/settings' element={<Settings />} />
+                  <Route path='/schemaSettings' element={<SchemaSettings />} />
+                  <Route path='/generalSettings' element={<GeneralSettings />} />
+                  <Route path='/pitchSettings' element={<PitchSettings />} />
+                  <Route path='/pitchDetails' element={<PitchDetails />} />
+                  <Route path='/smsSettings' element={<SmsSettings />} />
+                  <Route path='/smsTemplateDetails' element={<SMSTemplateDetails />} />
+                </Routes>
+              </BrowserRouter>
+            </DateProvider>
           </ReservationSchemaProvider>
         </CustomersProvider>
       </UserProvider>

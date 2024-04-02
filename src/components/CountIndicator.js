@@ -1,29 +1,32 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { countReservations, getReservationUpdateFlag } from '../firebase'
+import React, { useEffect, useState, useContext } from 'react';
+import { countReservations, getReservationUpdateFlag } from '../firebase';
+import { DateContext } from '../contexts/DateContext';
 
 function CountIndicator() {
     const [reservationsOfMonth, setReservationsOfMonth] = useState({});
-    const [updateFlag, setUpdateFlag] = useState(false);
     const [counts, setCounts] = useState({
         activeReservation: 0,
         preReservation: 0,
     });
+    const { selectedDay } = useContext(DateContext);
+    const [day, month, year] = selectedDay.split(".");
+    useEffect(() => {
+        const fetchData = async () => {
+            // Fetch reservations and update reservationsOfMonth state
+            const res = await countReservations(selectedDay);
+            if (res) {
+                setReservationsOfMonth(res);
+            }
+        };
+        fetchData();
+    }, [month, year]);
 
-    const fetchReservationsOfMonth = useMemo(() => async () => {
-        const res = await countReservations();
-        if (res) {
-            setReservationsOfMonth(res);
-            countReservationsOfMonth();
-            return res;
-        }
-    }, [updateFlag])
+    useEffect(() => {
+        // Count reservations whenever reservationsOfMonth changes
+        countReservationsOfMonth();
+    }, [reservationsOfMonth]);
 
-    const reservationLastUpdate = async () => {
-        const res = await getReservationUpdateFlag();
-        setUpdateFlag(res);
-    }
-
-    const countReservationsOfMonth = useMemo(() => () => {
+    const countReservationsOfMonth = () => {
         let activeReservation = 0;
         let preReservation = 0;
         Object.keys(reservationsOfMonth).forEach((day) => {
@@ -36,18 +39,9 @@ function CountIndicator() {
                     }
                 })
             })
-        })
-        setCounts({ activeReservation: activeReservation, preReservation: preReservation });
-    }, [reservationsOfMonth])
-
-    useEffect(() => {
-        const fetchData = async () => {
-            await fetchReservationsOfMonth();
-            await reservationLastUpdate();
-        };
-        fetchData();
-
-    }, [updateFlag]);
+        });
+        setCounts({ activeReservation, preReservation });
+    };
 
     return (
         <>
@@ -62,7 +56,7 @@ function CountIndicator() {
                 <span className="text-lg font-semibold">🟠 Ön Rez.: {counts.preReservation}</span>
             </div>
         </>
-    )
+    );
 }
 
-export default CountIndicator
+export default CountIndicator;
