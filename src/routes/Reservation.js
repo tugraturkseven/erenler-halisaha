@@ -160,7 +160,7 @@ function Reservation() {
             setSelectedDay(formatDateFourHoursEarlier())
         }
         fetchData();
-    }, [selectedDay, user, isTemplateLoaded]);
+    }, [selectedDay, user, isTemplateLoaded, schema]);
 
     const getTomorrowDate = () => {
         // Get tomorrow's date from selected day. Selected date is in dd.mm.yyyy format

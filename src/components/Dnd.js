@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setReservation, getReservationDetails } from "../firebase";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
-
+import { SendWhatsAppMessage } from "../utils/SendWhatsAppMessage";
 function Dnd({ reservations, tomorrowNight }) {
   const navigate = useNavigate();
   const user = useContext(UserContext);
@@ -53,6 +53,13 @@ function Dnd({ reservations, tomorrowNight }) {
     };
   }, [tomorrowNight]);
 
+
+  const notifyCustomer = (minute, reservationDate, reservationHour, reservationPitch, phone) => {
+    const message = "REZERVASYON SAATİNİZ YUKARIDA PAYLAŞILAN ŞEKİLDE GÜNCELLENMİŞTİR. LÜTFEN DİKKAT EDİNİZ.";
+
+    SendWhatsAppMessage(message, minute, "hourUpdate", reservationDate, reservationHour, reservationPitch, "Ön Rez.", phone)
+  }
+
   const updateDatabaseOnDragEnd = async (
     pitchA,
     pitchB,
@@ -83,7 +90,8 @@ function Dnd({ reservations, tomorrowNight }) {
           itemA.minute,
           itemB.reservedUserName,
           itemB.reservedUserPhone,
-          itemB.note
+          itemB.note,
+          itemB.reservationType
         );
         await setReservation(
           dateBString,
@@ -93,7 +101,8 @@ function Dnd({ reservations, tomorrowNight }) {
           itemB.minute,
           itemA.reservedUserName,
           itemA.reservedUserPhone,
-          itemA.note
+          itemA.note,
+          itemA.reservationType
         );
       }
     } catch (error) {
@@ -171,6 +180,12 @@ function Dnd({ reservations, tomorrowNight }) {
       [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
       [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
       [itemA.date, itemB.date] = [itemB.date, itemA.date];
+      if (itemA.reservationType && itemB.reservationType) {
+        [itemA.reservationType, itemB.reservationType] = [
+          itemB.reservationType,
+          itemA.reservationType,
+        ]
+      }
 
       sourceItems.splice(source.index, 1, itemB);
       destItems.splice(destination.index, 1, itemA);
@@ -182,6 +197,12 @@ function Dnd({ reservations, tomorrowNight }) {
       [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
       [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
       [itemA.date, itemB.date] = [itemB.date, itemA.date];
+      if (itemA.reservationType && itemB.reservationType) {
+        [itemA.reservationType, itemB.reservationType] = [
+          itemB.reservationType,
+          itemA.reservationType,
+        ]
+      }
 
       sourceItems.splice(source.index, 0, itemB);
       destItems.splice(destination.index, 0, itemA);
@@ -205,6 +226,7 @@ function Dnd({ reservations, tomorrowNight }) {
       sourceItems[source.index].date,
       destItems[destination.index].date
     );
+    notifyCustomer(destItems[destination.index].minute, destItems[destination.index].date, destItems[destination.index].hour, destination.droppableId, destItems[destination.index].reservedUserPhone);
   };
 
   const nightReservationsOnDragEnd = (source, destination) => {
@@ -232,7 +254,12 @@ function Dnd({ reservations, tomorrowNight }) {
       [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
       [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
       [itemA.date, itemB.date] = [itemB.date, itemA.date];
-
+      if (itemA.reservationType && itemB.reservationType) {
+        [itemA.reservationType, itemB.reservationType] = [
+          itemB.reservationType,
+          itemA.reservationType,
+        ]
+      }
       sourceItems.splice(sourceIndex, 1, itemB);
       destItems.splice(destinationIndex, 1, itemA);
     } else {
@@ -243,6 +270,12 @@ function Dnd({ reservations, tomorrowNight }) {
       [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
       [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
       [itemA.date, itemB.date] = [itemB.date, itemA.date];
+      if (itemA.reservationType && itemB.reservationType) {
+        [itemA.reservationType, itemB.reservationType] = [
+          itemB.reservationType,
+          itemA.reservationType,
+        ]
+      }
 
       sourceItems.splice(sourceIndex, 0, itemB);
       destItems.splice(destinationIndex, 0, itemA);
@@ -267,6 +300,7 @@ function Dnd({ reservations, tomorrowNight }) {
       sourceItems[sourceIndex].date,
       destItems[destinationIndex].date
     );
+    notifyCustomer(destItems[destination.index].minute, destItems[destination.index].date, destItems[destination.index].hour, destination.droppableId, destItems[destination.index].reservedUserPhone);
   };
 
   const crossReservationsOnDragEnd = (source, destination) => {
@@ -287,7 +321,12 @@ function Dnd({ reservations, tomorrowNight }) {
     [itemA.hour, itemB.hour] = [itemB.hour, itemA.hour];
     [itemA.minute, itemB.minute] = [itemB.minute, itemA.minute];
     [itemA.date, itemB.date] = [itemB.date, itemA.date];
-
+    if (itemA.reservationType && itemB.reservationType) {
+      [itemA.reservationType, itemB.reservationType] = [
+        itemB.reservationType,
+        itemA.reservationType,
+      ]
+    }
     sourceItems.splice(sourceIndex, 0, itemB); // Kaynak rezervasyonunu destinasyon rezervasyonunun bulunduğu indexe ekler
     destItems.splice(destinationIndex, 0, itemA); // Destinasyon rezervasyonunu kaynak rezervasyonunun bulunduğu indexe ekler
 
@@ -302,6 +341,7 @@ function Dnd({ reservations, tomorrowNight }) {
       sourceItems[sourceIndex].date,
       destItems[destinationIndex].date
     );
+    notifyCustomer(destItems[destination.index].minute, destItems[destination.index].date, destItems[destination.index].hour, destination.droppableId, destItems[destination.index].reservedUserPhone);
   };
 
   const updateSourcePitchReservations = (source, sourceItems) => {
