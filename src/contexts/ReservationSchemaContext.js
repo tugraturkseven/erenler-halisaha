@@ -5,7 +5,6 @@ export const ReservationSchemaContext = createContext(null);
 
 export const ReservationSchemaProvider = ({ children }) => {
   const [schemaInfo, setSchemaInfo] = useState([]);
-
   useEffect(() => {
     getReservationSchema().then((data) => setSchemaInfo(data));
 

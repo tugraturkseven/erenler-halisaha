@@ -13,14 +13,13 @@ import {
 import DateIndicator from "../components/DateIndicator";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { formatDateFourHoursEarlier } from "../utils/FormattedEarlierDateHook";
 import { DateContext } from "../contexts/DateContext";
 
 function Reservation() {
     const user = useContext(UserContext);
     const schema = useContext(ReservationSchemaContext);
-    const location = useLocation();
     const navigate = useNavigate();
     const { selectedDay, setSelectedDay } = useContext(DateContext);
 
@@ -46,7 +45,7 @@ function Reservation() {
             );
         }
 
-        if (!isTemplateLoaded) {
+        if (!isTemplateLoaded && schema) {
             getPitchList().then((fetchedPitches) => {
                 let initialReservations = {};
 
@@ -92,7 +91,7 @@ function Reservation() {
                         const reservation = pitchReservations.find(
                             (r) => r.hour === schemaItem.hour
                         );
-                        return { ...schemaItem, ...reservation, ...{ date: date } };
+                        return { ...schemaItem, ...reservation, ...{ date: date }, visible: schemaItem.visible };
                     });
                     return { [pitchName]: updatedPitch };
                 } else {
@@ -164,12 +163,15 @@ function Reservation() {
 
     const getTomorrowDate = () => {
         // Get tomorrow's date from selected day. Selected date is in dd.mm.yyyy format
-
-        const parts = selectedDay.split(".");
-        const dateString = `${parts[1]}/${parts[0]}/${parts[2]}`;
-        const date = new Date(dateString);
-        date.setDate(date.getDate() + 1);
-        return date.toLocaleDateString("tr");
+        if (selectedDay) {
+            const parts = selectedDay.split(".");
+            const dateString = `${parts[1]}/${parts[0]}/${parts[2]}`;
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + 1);
+            return date.toLocaleDateString("tr");
+        } {
+            return "";
+        }
     };
 
     const handleDatePick = (date) => {
@@ -196,6 +198,7 @@ function Reservation() {
             </div>
         );
     }
+    // if (selectedDay && reservationInfos.reservations.length > 0) {
     return (
         <div className="flex flex-col items-center">
             <Navbar endButton={pickDateComponent} />
@@ -215,6 +218,20 @@ function Reservation() {
             />
         </div>
     );
+    // } else {
+    //     return (
+    //         <div className="flex flex-col items-center">
+    //             <Navbar endButton={pickDateComponent} />
+    //             <DateIndicator
+    //                 selectedDay={selectedDay}
+    //                 setSelectedDay={setSelectedDay}
+    //             />
+    //             <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
+    //             <div className="skeleton w-full max-w-xs h-screen md:max-w-3xl"></div>
+    //         </div>
+    //     )
+    // }
+
 }
 
 export default Reservation;

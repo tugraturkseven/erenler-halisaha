@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
-import { setReservation, getReservationDetails } from "../firebase";
+import { setReservation, getReservationDetails, getReservations } from "../firebase";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
 import { SendWhatsAppMessage } from "../utils/SendWhatsAppMessage";
+import { DateContext } from "../contexts/DateContext";
+
+
 function Dnd({ reservations, tomorrowNight }) {
   const navigate = useNavigate();
   const user = useContext(UserContext);
   const schema = useContext(ReservationSchemaContext);
+  const { selectedDay } = useContext(DateContext);
 
   // Transforming the reservations object into an array for easier mapping
   const [pitchReservations, setPitchReservations] = useState(
@@ -73,8 +77,8 @@ function Dnd({ reservations, tomorrowNight }) {
       const dateAString = dateA.replaceAll(".", "-");
       const dateBString = dateB.replaceAll(".", "-");
 
-      const indexA = determineDBIndexOfItem(hourA);
-      const indexB = determineDBIndexOfItem(hourB);
+      const indexA = await determineDBIndexOfItem(hourA);
+      const indexB = await determineDBIndexOfItem(hourB);
 
       const itemA = await getReservationDetails(dateAString, pitchA, indexA);
       const itemB = await getReservationDetails(dateBString, pitchB, indexB);
@@ -151,8 +155,15 @@ function Dnd({ reservations, tomorrowNight }) {
     }
   };
 
-  const determineDBIndexOfItem = (hour) => {
-    const index = schema.findIndex((item) => item.hour === hour);
+  const fetchReservations = useMemo(() => async () => {
+    const dateStr = selectedDay.replaceAll(".", "-");
+    const items = await getReservations(dateStr, "Saha 1");
+    return items;
+  }, [selectedDay]);
+
+  const determineDBIndexOfItem = async (hour) => {
+    const items = await fetchReservations();
+    const index = items.findIndex((item) => item.hour === hour);
     if (index !== -1) {
       return index;
     }
@@ -452,10 +463,10 @@ function Dnd({ reservations, tomorrowNight }) {
     }
   };
 
-  const handleReservationClick = (pitch, item) => {
+  const handleReservationClick = async (pitch, item) => {
     const isReserved = item.reservedUserName !== "";
     const date = item.date;
-    const index = determineDBIndexOfItem(item.hour);
+    const index = await determineDBIndexOfItem(item.hour);
 
     if (user.type === "admin") {
       if (isReserved) {

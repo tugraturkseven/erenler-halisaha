@@ -22,7 +22,6 @@ function ReservationDetails() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, pitch, index, date } = location.state;
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
@@ -98,6 +97,7 @@ function ReservationDetails() {
 
     if (!reservationHour) {
       getReservationDetails(dateString, pitch, index).then((data) => {
+        console.log(data);
         if (data) {
           setPhone(user ? user.phone : data.reservedUserPhone);
           setNote(data?.note);
@@ -256,9 +256,6 @@ function ReservationDetails() {
       const minute = pitches.find(
         (pitch) => pitch.name === reservationPitch
       ).minute;
-      const index = reservationSchema.findIndex(
-        (schemaItem) => schemaItem.hour === reservationHour
-      );
 
       if (!reservationExists) {
         // Check reservation exists or user updating the reservation
