@@ -179,9 +179,10 @@ function ReservationDetails() {
       Saat: ${reservationHour}:${minute} 
       Saha No: ${reservationPitch}
 
-      ${smsTemplates.find(
-      (template) => template?.description === "Ön Rezervasyon Mesajı"
-    )?.message
+      ${
+        smsTemplates.find(
+          (template) => template?.description === "Ön Rezervasyon Mesajı"
+        )?.message
       }
     `;
 
@@ -191,10 +192,11 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute} 
     Saha No: ${reservationPitch}
 
-    ${smsTemplates.find(
-      (template) => template?.description === "Rezervasyon Onay Mesajı"
-    )?.message
-      }
+    ${
+      smsTemplates.find(
+        (template) => template?.description === "Rezervasyon Onay Mesajı"
+      )?.message
+    }
     `;
 
     const cancelMsg = `
@@ -203,18 +205,19 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
     
-    ${smsTemplates.find(
-      (template) => template?.description === "Üye Rezervasyon İptal Mesajı"
-    )?.message
-      }
+    ${
+      smsTemplates.find(
+        (template) => template?.description === "Üye Rezervasyon İptal Mesajı"
+      )?.message
+    }
     `;
 
     const message =
       msgType === "cancel"
         ? cancelMsg
         : reservationType === "Ön Rez."
-          ? preReservationMessage
-          : reservationMessage;
+        ? preReservationMessage
+        : reservationMessage;
 
     // Replace line breaks with a special character sequence
     const encodedMessage = encodeURIComponent(message);
@@ -234,10 +237,11 @@ function ReservationDetails() {
     Saat: ${reservationHour}:${minute}
     Saha No: ${reservationPitch}
 
-    ${smsTemplates.find(
-      (template) => template?.description === "Rezervasyon Hatırlatma Mesajı"
-    )?.message
-      }
+    ${
+      smsTemplates.find(
+        (template) => template?.description === "Rezervasyon Hatırlatma Mesajı"
+      )?.message
+    }
 `;
 
     const encodedMessage = encodeURIComponent(reminderMessage);
@@ -256,26 +260,28 @@ function ReservationDetails() {
       const minute = pitches.find(
         (pitch) => pitch.name === reservationPitch
       ).minute;
-
       if (!reservationExists) {
         // Check reservation exists or user updating the reservation
-        await setReservation(
-          newDateString,
-          reservationPitch,
-          index,
-          reservationHour,
-          minute,
-          name,
-          phone,
-          note,
-          reservationType
-        );
-        await setReservationUpdateFlag();
-        alert("Rezervasyon kaydedildi");
-        if (
-          window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")
-        ) {
-          sendWhatsAppMessage(minute, "reservation");
+        if (newDateString && reservationPitch && reservationHour & index) {
+          await setReservation(
+            newDateString,
+            reservationPitch,
+            index,
+            reservationHour,
+            minute,
+            name,
+            phone,
+            note,
+            reservationType
+          );
+          alert("Rezervasyon kaydedildi");
+          if (
+            window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")
+          ) {
+            sendWhatsAppMessage(minute, "reservation");
+          }
+        } else {
+          alert("Bilgiler alinamadi, tekrar deneyiniz.");
         }
         navigate("/reservation", { state: { date: reservationDate } });
       } else {
