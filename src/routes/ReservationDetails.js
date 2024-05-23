@@ -262,7 +262,12 @@ function ReservationDetails() {
       ).minute;
       if (!reservationExists) {
         // Check reservation exists or user updating the reservation
-        if (newDateString && reservationPitch && reservationHour & index) {
+        if (
+          newDateString &&
+          reservationPitch &&
+          reservationHour !== undefined &&
+          index !== undefined
+        ) {
           await setReservation(
             newDateString,
             reservationPitch,

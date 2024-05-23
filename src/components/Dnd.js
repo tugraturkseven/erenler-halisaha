@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
-import { setReservation, getReservationDetails, getReservations } from "../firebase";
+import {
+  setReservation,
+  getReservationDetails,
+  getReservations,
+} from "../firebase";
 import { UserContext } from "../contexts/UserContext";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
 import { SendWhatsAppMessage } from "../utils/SendWhatsAppMessage";
 import { DateContext } from "../contexts/DateContext";
-
 
 function Dnd({ reservations, tomorrowNight }) {
   const navigate = useNavigate();
@@ -24,7 +27,9 @@ function Dnd({ reservations, tomorrowNight }) {
     }))
   );
 
-  const [tomorrowNightReservations, setTomorrowNightReservations] = useState([]);
+  const [tomorrowNightReservations, setTomorrowNightReservations] = useState(
+    []
+  );
 
   useEffect(() => {
     setPitchReservations(
@@ -57,12 +62,27 @@ function Dnd({ reservations, tomorrowNight }) {
     };
   }, [tomorrowNight]);
 
+  const notifyCustomer = (
+    minute,
+    reservationDate,
+    reservationHour,
+    reservationPitch,
+    phone
+  ) => {
+    const message =
+      "REZERVASYON SAATİNİZ YUKARIDA PAYLAŞILAN ŞEKİLDE GÜNCELLENMİŞTİR. LÜTFEN DİKKAT EDİNİZ.";
 
-  const notifyCustomer = (minute, reservationDate, reservationHour, reservationPitch, phone) => {
-    const message = "REZERVASYON SAATİNİZ YUKARIDA PAYLAŞILAN ŞEKİLDE GÜNCELLENMİŞTİR. LÜTFEN DİKKAT EDİNİZ.";
-
-    SendWhatsAppMessage(message, minute, "hourUpdate", reservationDate, reservationHour, reservationPitch, "Ön Rez.", phone)
-  }
+    SendWhatsAppMessage(
+      message,
+      minute,
+      "hourUpdate",
+      reservationDate,
+      reservationHour,
+      reservationPitch,
+      "Ön Rez.",
+      phone
+    );
+  };
 
   const updateDatabaseOnDragEnd = async (
     pitchA,
@@ -86,28 +106,32 @@ function Dnd({ reservations, tomorrowNight }) {
       // Check if data is available before updating reservations
       if (itemA && itemB && itemA.hour === hourA && itemB.hour === hourB) {
         // Update reservations for pitchA and pitchB
-        await setReservation(
-          dateAString,
-          pitchA,
-          indexA,
-          hourA,
-          itemA.minute,
-          itemB.reservedUserName,
-          itemB.reservedUserPhone,
-          itemB.note,
-          itemB.reservationType
-        );
-        await setReservation(
-          dateBString,
-          pitchB,
-          indexB,
-          hourB,
-          itemB.minute,
-          itemA.reservedUserName,
-          itemA.reservedUserPhone,
-          itemA.note,
-          itemA.reservationType
-        );
+        if (indexA !== undefined && indexB !== undefined) {
+          await setReservation(
+            dateAString,
+            pitchA,
+            indexA,
+            hourA,
+            itemA.minute,
+            itemB.reservedUserName,
+            itemB.reservedUserPhone,
+            itemB.note,
+            itemB.reservationType
+          );
+          await setReservation(
+            dateBString,
+            pitchB,
+            indexB,
+            hourB,
+            itemB.minute,
+            itemA.reservedUserName,
+            itemA.reservedUserPhone,
+            itemA.note,
+            itemA.reservationType
+          );
+        } else {
+          alert("Rezervasyon bilgileri alınamadı. Lütfen tekrar deneyin.");
+        }
       }
     } catch (error) {
       // Handle errors here
@@ -155,11 +179,14 @@ function Dnd({ reservations, tomorrowNight }) {
     }
   };
 
-  const fetchReservations = useMemo(() => async () => {
-    const dateStr = selectedDay.replaceAll(".", "-");
-    const items = await getReservations(dateStr, "Saha 1");
-    return items;
-  }, [selectedDay]);
+  const fetchReservations = useMemo(
+    () => async () => {
+      const dateStr = selectedDay.replaceAll(".", "-");
+      const items = await getReservations(dateStr, "Saha 1");
+      return items;
+    },
+    [selectedDay]
+  );
 
   const determineDBIndexOfItem = async (hour) => {
     const items = await fetchReservations();
@@ -195,7 +222,7 @@ function Dnd({ reservations, tomorrowNight }) {
         [itemA.reservationType, itemB.reservationType] = [
           itemB.reservationType,
           itemA.reservationType,
-        ]
+        ];
       }
 
       sourceItems.splice(source.index, 1, itemB);
@@ -212,7 +239,7 @@ function Dnd({ reservations, tomorrowNight }) {
         [itemA.reservationType, itemB.reservationType] = [
           itemB.reservationType,
           itemA.reservationType,
-        ]
+        ];
       }
 
       sourceItems.splice(source.index, 0, itemB);
@@ -237,7 +264,13 @@ function Dnd({ reservations, tomorrowNight }) {
       sourceItems[source.index].date,
       destItems[destination.index].date
     );
-    notifyCustomer(destItems[destination.index].minute, destItems[destination.index].date, destItems[destination.index].hour, destination.droppableId, destItems[destination.index].reservedUserPhone);
+    notifyCustomer(
+      destItems[destination.index].minute,
+      destItems[destination.index].date,
+      destItems[destination.index].hour,
+      destination.droppableId,
+      destItems[destination.index].reservedUserPhone
+    );
   };
 
   const nightReservationsOnDragEnd = (source, destination) => {
@@ -269,7 +302,7 @@ function Dnd({ reservations, tomorrowNight }) {
         [itemA.reservationType, itemB.reservationType] = [
           itemB.reservationType,
           itemA.reservationType,
-        ]
+        ];
       }
       sourceItems.splice(sourceIndex, 1, itemB);
       destItems.splice(destinationIndex, 1, itemA);
@@ -285,7 +318,7 @@ function Dnd({ reservations, tomorrowNight }) {
         [itemA.reservationType, itemB.reservationType] = [
           itemB.reservationType,
           itemA.reservationType,
-        ]
+        ];
       }
 
       sourceItems.splice(sourceIndex, 0, itemB);
@@ -311,7 +344,13 @@ function Dnd({ reservations, tomorrowNight }) {
       sourceItems[sourceIndex].date,
       destItems[destinationIndex].date
     );
-    notifyCustomer(destItems[destination.index].minute, destItems[destination.index].date, destItems[destination.index].hour, destination.droppableId, destItems[destination.index].reservedUserPhone);
+    notifyCustomer(
+      destItems[destination.index].minute,
+      destItems[destination.index].date,
+      destItems[destination.index].hour,
+      destination.droppableId,
+      destItems[destination.index].reservedUserPhone
+    );
   };
 
   const crossReservationsOnDragEnd = (source, destination) => {
@@ -336,7 +375,7 @@ function Dnd({ reservations, tomorrowNight }) {
       [itemA.reservationType, itemB.reservationType] = [
         itemB.reservationType,
         itemA.reservationType,
-      ]
+      ];
     }
     sourceItems.splice(sourceIndex, 0, itemB); // Kaynak rezervasyonunu destinasyon rezervasyonunun bulunduğu indexe ekler
     destItems.splice(destinationIndex, 0, itemA); // Destinasyon rezervasyonunu kaynak rezervasyonunun bulunduğu indexe ekler
@@ -352,7 +391,13 @@ function Dnd({ reservations, tomorrowNight }) {
       sourceItems[sourceIndex].date,
       destItems[destinationIndex].date
     );
-    notifyCustomer(destItems[destination.index].minute, destItems[destination.index].date, destItems[destination.index].hour, destination.droppableId, destItems[destination.index].reservedUserPhone);
+    notifyCustomer(
+      destItems[destination.index].minute,
+      destItems[destination.index].date,
+      destItems[destination.index].hour,
+      destination.droppableId,
+      destItems[destination.index].reservedUserPhone
+    );
   };
 
   const updateSourcePitchReservations = (source, sourceItems) => {
@@ -467,7 +512,7 @@ function Dnd({ reservations, tomorrowNight }) {
     const isReserved = item.reservedUserName !== "";
     const date = item.date;
     const index = await determineDBIndexOfItem(item.hour);
-
+    console.log("pitch", pitch, "item", item, "index", index, "date", date);
     if (user.type === "admin") {
       if (isReserved) {
         navigate("/reservationDetails", {
@@ -533,14 +578,15 @@ function Dnd({ reservations, tomorrowNight }) {
                                 >
                                   <div className="flex flex-row justify-between align-baseline items-baseline">
                                     <p
-                                      className={`mr-2 text-lg text-left font-bold ${snapshot.isDragging
-                                        ? "text-transparent"
-                                        : ""
-                                        }`}
+                                      className={`mr-1 text-lg text-left font-bold ${
+                                        snapshot.isDragging
+                                          ? "text-transparent"
+                                          : ""
+                                      }`}
                                     >
                                       {item.hour + ":" + item.minute}
                                     </p>
-                                    <p className="text-sm flex-1 font-semibold truncate text-right md:text-base xl:text-lg">
+                                    <p className="text-sm flex-1 font-semibold truncate text-left md:text-right md:text-base xl:text-lg">
                                       {showReservedOrNot(item)}
                                     </p>
                                   </div>
@@ -592,10 +638,11 @@ function Dnd({ reservations, tomorrowNight }) {
                                   >
                                     <div className="flex flex-row justify-between align-baseline items-baseline">
                                       <p
-                                        className={`mr-2 text-lg text-left font-bold ${snapshot.isDragging
-                                          ? "text-transparent"
-                                          : ""
-                                          }`}
+                                        className={`mr-2 text-lg text-left font-bold ${
+                                          snapshot.isDragging
+                                            ? "text-transparent"
+                                            : ""
+                                        }`}
                                       >
                                         {item.hour + ":" + item.minute}
                                       </p>
