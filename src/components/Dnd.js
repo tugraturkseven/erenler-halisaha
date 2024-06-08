@@ -12,6 +12,7 @@ import { SendWhatsAppMessage } from "../utils/SendWhatsAppMessage";
 import { DateContext } from "../contexts/DateContext";
 
 function Dnd({ reservations, tomorrowNight }) {
+  console.log("reservations", reservations);
   const navigate = useNavigate();
   const user = useContext(UserContext);
   const schema = useContext(ReservationSchemaContext);
@@ -511,13 +512,32 @@ function Dnd({ reservations, tomorrowNight }) {
   const handleReservationClick = async (pitch, item) => {
     const isReserved = item.reservedUserName !== "";
     const date = item.date;
+    const type = item.reservationType;
+    console.log("item", item);
     const index = await determineDBIndexOfItem(item.hour);
-    console.log("pitch", pitch, "item", item, "index", index, "date", date);
     if (user.type === "admin") {
       if (isReserved) {
-        navigate("/reservationDetails", {
-          state: { pitch, item, index, date },
-        });
+        if (type === "Kesin Rez.") {
+          navigate("/reservationDetails", {
+            state: { pitch, item, index, date },
+          });
+        } else {
+          if (!item.subscriber) {
+            if (window.confirm("Abone eklemek ister misiniz?")) {
+              navigate("/chooseCustomer", {
+                state: { pitch, index, date, addSubscriber: true },
+              });
+            } else {
+              navigate("/reservationDetails", {
+                state: { pitch, item, index, date },
+              });
+            }
+          } else {
+            navigate("/reservationDetails", {
+              state: { pitch, item, index, date },
+            });
+          }
+        }
       } else {
         navigate("/chooseCustomer", { state: { pitch, index, date } });
       }

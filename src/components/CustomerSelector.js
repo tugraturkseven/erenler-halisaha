@@ -3,15 +3,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import Input from "react-phone-number-input/input";
 import { useNavigate, useLocation } from "react-router-dom";
+import { updateReservationProperty } from "../firebase";
 
 function Table({ data }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { pitch, index, date } = location.state;
-
+  const { pitch, index, date, addSubscriber } = location.state;
+  console.log(pitch, index, date, addSubscriber);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);  // Adjust number of items per page as needed
+  const [itemsPerPage] = useState(5); // Adjust number of items per page as needed
 
   // Calculate the index of the last and first items on the current page
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -21,7 +22,8 @@ function Table({ data }) {
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
-  useEffect(() => { // Reset page number when data changes
+  useEffect(() => {
+    // Reset page number when data changes
     setCurrentPage(1);
   }, [data]);
 
@@ -32,14 +34,19 @@ function Table({ data }) {
         <tr key={id}>
           <th>{index + 1}</th>
           {/* Set a fixed height and allow for scrolling if content overflows */}
-          <td style={{
-            display: '-webkit-box',
-            WebkitLineClamp: '3',
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxHeight: '3em', // Adjust as needed based on your line height
-          }} className="py-0">{name}</td>
+          <td
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: "3",
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxHeight: "3em", // Adjust as needed based on your line height
+            }}
+            className="py-0"
+          >
+            {name}
+          </td>
           {/* Ensure input has enough space to display the phone number */}
           <td className="px-0">
             <Input
@@ -49,7 +56,7 @@ function Table({ data }) {
             />
           </td>
           {/* Use flex and justify-end to align the button to the right */}
-          <td className="flex justify-center" >
+          <td className="flex justify-center">
             <button
               className="btn btn-success p-3"
               onClick={() => handleChoose(user)}
@@ -63,7 +70,7 @@ function Table({ data }) {
   };
 
   // Logic to change page
-  const paginate = pageNumber => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Function to generate the array of page numbers to be displayed
   const generatePageNumbers = () => {
@@ -78,22 +85,47 @@ function Table({ data }) {
       const startPage = Math.max(2, currentPage - 1);
       const endPage = Math.min(totalPages - 1, currentPage + 1);
 
-      pages = [1, ...Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i), totalPages];
+      pages = [
+        1,
+        ...Array.from(
+          { length: endPage - startPage + 1 },
+          (_, i) => startPage + i
+        ),
+        totalPages,
+      ];
 
       // Logic to add ellipses
       if (startPage > 2) {
-        pages.splice(1, 0, '...');
+        pages.splice(1, 0, "...");
       }
       if (endPage < totalPages - 1) {
-        pages.splice(pages.length - 1, 0, '...');
+        pages.splice(pages.length - 1, 0, "...");
       }
     }
     return pages;
   };
 
-  const handleChoose = (user) => {
-    navigate("/reservationDetails", { state: { user, pitch, index, date } });
-  }
+  const handleChoose = async (user) => {
+    if (addSubscriber) {
+      const [day, month, year] = date.split(".");
+      try {
+        await updateReservationProperty(
+          year,
+          month,
+          day,
+          pitch,
+          index,
+          "subscriber",
+          user.phone
+        );
+        alert("Abone eklendi");
+      } catch (err) {
+        alert("Bir hata oluştu. Lütfen tekrar deneyin.", err);
+      }
+    } else {
+      navigate("/reservationDetails", { state: { user, pitch, index, date } });
+    }
+  };
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -102,8 +134,8 @@ function Table({ data }) {
           <tr>
             <th></th>
             <th className="w-24 md:w-32">🏷️ Isim</th>
-            <th style={{ minWidth: '115px' }}>📞 Telefon</th>
-            <th >🧲 Müşteri Seç</th>
+            <th style={{ minWidth: "115px" }}>📞 Telefon</th>
+            <th>🧲 Müşteri Seç</th>
           </tr>
         </thead>
         <tbody>{renderTableData()}</tbody>
@@ -113,8 +145,10 @@ function Table({ data }) {
         {generatePageNumbers().map((number, index) => (
           <button
             key={index}
-            className={`join-item btn ${number === currentPage ? "btn-disabled" : ""}`}
-            onClick={() => number !== '...' && paginate(number)}
+            className={`join-item btn ${
+              number === currentPage ? "btn-disabled" : ""
+            }`}
+            onClick={() => number !== "..." && paginate(number)}
           >
             {number}
           </button>

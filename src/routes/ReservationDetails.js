@@ -31,6 +31,7 @@ function ReservationDetails() {
   const [reservationPitch, setReservationPitch] = useState(pitch);
   const [reservationHour, setReservationHour] = useState(hour);
   const [reservationType, setReservationType] = useState("");
+  const [subscriber, setSubscriber] = useState(false);
   const dateString = reservationDate.replaceAll(".", "-");
 
   const [showPicker, setShowPicker] = useState(false);
@@ -97,7 +98,6 @@ function ReservationDetails() {
 
     if (!reservationHour) {
       getReservationDetails(dateString, pitch, index).then((data) => {
-        console.log(data);
         if (data) {
           setPhone(user ? user.phone : data.reservedUserPhone);
           setNote(data?.note);
@@ -105,6 +105,7 @@ function ReservationDetails() {
           setReservationHour(data?.hour);
           setName(user ? user?.name : data?.reservedUserName);
           setReservationType(data?.reservationType || "Ön Rez.");
+          setSubscriber(data?.subscriber || false);
         }
       });
     }
@@ -249,6 +250,27 @@ function ReservationDetails() {
     window.open(whatsappUrl, "_blank");
   };
 
+  const sendSubscriberMessage = () => {
+    const minute = pitches.find(
+      (pitch) => pitch.name === reservationPitch
+    ).minute;
+    const subscriberMessage = `
+    Tarih: ${turkishDateFormatter(reservationDate)}
+    Gün: ${getTurkishDayName(reservationDate)}
+    Saat: ${reservationHour}:${minute}
+    Saha No: ${reservationPitch}
+
+    ${
+      smsTemplates.find(
+        (template) => template?.description === "Abone Hatırlatma"
+      )?.message
+    }
+`;
+    const encodedMessage = encodeURIComponent(subscriberMessage);
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   const handleSave = async () => {
     try {
       const newDateString = reservationDate.replaceAll(".", "-");
@@ -345,6 +367,12 @@ function ReservationDetails() {
       "",
       ""
     );
+
+    if (reservationType === "Ön Rez." && subscriber) {
+      if (window.confirm("Bu saate abone var, bilgi vermek ister misiniz?")) {
+        sendSubscriberMessage();
+      }
+    }
 
     setReservationUpdateFlag().then(() => {
       return;
