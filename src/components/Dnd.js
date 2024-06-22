@@ -12,7 +12,6 @@ import { SendWhatsAppMessage } from "../utils/SendWhatsAppMessage";
 import { DateContext } from "../contexts/DateContext";
 
 function Dnd({ reservations, tomorrowNight }) {
-  console.log("reservations", reservations);
   const navigate = useNavigate();
   const user = useContext(UserContext);
   const schema = useContext(ReservationSchemaContext);
@@ -513,31 +512,12 @@ function Dnd({ reservations, tomorrowNight }) {
     const isReserved = item.reservedUserName !== "";
     const date = item.date;
     const type = item.reservationType;
-    console.log("item", item);
     const index = await determineDBIndexOfItem(item.hour);
     if (user.type === "admin") {
       if (isReserved) {
-        if (type === "Kesin Rez.") {
-          navigate("/reservationDetails", {
-            state: { pitch, item, index, date },
-          });
-        } else {
-          if (!item.subscriber) {
-            if (window.confirm("Abone eklemek ister misiniz?")) {
-              navigate("/chooseCustomer", {
-                state: { pitch, index, date, addSubscriber: true },
-              });
-            } else {
-              navigate("/reservationDetails", {
-                state: { pitch, item, index, date },
-              });
-            }
-          } else {
-            navigate("/reservationDetails", {
-              state: { pitch, item, index, date },
-            });
-          }
-        }
+        navigate("/reservationDetails", {
+          state: { pitch, item, index, date },
+        });
       } else {
         navigate("/chooseCustomer", { state: { pitch, index, date } });
       }
@@ -547,6 +527,7 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const handleBackground = (item) => {
+    if (item.subscribers && item.subscribers.length > 0) return "bg-sky-600";
     if (item.reservationType === "Ön Rez.") return "bg-yellow-600";
     if (item.reservationType === "Kesin Rez.") return "bg-green-600";
     return "bg-slate-700";

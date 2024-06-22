@@ -3,13 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import Input from "react-phone-number-input/input";
 import { useNavigate, useLocation } from "react-router-dom";
-import { updateReservationProperty } from "../firebase";
+import { addSubscriberToReservation } from "../firebase";
 
 function Table({ data }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { pitch, index, date, addSubscriber } = location.state;
-  console.log(pitch, index, date, addSubscriber);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5); // Adjust number of items per page as needed
@@ -108,19 +107,23 @@ function Table({ data }) {
   const handleChoose = async (user) => {
     if (addSubscriber) {
       const [day, month, year] = date.split(".");
+      const customer = {
+        phoneNumber: user.phone,
+        name: user.name,
+      };
       try {
-        await updateReservationProperty(
+        await addSubscriberToReservation(
           year,
           month,
           day,
           pitch,
           index,
-          "subscriber",
-          user.phone
+          customer
         );
         alert("Abone eklendi");
+        navigate("/reservation", { state: { date } });
       } catch (err) {
-        alert("Bir hata oluştu. Lütfen tekrar deneyin.", err);
+        alert(`Bir hata oluştu. Lütfen tekrar deneyin. Hata: ${err}`);
       }
     } else {
       navigate("/reservationDetails", { state: { user, pitch, index, date } });

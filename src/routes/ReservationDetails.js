@@ -11,12 +11,14 @@ import {
   getTomorrowNightVisibility,
   getSMSTemplates,
   setReservationUpdateFlag,
+  updateReservationProperty,
 } from "../firebase";
 import DropDown from "../components/DropDown";
 import DatePicker from "../components/DatePicker";
 import DateIndicator from "../components/DateIndicator";
 import PhoneNumberInput from "../components/PhoneNumberInput";
 import RadioGroup from "../components/RadioGroup";
+import WaiterList from "./WaiterList";
 
 function ReservationDetails() {
   const location = useLocation();
@@ -31,7 +33,7 @@ function ReservationDetails() {
   const [reservationPitch, setReservationPitch] = useState(pitch);
   const [reservationHour, setReservationHour] = useState(hour);
   const [reservationType, setReservationType] = useState("");
-  const [subscriber, setSubscriber] = useState(false);
+  const [subscribers, setSubscribers] = useState([]);
   const dateString = reservationDate.replaceAll(".", "-");
 
   const [showPicker, setShowPicker] = useState(false);
@@ -39,6 +41,7 @@ function ReservationDetails() {
   const [schemaHours, setSchemaHours] = useState([]);
   const [pitches, setPitches] = useState([]);
   const [smsTemplates, setSmsTemplates] = useState(null);
+  const [tab, setTab] = useState(true);
 
   const monthNames = [
     "Ocak",
@@ -105,7 +108,7 @@ function ReservationDetails() {
           setReservationHour(data?.hour);
           setName(user ? user?.name : data?.reservedUserName);
           setReservationType(data?.reservationType || "Ön Rez.");
-          setSubscriber(data?.subscriber || false);
+          setSubscribers(data?.subscribers || []);
         }
       });
     }
@@ -250,7 +253,7 @@ function ReservationDetails() {
     window.open(whatsappUrl, "_blank");
   };
 
-  const sendSubscriberMessage = () => {
+  const sendSubscriberMessage = (phoneNumber) => {
     const minute = pitches.find(
       (pitch) => pitch.name === reservationPitch
     ).minute;
@@ -262,12 +265,12 @@ function ReservationDetails() {
 
     ${
       smsTemplates.find(
-        (template) => template?.description === "Abone Hatırlatma"
+        (template) => template?.description === "Bekleyen Hatırlatma"
       )?.message
     }
 `;
     const encodedMessage = encodeURIComponent(subscriberMessage);
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -301,6 +304,24 @@ function ReservationDetails() {
             note,
             reservationType
           );
+          if (
+            subscribers.find((subscriber) => subscriber.phoneNumber === phone)
+          ) {
+            const filteredSubscribers = subscribers.filter(
+              (subscriber) => subscriber.phoneNumber !== phone
+            );
+            const [day, month, year] = newDateString.split("-");
+
+            await updateReservationProperty(
+              year,
+              month,
+              day,
+              reservationPitch,
+              index,
+              "subscribers",
+              filteredSubscribers
+            );
+          }
           alert("Rezervasyon kaydedildi");
           if (
             window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")
@@ -326,6 +347,14 @@ function ReservationDetails() {
       clearReservation(false);
   };
 
+  const handleWaiterAssign = (waiter) => {
+    setName(waiter.name);
+    setPhone(waiter.phoneNumber);
+    setNote("");
+    setReservationType("Ön Rez.");
+    setTab(true);
+  };
+
   const handlePitch = (selectedPitchName) => {
     const selectedPitch = pitches.find(
       (pitch) => pitch.name === selectedPitchName
@@ -338,12 +367,12 @@ function ReservationDetails() {
     setReservationDate(date.toLocaleDateString("tr"));
   };
 
-  const pickDateComponent = (
+  const waiterListButton = (
     <button
-      onClick={() => setShowPicker(!showPicker)}
+      onClick={() => setTab(!tab)}
       className="btn btn-ghost normal-case text-xl xl:text-3xl "
     >
-      📅
+      {tab ? "👁️" : "📅"}
     </button>
   );
 
@@ -368,12 +397,6 @@ function ReservationDetails() {
       ""
     );
 
-    if (reservationType === "Ön Rez." && subscriber) {
-      if (window.confirm("Bu saate abone var, bilgi vermek ister misiniz?")) {
-        sendSubscriberMessage();
-      }
-    }
-
     setReservationUpdateFlag().then(() => {
       return;
     });
@@ -389,8 +412,8 @@ function ReservationDetails() {
 
   return (
     <div className="flex flex-col items-center">
-      <Navbar endButton={pickDateComponent} />
-      <div className="flex flex-col gap-5 items-center">
+      <Navbar endButton={waiterListButton} />
+      <div className="flex flex-col gap-4 items-center">
         <p className="titleMedium font-bold text-center">
           Rezervasyon Bilgileri
         </p>
@@ -399,68 +422,81 @@ function ReservationDetails() {
           setSelectedDay={setReservationDate}
         />
         <DatePicker showPicker={showPicker} handleDatePick={handleDatePick} />
-        <DropDown
-          options={pitches.map((pitch) => pitch.name)}
-          onSelect={handlePitch}
-          selectedOption={reservationPitch}
-          placeHolder={"🏟️ Saha"}
-        />
-        <DropDown
-          options={schemaHours}
-          onSelect={setReservationHour}
-          selectedOption={reservationHour}
-          placeHolder={"🕓 Saat"}
-        />
+        {tab ? (
+          <>
+            <DropDown
+              options={pitches.map((pitch) => pitch.name)}
+              onSelect={handlePitch}
+              selectedOption={reservationPitch}
+              placeHolder={"🏟️ Saha"}
+            />
+            <DropDown
+              options={schemaHours}
+              onSelect={setReservationHour}
+              selectedOption={reservationHour}
+              placeHolder={"🕓 Saat"}
+            />
 
-        <PhoneNumberInput
-          phoneNumber={phone}
-          setPhoneNumber={setPhone}
-          width={"w-52"}
-        />
-        <input
-          className="input  w-52 max-w-sm input-bordered"
-          type="text"
-          placeholder="🏷️ İsim Soyisim"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="input w-52 max-w-sm input-bordered"
-          type="text"
-          placeholder="🗒️ Not"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        />
-        <div className="flex flex-row items-center justify-center gap-5 w-52">
-          <RadioGroup
-            options={["Ön Rez.", "Kesin Rez."]}
-            selected={reservationType}
-            setSelected={setReservationType}
+            <PhoneNumberInput
+              phoneNumber={phone}
+              setPhoneNumber={setPhone}
+              width={"w-52"}
+            />
+            <input
+              className="input  w-52 max-w-sm input-bordered"
+              type="text"
+              placeholder="🏷️ İsim Soyisim"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              className="input w-52 max-w-sm input-bordered"
+              type="text"
+              placeholder="🗒️ Not"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+            <div className="flex flex-row items-center justify-center gap-5 w-52">
+              <RadioGroup
+                options={["Ön Rez.", "Kesin Rez."]}
+                selected={reservationType}
+                setSelected={setReservationType}
+              />
+            </div>
+            <div className="flex flex-row gap-5 w-52 justify-center">
+              <button className="btn btn-info" onClick={() => handleSave(true)}>
+                💾
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => clearReservation(true)}
+              >
+                ❌
+              </button>
+              <button
+                className="btn btn-neutral"
+                onClick={() => sendReminderMessage()}
+              >
+                🔔
+              </button>
+              <button
+                className="btn btn-accent"
+                onClick={() => navigate("/reservation")}
+              >
+                🚪
+              </button>
+            </div>
+          </>
+        ) : (
+          <WaiterList
+            data={subscribers}
+            pitch={pitch}
+            date={date}
+            index={index}
+            sendMessage={sendSubscriberMessage}
+            handleAssign={handleWaiterAssign}
           />
-        </div>
-        <div className="flex flex-row gap-5 w-52 justify-center">
-          <button className="btn btn-info" onClick={() => handleSave(true)}>
-            💾
-          </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => clearReservation(true)}
-          >
-            ❌
-          </button>
-          <button
-            className="btn btn-neutral"
-            onClick={() => sendReminderMessage()}
-          >
-            🔔
-          </button>
-          <button
-            className="btn btn-accent"
-            onClick={() => navigate("/reservation")}
-          >
-            🚪
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
