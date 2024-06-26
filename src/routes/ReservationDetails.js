@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -19,6 +19,8 @@ import DateIndicator from "../components/DateIndicator";
 import PhoneNumberInput from "../components/PhoneNumberInput";
 import RadioGroup from "../components/RadioGroup";
 import WaiterList from "./WaiterList";
+import { PitchListContext } from "../contexts/PitchListContext";
+import { SMSTemplatesContext } from "../contexts/SMSTemplatesContext";
 
 function ReservationDetails() {
   const location = useLocation();
@@ -39,8 +41,8 @@ function ReservationDetails() {
   const [showPicker, setShowPicker] = useState(false);
   const [reservationSchema, setReservationSchema] = useState([]);
   const [schemaHours, setSchemaHours] = useState([]);
-  const [pitches, setPitches] = useState([]);
-  const [smsTemplates, setSmsTemplates] = useState(null);
+  const pitches = useContext(PitchListContext);
+  const smsTemplates = useContext(SMSTemplatesContext);
   const [tab, setTab] = useState(true);
 
   const monthNames = [
@@ -89,15 +91,6 @@ function ReservationDetails() {
         }
       });
     }
-    if (pitches.length === 0) {
-      getPitchList()
-        .then((fetchedPitches) => {
-          setPitches(fetchedPitches);
-        })
-        .catch((error) => {
-          console.log("Error fetching pitches:", error);
-        });
-    }
 
     if (!reservationHour) {
       getReservationDetails(dateString, pitch, index).then((data) => {
@@ -111,16 +104,6 @@ function ReservationDetails() {
           setSubscribers(data?.subscribers || []);
         }
       });
-    }
-
-    if (!smsTemplates) {
-      getSMSTemplates()
-        .then((data) => {
-          setSmsTemplates(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching sms templates:", error);
-        });
     }
   }, []);
 
@@ -293,6 +276,9 @@ function ReservationDetails() {
           reservationHour !== undefined &&
           index !== undefined
         ) {
+          const filteredSubscribers = subscribers.filter(
+            (subscriber) => subscriber.phoneNumber !== phone
+          );
           await setReservation(
             newDateString,
             reservationPitch,
@@ -302,26 +288,9 @@ function ReservationDetails() {
             name,
             phone,
             note,
-            reservationType
+            reservationType,
+            filteredSubscribers
           );
-          if (
-            subscribers.find((subscriber) => subscriber.phoneNumber === phone)
-          ) {
-            const filteredSubscribers = subscribers.filter(
-              (subscriber) => subscriber.phoneNumber !== phone
-            );
-            const [day, month, year] = newDateString.split("-");
-
-            await updateReservationProperty(
-              year,
-              month,
-              day,
-              reservationPitch,
-              index,
-              "subscribers",
-              filteredSubscribers
-            );
-          }
           alert("Rezervasyon kaydedildi");
           if (
             window.confirm("Rezervasyon sahibine bilgi vermek ister misiniz?")
@@ -372,7 +341,7 @@ function ReservationDetails() {
       onClick={() => setTab(!tab)}
       className="btn btn-ghost normal-case text-xl xl:text-3xl "
     >
-      {tab ? "👁️" : "📅"}
+      {tab ? "⏳" : "📅"}
     </button>
   );
 
@@ -495,6 +464,7 @@ function ReservationDetails() {
             index={index}
             sendMessage={sendSubscriberMessage}
             handleAssign={handleWaiterAssign}
+            addNew={true}
           />
         )}
       </div>

@@ -8,7 +8,7 @@ import { addSubscriberToReservation } from "../firebase";
 function Table({ data }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { pitch, index, date, addSubscriber } = location.state;
+  const { pitch, index, date } = location.state;
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5); // Adjust number of items per page as needed
@@ -55,7 +55,14 @@ function Table({ data }) {
             />
           </td>
           {/* Use flex and justify-end to align the button to the right */}
-          <td className="flex justify-center">
+          <td className="flex justify-center gap-3">
+            <button
+              className="btn bg-black p-3 text-lg relative"
+              onClick={() => handleAddWishList(user)}
+            >
+              <p>⌛</p>
+              <p className="absolute text-xl top-0 right-1 text-green-300">+</p>
+            </button>
             <button
               className="btn btn-success p-3"
               onClick={() => handleChoose(user)}
@@ -104,34 +111,34 @@ function Table({ data }) {
     return pages;
   };
 
-  const handleChoose = async (user) => {
-    if (addSubscriber) {
-      const [day, month, year] = date.split(".");
-      const customer = {
-        phoneNumber: user.phone,
-        name: user.name,
-      };
-      try {
-        await addSubscriberToReservation(
-          year,
-          month,
-          day,
-          pitch,
-          index,
-          customer
-        );
-        alert("Abone eklendi");
-        navigate("/reservation", { state: { date } });
-      } catch (err) {
-        alert(`Bir hata oluştu. Lütfen tekrar deneyin. Hata: ${err}`);
-      }
-    } else {
-      navigate("/reservationDetails", { state: { user, pitch, index, date } });
+  const handleAddWishList = async (user) => {
+    const [day, month, year] = date.split(".");
+    const customer = {
+      phoneNumber: user.phone,
+      name: user.name,
+    };
+    try {
+      await addSubscriberToReservation(
+        year,
+        month,
+        day,
+        pitch,
+        index,
+        customer
+      );
+      alert("Müşteri bekleyen listesine eklendi");
+      navigate("/reservation", { state: { date } });
+    } catch (err) {
+      alert(`Bir hata oluştu. Lütfen tekrar deneyin. Hata: ${err}`);
     }
   };
 
+  const handleChoose = async (user) => {
+    navigate("/reservationDetails", { state: { user, pitch, index, date } });
+  };
+
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center ">
       <table className="table">
         <thead>
           <tr>

@@ -3,29 +3,35 @@ import { useNavigate } from "react-router-dom";
 
 const WaiterList = ({
   data,
+  sendMessage,
+  handleAssign,
+  addNew,
   pitch,
   index,
   date,
-  sendMessage,
-  handleAssign,
 }) => {
   const navigate = useNavigate();
 
   const handleAddWaiter = () => {
     navigate("/chooseCustomer", {
-      state: { pitch: pitch, index: index, date: date, addSubscriber: true },
+      state: { pitch: pitch, index: index, date: date },
     });
   };
 
   return (
     <div className="flex flex-col gap-5">
-      <button
-        className="btn bg-base-200 w-full normal-case"
-        onClick={handleAddWaiter}
-      >
-        ➕ Yeni Bekleyen Ekle
-      </button>
-      <div className="bg-base-200 rounded-lg h-96 w-80 max-w-80 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-4">
+      {addNew ? (
+        <button
+          className="btn bg-base-200 w-full normal-case"
+          onClick={handleAddWaiter}
+        >
+          ➕ Yeni Bekleyen Ekle
+        </button>
+      ) : (
+        <h2 className="text-xl text-center">Bekleyen Listesi</h2>
+      )}
+
+      <div className="bg-base-200 rounded-lg h-96 w-80 max-h-full max-w-80 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-4">
         {data &&
           data.map((waiter, index) => (
             <div key={index} className="flex flex-row flex-nowrap items-center">

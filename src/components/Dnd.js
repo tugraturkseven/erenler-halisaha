@@ -519,7 +519,7 @@ function Dnd({ reservations, tomorrowNight }) {
           state: { pitch, item, index, date },
         });
       } else {
-        navigate("/chooseCustomer", { state: { pitch, index, date } });
+        navigate("/chooseCustomer", { state: { pitch, index, date, item } });
       }
     } else if (user.type !== "admin" && !isReserved) {
       navigate("/reservationForm", { state: { pitch, index, date } });
