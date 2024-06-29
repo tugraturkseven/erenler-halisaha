@@ -527,7 +527,15 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   const handleBackground = (item) => {
-    if (item.subscribers && item.subscribers.length > 0) return "bg-sky-600";
+    if (item.subscribers && item.subscribers.length > 0) {
+      if (item.reservationType === "Ön Rez.") {
+        return "bg-gradient-to-t from-sky-600 to-yellow-600";
+      }
+      if (item.reservationType === "Kesin Rez.") {
+        return "bg-gradient-to-t from-sky-600 to-green-600";
+      }
+      return "bg-sky-600";
+    }
     if (item.reservationType === "Ön Rez.") return "bg-yellow-600";
     if (item.reservationType === "Kesin Rez.") return "bg-green-600";
     return "bg-slate-700";

@@ -4,6 +4,7 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import Input from "react-phone-number-input/input";
 import { useNavigate, useLocation } from "react-router-dom";
 import { addSubscriberToReservation } from "../firebase";
+import { toast } from "react-toastify";
 
 function Table({ data }) {
   const navigate = useNavigate();
@@ -126,10 +127,14 @@ function Table({ data }) {
         index,
         customer
       );
-      alert("Müşteri bekleyen listesine eklendi");
       navigate("/reservation", { state: { date } });
+      setTimeout(() => {
+        toast(`${user.name} bekleyen listesine eklendi`);
+      }, 1);
     } catch (err) {
-      alert(`Bir hata oluştu. Lütfen tekrar deneyin. Hata: ${err}`);
+      toast(`${user.name} bekleyen listesinde kayıtlıdır.`, {
+        type: "error",
+      });
     }
   };
 

@@ -363,7 +363,9 @@ function ReservationDetails() {
       minute,
       "",
       "",
-      ""
+      "",
+      "",
+      subscribers
     );
 
     setReservationUpdateFlag().then(() => {
