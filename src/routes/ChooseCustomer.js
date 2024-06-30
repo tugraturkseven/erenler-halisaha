@@ -7,7 +7,8 @@ import { PitchListContext } from "../contexts/PitchListContext";
 import { SMSTemplatesContext } from "../contexts/SMSTemplatesContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import WaiterList from "./WaiterList";
-
+import { updateReservationProperty } from "../firebase";
+import { toast } from "react-toastify";
 function ChooseCustomer() {
   const costumersContext = useContext(CustomersContext);
   const costumers = [...costumersContext.customers];
@@ -77,6 +78,52 @@ function ChooseCustomer() {
         ...location.state,
       },
     });
+  };
+
+  const handleRemove = async (user) => {
+    const [day, month, year] = location.state.date.split(".");
+    const { pitch, index } = location.state;
+    const confirm = window.confirm(
+      "Bekleyen listesinden kaldırmak istediğinizden emin misiniz?"
+    );
+    if (!confirm) {
+      return;
+    }
+
+    if (!user) {
+      await updateReservationProperty(
+        year,
+        month,
+        day,
+        pitch,
+        index,
+        "subscribers",
+        []
+      );
+      navigate("/reservation", { state: { date: location.state.date } });
+      setTimeout(() => {
+        toast(`Bekleyen listesi temizlendi.`);
+      }, 1);
+    } else {
+      const filtered = item?.subscribers?.filter(
+        (subscriber) => subscriber.phoneNumber !== user.phoneNumber
+      );
+
+      await updateReservationProperty(
+        year,
+        month,
+        day,
+        pitch,
+        index,
+        "subscribers",
+        filtered
+      );
+
+      navigate("/reservation", { state: { date: location.state.date } });
+      setTimeout(() => {
+        toast(`${user.name} bekleyen listesinden kaldırıldı`);
+      }, 1);
+    }
   };
 
   const formatPhoneNumber = (phoneNumber) => {
@@ -194,6 +241,7 @@ function ChooseCustomer() {
           data={item.subscribers}
           sendMessage={sendSubscriberMessage}
           handleAssign={(user) => handleAssign(user)}
+          handleRemove={(user) => handleRemove(user)}
         />
       )}
     </div>

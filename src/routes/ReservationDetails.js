@@ -381,6 +381,47 @@ function ReservationDetails() {
     }
   };
 
+  const handleRemove = async (user) => {
+    const [day, month, year] = location.state.date.split(".");
+    const { pitch, index } = location.state;
+    const confirm = window.confirm(
+      "Bekleyen listesinden kaldırmak istediğinizden emin misiniz?"
+    );
+
+    if (!confirm) {
+      return;
+    }
+
+    if (!user) {
+      await updateReservationProperty(
+        year,
+        month,
+        day,
+        pitch,
+        index,
+        "subscribers",
+        []
+      );
+
+      setSubscribers([]);
+    } else {
+      const filtered = subscribers.filter(
+        (subscriber) => subscriber.phoneNumber !== user.phoneNumber
+      );
+      await updateReservationProperty(
+        year,
+        month,
+        day,
+        pitch,
+        index,
+        "subscribers",
+        filtered
+      );
+
+      setSubscribers(filtered);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center">
       <Navbar endButton={waiterListButton} />
@@ -466,6 +507,7 @@ function ReservationDetails() {
             index={index}
             sendMessage={sendSubscriberMessage}
             handleAssign={handleWaiterAssign}
+            handleRemove={handleRemove}
             addNew={true}
           />
         )}
