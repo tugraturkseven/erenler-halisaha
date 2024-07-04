@@ -9,6 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import WaiterList from "./WaiterList";
 import { updateReservationProperty } from "../firebase";
 import { toast } from "react-toastify";
+import { getNextSameDayDate } from "../utils/SameDaysDate";
 function ChooseCustomer() {
   const costumersContext = useContext(CustomersContext);
   const costumers = [...costumersContext.customers];
@@ -81,7 +82,8 @@ function ChooseCustomer() {
   };
 
   const handleRemove = async (user) => {
-    const [day, month, year] = location.state.date.split(".");
+    const date = location.state.date;
+    const dates = getNextSameDayDate(date);
     const { pitch, index } = location.state;
     const confirm = window.confirm(
       "Bekleyen listesinden kaldırmak istediğinizden emin misiniz?"
@@ -91,15 +93,18 @@ function ChooseCustomer() {
     }
 
     if (!user) {
-      await updateReservationProperty(
-        year,
-        month,
-        day,
-        pitch,
-        index,
-        "subscribers",
-        []
-      );
+      for (const date of dates) {
+        const [day, month, year] = date.split(".");
+        await updateReservationProperty(
+          year,
+          month,
+          day,
+          pitch,
+          index,
+          "subscribers",
+          []
+        );
+      }
       navigate("/reservation", { state: { date: location.state.date } });
       setTimeout(() => {
         toast(`Bekleyen listesi temizlendi.`);
@@ -108,17 +113,18 @@ function ChooseCustomer() {
       const filtered = item?.subscribers?.filter(
         (subscriber) => subscriber.phoneNumber !== user.phoneNumber
       );
-
-      await updateReservationProperty(
-        year,
-        month,
-        day,
-        pitch,
-        index,
-        "subscribers",
-        filtered
-      );
-
+      for (const date of dates) {
+        const [day, month, year] = date.split(".");
+        await updateReservationProperty(
+          year,
+          month,
+          day,
+          pitch,
+          index,
+          "subscribers",
+          filtered
+        );
+      }
       navigate("/reservation", { state: { date: location.state.date } });
       setTimeout(() => {
         toast(`${user.name} bekleyen listesinden kaldırıldı`);
@@ -242,6 +248,9 @@ function ChooseCustomer() {
           sendMessage={sendSubscriberMessage}
           handleAssign={(user) => handleAssign(user)}
           handleRemove={(user) => handleRemove(user)}
+          date={location.state.date}
+          index={location.state.index}
+          pitch={location.state.pitch}
         />
       )}
     </div>

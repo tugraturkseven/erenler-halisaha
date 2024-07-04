@@ -5,6 +5,7 @@ import Input from "react-phone-number-input/input";
 import { useNavigate, useLocation } from "react-router-dom";
 import { addSubscriberToReservation } from "../firebase";
 import { toast } from "react-toastify";
+import { getNextSameDayDate } from "../utils/SameDaysDate";
 
 function Table({ data }) {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ function Table({ data }) {
           <td className="flex justify-center gap-3">
             <button
               className="btn bg-black p-3 text-lg relative"
-              onClick={() => handleAddWishList(user)}
+              onClick={() => handleAddWaiter(user)}
             >
               <p>⌛</p>
               <p className="absolute text-xl top-0 right-1 text-green-300">+</p>
@@ -112,21 +113,24 @@ function Table({ data }) {
     return pages;
   };
 
-  const handleAddWishList = async (user) => {
-    const [day, month, year] = date.split(".");
+  const handleAddWaiter = async (user) => {
+    const dates = getNextSameDayDate(date);
     const customer = {
       phoneNumber: user.phone,
       name: user.name,
     };
     try {
-      await addSubscriberToReservation(
-        year,
-        month,
-        day,
-        pitch,
-        index,
-        customer
-      );
+      for (const date of dates) {
+        const [day, month, year] = date.split(".");
+        await addSubscriberToReservation(
+          year,
+          month,
+          day,
+          pitch,
+          index,
+          customer
+        );
+      }
       navigate("/reservation", { state: { date } });
       setTimeout(() => {
         toast(`${user.name} bekleyen listesine eklendi`);
@@ -135,6 +139,7 @@ function Table({ data }) {
       toast(`${user.name} bekleyen listesinde kayıtlıdır.`, {
         type: "error",
       });
+      console.log("Error:", err);
     }
   };
 
