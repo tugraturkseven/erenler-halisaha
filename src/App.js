@@ -24,6 +24,7 @@ import { ReservationSchemaProvider } from "./contexts/ReservationSchemaContext";
 import { DateProvider } from "./contexts/DateContext";
 import { SMSTemplatesProvider } from "./contexts/SMSTemplatesContext";
 import { PitchListProvider } from "./contexts/PitchListContext";
+import Score from "./routes/Score";
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
                         path="/smsTemplateDetails"
                         element={<SMSTemplateDetails />}
                       />
+                      <Route path="/score" element={<Score />} />
                     </Routes>
                   </PitchListProvider>
                 </SMSTemplatesProvider>
