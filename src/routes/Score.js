@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { PitchListContext } from "../contexts/PitchListContext";
 import ScoreCard from "../components/ScoreCard";
+import { getReservationDetails } from "../firebase";
+import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
 
 const Score = () => {
   const pitchList = useContext(PitchListContext);
+  const reservationSchema = useContext(ReservationSchemaContext);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [pitch, setPitch] = useState({
     name: "",
     minute: "",
@@ -18,19 +22,40 @@ const Score = () => {
     time: new Date().toLocaleTimeString(),
   });
 
+  function formatMinutes(minutes) {
+    return String(minutes).padStart(2, "0");
+  }
+
   useEffect(() => {
+    if (!pitch.name || !pitch.minute) return;
+    const minute = pitch.minute;
     const interval = setInterval(() => {
       setTime({
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
       });
+
+      if (
+        minute == formatMinutes(new Date().getMinutes()) &&
+        `00` === formatMinutes(new Date().getSeconds())
+      ) {
+        // Get the day in the format of DD-MM-YYYY
+        const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
+
+        const index = reservationSchema.findIndex(
+          (item) => item.hour === new Date().getHours().toString()
+        );
+        const reservationDetails = getReservationDetails(
+          date,
+          pitch.name,
+          index
+        ).then((reservationDetails) => {
+          return reservationDetails;
+        });
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    console.log(pitchList);
-  }, [pitchList]);
+  }, [pitch]);
 
   const handleScoreChange = (teamIndex, score) => {
     const teamName = teamIndex === 0 ? "teamA" : "teamB";
