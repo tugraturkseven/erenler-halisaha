@@ -25,6 +25,8 @@ import { DateProvider } from "./contexts/DateContext";
 import { SMSTemplatesProvider } from "./contexts/SMSTemplatesContext";
 import { PitchListProvider } from "./contexts/PitchListContext";
 import Score from "./routes/Score";
+import Announcements from "./routes/Announcements";
+import AnnouncementDetails from "./routes/AnnouncementDetails";
 
 function App() {
   return (
@@ -83,6 +85,14 @@ function App() {
                         element={<SMSTemplateDetails />}
                       />
                       <Route path="/score" element={<Score />} />
+                      <Route
+                        path="/announcements"
+                        element={<Announcements />}
+                      />
+                      <Route
+                        path="/announcementDetails"
+                        element={<AnnouncementDetails />}
+                      />
                     </Routes>
                   </PitchListProvider>
                 </SMSTemplatesProvider>

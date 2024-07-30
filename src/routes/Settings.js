@@ -29,12 +29,13 @@ function Settings() {
   return (
     <div>
       <Navbar endButton={logOffButton} />
-      <div className="flex flex-col justify-between items-center md:flex-row lg:justify-around">
+      <div className="flex flex-row  gap-10 md:gap-0 flex-wrap justify-center items-center lg:justify-around">
         <Card icon="⚙️" title="Genel" route="generalSettings" />
         <Card icon="⛓️" title="Şema" route="schemaSettings" />
         <Card icon="🏟️" title="Saha" route="pitchSettings" />
         <Card icon="📱" title="SMS" route="smsSettings" />
-        <Card icon="🥅" title="Skor" route="score" />
+        <Card icon="🥅" title="Skor Tablosu" route="score" />
+        <Card icon="📢" title="Anons" route="announcements" />
       </div>
     </div>
   );

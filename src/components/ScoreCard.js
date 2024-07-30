@@ -11,13 +11,13 @@ const ScoreCard = (props) => {
       <div className="w-full flex flex-row justify-between">
         <button
           className="size-12 bg-secondary text-secondary-content font-semibold text-2xl text-center rounded-bl-lg rounded-tr-lg"
-          onClick={() => setScore(teamIndex, score - 1)}
+          onClick={() => setScore(teamIndex, -1)}
         >
           -1
         </button>
         <button
           className="size-12 bg-secondary text-secondary-content font-semibold text-2xl text-center rounded-br-lg rounded-tl-lg"
-          onClick={() => setScore(teamIndex, score + 1)}
+          onClick={() => setScore(teamIndex, 1)}
         >
           +1
         </button>
