@@ -3,7 +3,7 @@ import { PitchListContext } from "../contexts/PitchListContext";
 import ScoreCard from "../components/ScoreCard";
 import { getReservationDetails, getAnnouncementMessages } from "../firebase";
 import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
-import { useSpeechSynthesis } from "react-speech-kit";
+import { useSpeech } from "react-text-to-speech";
 
 const Score = () => {
   const pitchList = useContext(PitchListContext);
@@ -24,41 +24,58 @@ const Score = () => {
     time: new Date().toLocaleTimeString(),
   });
 
-  const { speak } = useSpeechSynthesis();
+  const [text, setText] = useState("");
+  const { start } = useSpeech({
+    text: text,
+    pitch: 0.6,
+    rate: 1,
+    volume: 1,
+    lang: "tr-TR",
+    voiceURI: "",
+    highlightText: false,
+  });
+
+  useEffect(() => {
+    if (text.length == 0) return;
+    start();
+  }, [text]);
 
   function formatMinutes(minutes) {
     return String(minutes).padStart(2, "0");
   }
 
   const checkReservation = async () => {
-    // Get the day in the format of DD-MM-YYYY
     const finish =
       announcements.find((item) => item?.description === "Bitis")?.message ||
       "Son düdük! Maç bitti!";
     const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
     const start =
-      announcements.find((item) => item?.description === "Baslangic").message ||
-      "İlk düdük! Maç başladı!";
+      announcements.find((item) => item?.description === "Baslangic")
+        ?.message || "İlk düdük! Maç başladı!";
+
     const index = reservationSchema.findIndex(
-      (item) => item.hour === new Date().getHours().toString()
+      (item) => item.hour === new Date().getHours().toString() // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
     );
+
     const reservationDetails = await getReservationDetails(
       date,
       pitch.name,
       index
     );
+
     const { reservationType, reservedUserName } = reservationDetails;
+
     if (reservationType === "Kesin Rez." && reservedUserName) {
       if (isPlaying) {
         // Make an announcement for end of the current game.
-        speak({ text: finish });
+        setText(finish);
         // wait for 60 seconds
-        setTimeout(() => {}, 60000);
-
-        speak({ text: start });
+        setTimeout(() => {
+          setText(start);
+        }, 60000);
       } else {
         // Make an announcement for start of the current game.
-        speak({ text: start });
+        setText(start);
         setIsPlaying(true);
       }
     } else {
@@ -66,8 +83,8 @@ const Score = () => {
         // Make an announcement for end of the current game.
         const extraTime =
           announcements.find((item) => item?.description === "Uzatma")
-            .message || "Maç bitmek üzere, son dakikalar!";
-        speak({ text: extraTime });
+            ?.message || "Maç bitmek üzere, son dakikalar!";
+        setText(extraTime);
       }
     }
   };
@@ -113,7 +130,7 @@ const Score = () => {
       });
 
       if (
-        minute === formatMinutes(new Date().getMinutes()) &&
+        minute === formatMinutes(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
         `00` === formatMinutes(new Date().getSeconds())
       ) {
         checkReservation();
@@ -142,10 +159,6 @@ const Score = () => {
     } else {
       alert("Hatalı sifre");
     }
-  };
-
-  const handleAnnouncement = () => {
-    speak({ text: "Maç süreniz bitmiştir!" });
   };
 
   if (!pitch.name || !pitch.minute) {
