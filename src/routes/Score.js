@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 import { PitchListContext } from "../contexts/PitchListContext";
 import ScoreCard from "../components/ScoreCard";
-import { getReservationDetails, getAnnouncementMessages } from "../firebase";
-import { ReservationSchemaContext } from "../contexts/ReservationSchemaContext";
+import {
+  getReservationDetails,
+  getAnnouncementMessages,
+  getReservations,
+} from "../firebase";
 import { useSpeech } from "react-text-to-speech";
 
 const Score = () => {
   const pitchList = useContext(PitchListContext);
-  const reservationSchema = useContext(ReservationSchemaContext);
+  const [reservations, setReservations] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [announcements, setAnnouncements] = useState([]);
   const [pitch, setPitch] = useState({
@@ -53,7 +56,7 @@ const Score = () => {
       announcements.find((item) => item?.description === "Baslangic")
         ?.message || "İlk düdük! Maç başladı!";
 
-    const index = reservationSchema.findIndex(
+    const index = reservations.findIndex(
       (item) => item.hour === new Date().getHours().toString() // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
     );
 
@@ -62,9 +65,7 @@ const Score = () => {
       pitch.name,
       index
     );
-
     const { reservationType, reservedUserName } = reservationDetails;
-
     if (reservationType === "Kesin Rez." && reservedUserName) {
       if (isPlaying) {
         // Make an announcement for end of the current game.
@@ -83,10 +84,20 @@ const Score = () => {
         // Make an announcement for end of the current game.
         const extraTime =
           announcements.find((item) => item?.description === "Uzatma")
-            ?.message || "Maç bitmek üzere, son dakikalar!";
+            ?.message || "Maç bitmek üzere, son dakfikalar!";
         setText(extraTime);
       }
     }
+  };
+
+  const handleTestSpeak = () => {
+    setText("test anonsu yapılıyor!");
+  };
+
+  const fetchReservations = async () => {
+    const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
+    const items = await getReservations(date, pitch.name);
+    setReservations(items);
   };
 
   const fetchAnnouncements = async () => {
@@ -94,31 +105,10 @@ const Score = () => {
     setAnnouncements(messages);
   };
 
-  const handleKeyPress = (e) => {
-    switch (e.key) {
-      case `1`:
-        handleScoreChange(0, -1);
-        break;
-      case `2`:
-        handleScoreChange(0, 1);
-        break;
-      case `3`:
-        handleScoreChange(1, -1);
-        break;
-      case `4`:
-        handleScoreChange(1, 1);
-        break;
-      case `5`:
-        setScores({ teamA: 0, teamB: 0 });
-        break;
-      default:
-        break;
-    }
-  };
-
   useEffect(() => {
     if (!pitch.name || !pitch.minute) return;
     const minute = pitch.minute;
+    fetchReservations();
     fetchAnnouncements();
 
     window.addEventListener("keydown", handleKeyPress);
@@ -161,6 +151,28 @@ const Score = () => {
     }
   };
 
+  const handleKeyPress = (e) => {
+    switch (e.key) {
+      case `1`:
+        handleScoreChange(0, -1);
+        break;
+      case `2`:
+        handleScoreChange(0, 1);
+        break;
+      case `3`:
+        handleScoreChange(1, -1);
+        break;
+      case `4`:
+        handleScoreChange(1, 1);
+        break;
+      case `5`:
+        setScores({ teamA: 0, teamB: 0 });
+        break;
+      default:
+        break;
+    }
+  };
+
   if (!pitch.name || !pitch.minute) {
     return (
       <div className="w-full h-screen flex flex-row items-center justify-evenly gap-16">
@@ -198,6 +210,9 @@ const Score = () => {
             onClick={() => setScores({ teamA: 0, teamB: 0 })}
           >
             ↩️
+          </button>
+          <button className="text-3xl" onClick={handleTestSpeak}>
+            🔊
           </button>
         </div>
       </div>
