@@ -43,6 +43,14 @@ const Score = () => {
     start();
   }, [text]);
 
+  const handleTestSpeak = () => {
+    if (text === "test anonsu yapılıyor!") {
+      setText("test anonsu yapılıyor.");
+    } else {
+      setText("test anonsu yapılıyor!");
+    }
+  };
+
   function formatMinutes(minutes) {
     return String(minutes).padStart(2, "0");
   }
@@ -84,14 +92,10 @@ const Score = () => {
         // Make an announcement for end of the current game.
         const extraTime =
           announcements.find((item) => item?.description === "Uzatma")
-            ?.message || "Maç bitmek üzere, son dakfikalar!";
+            ?.message || "Maç bitmek üzere, son dakikalar!";
         setText(extraTime);
       }
     }
-  };
-
-  const handleTestSpeak = () => {
-    setText("test anonsu yapılıyor!");
   };
 
   const fetchReservations = async () => {
@@ -142,7 +146,7 @@ const Score = () => {
   };
 
   const handleNavigateBackWithPassword = () => {
-    const password = "44153";
+    const password = "11111";
     const userInput = prompt("Sifrenizi giriniz");
     if (userInput === password) {
       window.location.href = "/settings";

@@ -25,8 +25,10 @@ import { DateProvider } from "./contexts/DateContext";
 import { SMSTemplatesProvider } from "./contexts/SMSTemplatesContext";
 import { PitchListProvider } from "./contexts/PitchListContext";
 import Score from "./routes/Score";
+import MatchAnnouncements from "./routes/MatchAnnouncements";
+import MatchAnnouncementsDetails from "./routes/MatchAnnouncementDetails";
 import Announcements from "./routes/Announcements";
-import AnnouncementDetails from "./routes/AnnouncementDetails";
+import AnnouncementsSettings from "./routes/AnnouncementsSettings";
 
 function App() {
   return (
@@ -90,8 +92,16 @@ function App() {
                         element={<Announcements />}
                       />
                       <Route
+                        path="/announcementsettings"
+                        element={<AnnouncementsSettings />}
+                      />
+                      <Route
+                        path="/matchannouncements"
+                        element={<MatchAnnouncements />}
+                      />
+                      <Route
                         path="/announcementDetails"
-                        element={<AnnouncementDetails />}
+                        element={<MatchAnnouncementsDetails />}
                       />
                     </Routes>
                   </PitchListProvider>

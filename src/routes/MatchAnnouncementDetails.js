@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { saveAnnouncementMessage } from "../firebase";
 
-const AnnouncementDetails = () => {
+const MatchAnnouncementsDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { template } = location.state || {};
@@ -75,4 +75,4 @@ const AnnouncementDetails = () => {
   );
 };
 
-export default AnnouncementDetails;
+export default MatchAnnouncementsDetails;
