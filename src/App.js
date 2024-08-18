@@ -29,6 +29,7 @@ import MatchAnnouncements from "./routes/MatchAnnouncements";
 import MatchAnnouncementsDetails from "./routes/MatchAnnouncementDetails";
 import Announcements from "./routes/Announcements";
 import AnnouncementsSettings from "./routes/AnnouncementsSettings";
+import Notices from "./routes/Notices";
 
 function App() {
   return (
@@ -103,6 +104,7 @@ function App() {
                         path="/announcementDetails"
                         element={<MatchAnnouncementsDetails />}
                       />
+                      <Route path="/notices" element={<Notices />} />
                     </Routes>
                   </PitchListProvider>
                 </SMSTemplatesProvider>

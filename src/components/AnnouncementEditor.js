@@ -25,7 +25,7 @@ const AnnouncementEditor = ({ onChange }) => {
 AnnouncementEditor.modules = {
   toolbar: [
     ["bold", "italic", "underline", "strike", "blockquote"],
-    [{ color: [] }, { background: [] }], // Add color and background color options
+    [{ size: [] }, { color: [] }, { background: [] }], // Add color and background color options
     ["clean"], // Remove formatting button
   ],
 };

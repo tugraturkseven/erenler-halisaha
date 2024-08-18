@@ -3,7 +3,7 @@ import "react-quill/dist/quill.snow.css"; // Import styles
 const AnnouncementDisplay = ({ content }) => {
   return (
     <div
-      className="max-w-full max-h-full break-words"
+      className="w-92 px-5 max-h-full break-words"
       dangerouslySetInnerHTML={{ __html: content }}
     />
   );
