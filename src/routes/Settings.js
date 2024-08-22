@@ -31,7 +31,7 @@ function Settings() {
       <Navbar endButton={logOffButton} />
       <div className="flex flex-row  gap-10 md:gap-0 flex-wrap justify-center items-center lg:justify-around">
         <Card icon="⚙️" title="Genel" route="generalSettings" />
-        <Card icon="📰" title="Duyurular" route="announcementsettings" />
+        <Card icon="📰" title="Duyurular" route="noticesSettings" />
         <Card icon="📱" title="SMS" route="smsSettings" />
         <Card icon="📢" title="Anons" route="matchannouncements" />
         <Card icon="🏟️" title="Saha" route="pitchSettings" />

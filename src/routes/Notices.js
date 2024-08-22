@@ -39,7 +39,9 @@ const Notices = () => {
     const notices = await getAllNotices();
     setLoading(false);
     if (!notices) return;
-    const filteredNotices = notices.filter((item) => item.id > 0);
+    const filteredNotices = notices.filter(
+      (item) => item.id > 0 && item.isActive
+    );
     setNotices(filteredNotices);
   };
 

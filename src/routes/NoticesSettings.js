@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faEye,
+  faEyeSlash,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import AnnouncementDisplay from "../components/AnnouncementDisplay";
 import AnnouncementEditor from "../components/AnnouncementEditor";
 import {
@@ -11,46 +16,99 @@ import {
   deleteNotice,
   setNoticeAutoflow,
   getNoticeAutoflow,
+  updateAllNotices,
 } from "../firebase";
 import { toast } from "react-toastify";
 
-const AnnouncementSettings = () => {
+const NoticesSettings = () => {
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [notices, setNotices] = useState([]);
-  const [newAnnouncement, setNewAnnouncement] = useState("");
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    id: "",
+    message: "",
+    isActive: true,
+  });
   const [autoFlow, setAutoFlow] = useState(false);
 
   const handleSave = async () => {
-    const res = await setNoticeAutoflow(autoFlow);
-    if (res) {
-      toast("Otomatik kaydırma ayarı kayıt edildi.");
+    const autoFlowRes = await setNoticeAutoflow(autoFlow);
+    const saveRes = await updateAllNotices(notices);
+
+    if (autoFlowRes && saveRes) {
+      toast(`Ayarlar kayıt edildi.`);
     } else {
-      toast("Otomatik kaydırma ayarı kayıt edilemedi.");
+      toast("Ayarlar kayıt edilemedi.");
     }
   };
 
+  const handleEditButtonClick = (item) => {
+    setNewAnnouncement(item);
+    setIsAdding(true);
+  };
+
   const handleAddButtonClick = async () => {
-    if (isAdding) {
-      const res = await addNotice({
+    const isExist = notices.some((item) => item.id === newAnnouncement.id);
+    if (isExist && !isAdding) {
+      // Notice already exist and not adding. So editing the existing notice.
+      setNewAnnouncement({
+        ...newAnnouncement,
         id: notices.length + 1,
-        message: newAnnouncement,
       });
+
+      setIsAdding(true);
+
+      return;
+    }
+    if (isAdding) {
+      const isNotUpdated = notices.some(
+        (item) => item.message === newAnnouncement.message
+      );
+      if (newAnnouncement.message === "" || isNotUpdated) {
+        setIsAdding(false);
+        return;
+      }
+
+      const lastID = notices[notices.length - 1]?.id || 0;
+      const res = isExist
+        ? await addNotice(newAnnouncement)
+        : await addNotice({
+            ...newAnnouncement,
+            id: lastID + 1,
+          });
       if (res) {
         toast("Duyuru Eklendi");
-        setNotices([
-          ...notices,
-          {
-            id: notices.length + 1,
-            message: newAnnouncement,
-          },
-        ]);
+        if (!isExist)
+          setNotices([
+            ...notices,
+            {
+              ...newAnnouncement,
+              id: lastID + 1,
+            },
+          ]);
       }
-      setNewAnnouncement(``);
+      setNewAnnouncement({
+        id: "",
+        message: "",
+        isActive: true,
+      });
       setIsAdding(false);
     } else {
       setIsAdding(true);
     }
+  };
+
+  const handleActiveChange = (id) => {
+    const filteredNotices = notices.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          isActive: !item.isActive,
+        };
+      }
+      return item;
+    });
+    setNotices(filteredNotices);
   };
 
   const handleDelete = async (id) => {
@@ -109,12 +167,15 @@ const AnnouncementSettings = () => {
           </button>
           <div className="w-full px-5 ">
             <AnnouncementEditor
-              onChange={(value) => setNewAnnouncement(value)}
+              onChange={(value) =>
+                setNewAnnouncement({ ...newAnnouncement, message: value })
+              }
+              content={newAnnouncement?.message}
             />
           </div>
           <div className="w-full h-full px-5 flex flex-col items-center justify-center">
             <h3>Önizleme</h3>
-            <AnnouncementDisplay content={newAnnouncement} />
+            <AnnouncementDisplay content={newAnnouncement?.message} />
           </div>
         </div>
       </div>
@@ -168,12 +229,28 @@ const AnnouncementSettings = () => {
                     <tr key={notice.id}>
                       <th className="">{index}</th>
                       <td className="font-semibold">{notice.message}</td>
-                      <td>
+                      <td className="flex flex-col md:flex-row gap-5">
                         <button
-                          className="btn btn-info mr-5"
+                          className="btn btn-info"
                           onClick={() => handleDelete(notice.id)}
                         >
                           <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                        <button
+                          className="btn bg-orange-500 hover:bg-orange-600 text-black"
+                          onClick={() => handleEditButtonClick(notice)}
+                        >
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                        <button
+                          className="btn btn-warning"
+                          onClick={() => handleActiveChange(notice.id)}
+                        >
+                          {notice.isActive ? (
+                            <FontAwesomeIcon icon={faEye} />
+                          ) : (
+                            <FontAwesomeIcon icon={faEyeSlash} />
+                          )}
                         </button>
                       </td>
                     </tr>
@@ -187,4 +264,4 @@ const AnnouncementSettings = () => {
   );
 };
 
-export default AnnouncementSettings;
+export default NoticesSettings;

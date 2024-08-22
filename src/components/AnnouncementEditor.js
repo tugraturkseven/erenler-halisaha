@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import styles
 
-const AnnouncementEditor = ({ onChange }) => {
-  const [value, setValue] = useState("");
+const AnnouncementEditor = ({ onChange, content }) => {
+  const [value, setValue] = useState(content);
 
   const handleChange = (content) => {
     setValue(content);

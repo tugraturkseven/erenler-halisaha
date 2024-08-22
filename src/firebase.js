@@ -567,7 +567,7 @@ const addNotice = async (notice) => {
 
   try {
     await set(noticeRef, notice);
-    return "success";
+    return { success: true };
   } catch (error) {
     throw error;
   }
@@ -579,7 +579,7 @@ const deleteNotice = async (id) => {
 
   try {
     await remove(noticeRef);
-    return "success";
+    return { success: true };
   } catch (error) {
     throw error;
   }
@@ -607,6 +607,18 @@ const getAllNotices = async () => {
     } else {
       return null;
     }
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateAllNotices = async (notices) => {
+  const db = getDatabase();
+  const noticesRef = ref(db, "notices");
+
+  try {
+    await set(noticesRef, notices);
+    return { success: true };
   } catch (error) {
     throw error;
   }
@@ -686,4 +698,5 @@ export {
   deleteNotice,
   setNoticeAutoflow,
   getNoticeAutoflow,
+  updateAllNotices,
 };

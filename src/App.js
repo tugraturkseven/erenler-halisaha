@@ -27,9 +27,8 @@ import { PitchListProvider } from "./contexts/PitchListContext";
 import Score from "./routes/Score";
 import MatchAnnouncements from "./routes/MatchAnnouncements";
 import MatchAnnouncementsDetails from "./routes/MatchAnnouncementDetails";
-import Announcements from "./routes/Announcements";
-import AnnouncementsSettings from "./routes/AnnouncementsSettings";
 import Notices from "./routes/Notices";
+import NoticesSettings from "./routes/NoticesSettings";
 
 function App() {
   return (
@@ -88,13 +87,10 @@ function App() {
                         element={<SMSTemplateDetails />}
                       />
                       <Route path="/score" element={<Score />} />
+
                       <Route
-                        path="/announcements"
-                        element={<Announcements />}
-                      />
-                      <Route
-                        path="/announcementsettings"
-                        element={<AnnouncementsSettings />}
+                        path="/noticesSettings"
+                        element={<NoticesSettings />}
                       />
                       <Route
                         path="/matchannouncements"
