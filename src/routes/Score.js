@@ -39,6 +39,7 @@ const Score = () => {
   });
 
   useEffect(() => {
+    console.log("text changed", text);
     if (text.length == 0) return;
     start();
   }, [text]);
@@ -57,15 +58,15 @@ const Score = () => {
 
   const checkReservation = async () => {
     const finish =
-      announcements.find((item) => item?.description === "Bitis")?.message ||
+      announcements.find((item) => item?.description == "Bitis")?.message ||
       "Son düdük! Maç bitti!";
     const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
     const start =
-      announcements.find((item) => item?.description === "Baslangic")
-        ?.message || "İlk düdük! Maç başladı!";
+      announcements.find((item) => item?.description == "Baslangic")?.message ||
+      "İlk düdük! Maç başladı!";
 
     const index = reservations.findIndex(
-      (item) => item.hour === new Date().getHours().toString() // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
+      (item) => item.hour == new Date().getHours().toString() // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
     );
 
     const reservationDetails = await getReservationDetails(
@@ -74,7 +75,12 @@ const Score = () => {
       index
     );
     const { reservationType, reservedUserName } = reservationDetails;
-    if (reservationType === "Kesin Rez." && reservedUserName) {
+    console.log(
+      "reservationType and reservedUserName",
+      reservationType,
+      reservedUserName
+    );
+    if (reservationType == "Kesin Rez." && reservedUserName) {
       if (isPlaying) {
         // Make an announcement for end of the current game.
         setText(finish);
@@ -91,7 +97,7 @@ const Score = () => {
       if (isPlaying) {
         // Make an announcement for end of the current game.
         const extraTime =
-          announcements.find((item) => item?.description === "Uzatma")
+          announcements.find((item) => item?.description == "Uzatma")
             ?.message || "Maç bitmek üzere, son dakikalar!";
         setText(extraTime);
       }
@@ -112,6 +118,7 @@ const Score = () => {
   useEffect(() => {
     if (!pitch.name || !pitch.minute) return;
     const minute = pitch.minute;
+    console.log("minute", minute);
     fetchReservations();
     fetchAnnouncements();
 
@@ -124,8 +131,8 @@ const Score = () => {
       });
 
       if (
-        minute === formatMinutes(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
-        `00` === formatMinutes(new Date().getSeconds())
+        minute == formatMinutes(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
+        `00` == formatMinutes(new Date().getSeconds())
       ) {
         checkReservation();
       }
