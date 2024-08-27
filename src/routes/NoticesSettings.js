@@ -22,172 +22,160 @@ import { toast } from "react-toastify";
 
 const NoticesSettings = () => {
   const [loading, setLoading] = useState(true);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editIndex, setEditIndex] = useState(-1);
   const [notices, setNotices] = useState([]);
-  const [newAnnouncement, setNewAnnouncement] = useState({
-    id: "",
+  const [currentNotice, setCurrentNotice] = useState({
     message: "",
     isActive: true,
   });
   const [autoFlow, setAutoFlow] = useState(false);
-
-  const handleSave = async () => {
-    const autoFlowRes = await setNoticeAutoflow(autoFlow);
-    const saveRes = await updateAllNotices(notices);
-
-    if (autoFlowRes && saveRes) {
-      toast(`Ayarlar kayıt edildi.`);
-    } else {
-      toast("Ayarlar kayıt edilemedi.");
-    }
-  };
-
-  const handleEditButtonClick = (item) => {
-    setNewAnnouncement(item);
-    setIsAdding(true);
-  };
-
-  const handleAddButtonClick = async () => {
-    const isExist = notices.some((item) => item.id === newAnnouncement.id);
-    if (isExist && !isAdding) {
-      // Notice already exist and not adding. So editing the existing notice.
-      setNewAnnouncement({
-        ...newAnnouncement,
-        id: notices.length + 1,
-      });
-
-      setIsAdding(true);
-
-      return;
-    }
-    if (isAdding) {
-      const isNotUpdated = notices.some(
-        (item) => item.message === newAnnouncement.message
-      );
-      if (newAnnouncement.message === "" || isNotUpdated) {
-        setIsAdding(false);
-        return;
-      }
-
-      const lastID = notices[notices.length - 1]?.id || 0;
-      const res = isExist
-        ? await addNotice(newAnnouncement)
-        : await addNotice({
-            ...newAnnouncement,
-            id: lastID + 1,
-          });
-      if (res) {
-        toast("Duyuru Eklendi");
-        if (!isExist)
-          setNotices([
-            ...notices,
-            {
-              ...newAnnouncement,
-              id: lastID + 1,
-            },
-          ]);
-      }
-      setNewAnnouncement({
-        id: "",
-        message: "",
-        isActive: true,
-      });
-      setIsAdding(false);
-    } else {
-      setIsAdding(true);
-    }
-  };
-
-  const handleActiveChange = (id) => {
-    const filteredNotices = notices.map((item) => {
-      if (item.id === id) {
-        return {
-          ...item,
-          isActive: !item.isActive,
-        };
-      }
-      return item;
-    });
-    setNotices(filteredNotices);
-  };
-
-  const handleDelete = async (id) => {
-    if (id) {
-      const res = await deleteNotice(id);
-      const filteredNotices = notices.filter((item) => item.id !== id);
-      setNotices(filteredNotices);
-      toast("Duyuru Silindi");
-    } else {
-      const res = await deleteAllNotices(id);
-      setNotices([]);
-      toast("Tüm duyurular silindi!");
-    }
-  };
-
-  const fetchAutoflow = async () => {
-    const res = await getNoticeAutoflow();
-    if (res) {
-      console.log("res", res);
-      setAutoFlow(res);
-    }
-  };
-
-  const fetchNotices = async () => {
-    const notices = await getAllNotices();
-    if (!notices) return;
-    const filteredNotices = notices?.filter((item) => item.id > 0);
-    setNotices(filteredNotices);
-    setLoading(false);
-  };
+  const isArray = (item) => Array.isArray(item);
 
   useEffect(() => {
-    if (!notices.length <= 0) return;
-    fetchNotices();
-    fetchAutoflow();
+    const fetchData = async () => {
+      const [noticesRes, autoFlowRes] = await Promise.all([
+        getAllNotices(),
+        getNoticeAutoflow(),
+      ]);
+
+      if (!noticesRes) return;
+      if (isArray(noticesRes)) {
+        const filteredNotices = noticesRes.filter(
+          (notice) => notice.message.length > 0
+        );
+        setNotices(filteredNotices);
+      } else {
+        // Convert the object into an array if necessary
+        const templatesArray = Object.keys(noticesRes).map((key) => ({
+          ...noticesRes[key],
+        }));
+        setNotices(templatesArray);
+      }
+      setAutoFlow(autoFlowRes);
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
-  const saveButton = (
-    <button
-      className="btn btn-ghost normal-case text-xl xl:text-3xl"
-      onClick={handleSave}
-    >
-      💾
-    </button>
-  );
-  if (isAdding) {
+  const handleSaveSettings = async () => {
+    const autoFlowRes = await setNoticeAutoflow(autoFlow);
+    const saveRes = await updateAllNotices(notices);
+    toast(
+      autoFlowRes && saveRes
+        ? "Ayarlar kayıt edildi."
+        : "Ayarlar kayıt edilemedi."
+    );
+  };
+
+  const handleEditClick = (notice) => {
+    setCurrentNotice(notice);
+    setIsEditing(true);
+    setEditIndex(notices.indexOf(notice));
+  };
+
+  const handleAddClick = async () => {
+    if (isEditing) {
+      if (
+        !currentNotice.message ||
+        (notices &&
+          notices.length > 0 &&
+          notices.some((notice) => notice.message === currentNotice.message))
+      ) {
+        setIsEditing(false);
+        return;
+      }
+      const dbIndex = editIndex === -1 ? notices.length : editIndex;
+      const res = await addNotice(currentNotice, dbIndex);
+      if (res) {
+        toast("Duyuru Eklendi");
+        if (editIndex !== -1) {
+          setNotices((notices) =>
+            notices.map((notice, i) =>
+              i === editIndex
+                ? { ...notice, message: currentNotice.message }
+                : notice
+            )
+          );
+        } else {
+          setNotices((notices) => [...notices, currentNotice]);
+        }
+        setCurrentNotice({ message: "", isActive: true });
+        setIsEditing(false);
+        setEditIndex(-1);
+      }
+    } else {
+      setIsEditing(true);
+    }
+  };
+
+  const handleToggleActive = (index) => {
+    setNotices((notices) =>
+      notices.map((notice, i) =>
+        i === index ? { ...notice, isActive: !notice.isActive } : notice
+      )
+    );
+  };
+
+  const handleDeleteClick = async (index) => {
+    if (notices.length === 1) {
+      const deleteAllRes = await deleteAllNotices();
+      if (deleteAllRes) {
+        setNotices([]);
+        toast("Duyurular Silindi");
+        return;
+      }
+    }
+    const res = await deleteNotice(index);
+    if (res) {
+      setNotices((notices) => notices.filter((_, i) => i !== index));
+      toast("Duyuru Silindi");
+    }
+  };
+
+  if (isEditing) {
     return (
       <div className="max-w-screen overflow-hidden">
-        <Navbar />
         <div className="flex flex-col justify-center items-center gap-7">
           <button
             className="btn btn-success text-secondary-content mt-10 w-40"
-            onClick={handleAddButtonClick}
+            onClick={handleAddClick}
           >
             🚀 TAMAM
           </button>
-          <div className="w-full px-5 ">
+          <div className="w-full px-5 h-full min-h-52">
             <AnnouncementEditor
               onChange={(value) =>
-                setNewAnnouncement({ ...newAnnouncement, message: value })
+                setCurrentNotice({ ...currentNotice, message: value })
               }
-              content={newAnnouncement?.message}
+              content={currentNotice.message}
             />
           </div>
           <div className="w-full h-full px-5 flex flex-col items-center justify-center">
             <h3>Önizleme</h3>
-            <AnnouncementDisplay content={newAnnouncement?.message} />
+            <AnnouncementDisplay content={currentNotice.message} />
           </div>
         </div>
       </div>
     );
   }
+
   return (
     <div>
-      <Navbar endButton={saveButton} />
+      <Navbar
+        endButton={
+          <button
+            className="btn btn-ghost normal-case text-xl xl:text-3xl"
+            onClick={handleSaveSettings}
+          >
+            💾
+          </button>
+        }
+      />
       <div className="flex flex-col justify-center items-center gap-7">
         <button
           className="btn btn-secondary text-secondary-content mt-10 w-40"
-          onClick={handleAddButtonClick}
+          onClick={handleAddClick}
         >
           ➕ Duyuru Ekle
         </button>
@@ -198,64 +186,52 @@ const NoticesSettings = () => {
               <input
                 type="checkbox"
                 className="checkbox"
-                onChange={(e) => {
-                  setAutoFlow(e.target.checked);
-                }}
+                onChange={(e) => setAutoFlow(e.target.checked)}
                 checked={autoFlow}
               />
               <span className="text-md font-semibold"> Otomatik Kaydır</span>
             </label>
           </div>
         </div>
-
         <h2 className="text-lg font-semibold">📣 Duyurular</h2>
         <div className="overflow-x-auto max-w-2xl w-full">
           <table className="table">
-            {/* head */}
             <thead>
               <tr>
-                <th>#</th>
-                {/* Name - set to take half of the remaining space */}
-                <th>Mesaj</th>{" "}
-                {/* Role - set to take half of the remaining space */}
+                <th>Mesaj</th>
                 <th>Aksiyonlar</th>
               </tr>
             </thead>
-
             <tbody>
               {!loading &&
-                notices.map((notice, index) => {
-                  return (
-                    <tr key={notice.id}>
-                      <th className="">{index}</th>
-                      <td className="font-semibold">{notice.message}</td>
-                      <td className="flex flex-col md:flex-row gap-5">
-                        <button
-                          className="btn btn-info"
-                          onClick={() => handleDelete(notice.id)}
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                        <button
-                          className="btn bg-orange-500 hover:bg-orange-600 text-black"
-                          onClick={() => handleEditButtonClick(notice)}
-                        >
-                          <FontAwesomeIcon icon={faEdit} />
-                        </button>
-                        <button
-                          className="btn btn-warning"
-                          onClick={() => handleActiveChange(notice.id)}
-                        >
-                          {notice.isActive ? (
-                            <FontAwesomeIcon icon={faEye} />
-                          ) : (
-                            <FontAwesomeIcon icon={faEyeSlash} />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                notices.length > 0 &&
+                notices.map((notice, index) => (
+                  <tr key={index}>
+                    <td className="font-semibold">{notice.message}</td>
+                    <td className="flex flex-col md:flex-row gap-5">
+                      <button
+                        className="btn btn-info"
+                        onClick={() => handleDeleteClick(index)}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                      <button
+                        className="btn bg-orange-500 hover:bg-orange-600 text-black"
+                        onClick={() => handleEditClick(notice)}
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                      <button
+                        className="btn btn-warning"
+                        onClick={() => handleToggleActive(index)}
+                      >
+                        <FontAwesomeIcon
+                          icon={notice.isActive ? faEye : faEyeSlash}
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

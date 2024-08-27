@@ -28,6 +28,7 @@ const Score = () => {
   });
 
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
   const { start } = useSpeech({
     text: text,
     pitch: 0.6,
@@ -39,7 +40,6 @@ const Score = () => {
   });
 
   useEffect(() => {
-    console.log("text changed", text);
     if (text.length == 0) return;
     start();
   }, [text]);
@@ -56,6 +56,48 @@ const Score = () => {
     return String(minutes).padStart(2, "0");
   }
 
+  const fetchReservations = async () => {
+    const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
+    const items = await getReservations(date, pitch.name);
+    if (items) setLoading(false);
+    setReservations(items);
+  };
+
+  const fetchAnnouncements = async () => {
+    const messages = await getAnnouncementMessages();
+    setAnnouncements(messages);
+  };
+
+  useEffect(() => {
+    if (loading) return;
+    window.addEventListener("keydown", handleKeyPress);
+    const minute = pitch.minute;
+
+    const interval = setInterval(() => {
+      setTime({
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+      });
+
+      if (
+        minute == formatMinutes(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
+        `00` == formatMinutes(new Date().getSeconds())
+      ) {
+        checkReservation();
+      }
+    }, 1000);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+      clearInterval(interval);
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    if (!pitch.name || !pitch.minute) return;
+    fetchReservations();
+    fetchAnnouncements();
+  }, [pitch]);
+
   const checkReservation = async () => {
     const finish =
       announcements.find((item) => item?.description == "Bitis")?.message ||
@@ -66,20 +108,21 @@ const Score = () => {
       "İlk düdük! Maç başladı!";
 
     const index = reservations.findIndex(
-      (item) => item.hour == new Date().getHours().toString() // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
+      (item) => item.hour == formatMinutes(new Date().getHours().toString()) // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
     );
-
+    console.log("index", index, "reservations", reservations);
     const reservationDetails = await getReservationDetails(
       date,
       pitch.name,
       index
     );
+
+    console.log("reservationDetails", reservationDetails);
+
+    if (!reservationDetails) return;
+
     const { reservationType, reservedUserName } = reservationDetails;
-    console.log(
-      "reservationType and reservedUserName",
-      reservationType,
-      reservedUserName
-    );
+
     if (reservationType == "Kesin Rez." && reservedUserName) {
       if (isPlaying) {
         // Make an announcement for end of the current game.
@@ -103,45 +146,6 @@ const Score = () => {
       }
     }
   };
-
-  const fetchReservations = async () => {
-    const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
-    const items = await getReservations(date, pitch.name);
-    setReservations(items);
-  };
-
-  const fetchAnnouncements = async () => {
-    const messages = await getAnnouncementMessages();
-    setAnnouncements(messages);
-  };
-
-  useEffect(() => {
-    if (!pitch.name || !pitch.minute) return;
-    const minute = pitch.minute;
-    console.log("minute", minute);
-    fetchReservations();
-    fetchAnnouncements();
-
-    window.addEventListener("keydown", handleKeyPress);
-
-    const interval = setInterval(() => {
-      setTime({
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
-      });
-
-      if (
-        minute == formatMinutes(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
-        `00` == formatMinutes(new Date().getSeconds())
-      ) {
-        checkReservation();
-      }
-    }, 1000);
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-      clearInterval(interval);
-    };
-  }, [pitch]);
 
   const handleScoreChange = (teamIndex, value) => {
     const teamName = teamIndex === 0 ? "teamA" : "teamB";
@@ -210,6 +214,9 @@ const Score = () => {
       />
       <div className="flex flex-col items-center justify-evenly h-96">
         <h1 className="text-5xl font-semibold tracking-widest">EFELERPARK</h1>
+        <span className="text-5xl font-semibold">
+          {String(pitch.name).toUpperCase()}
+        </span>
         <span className="text-5xl font-semibold">{time.date}</span>
         <span className="text-5xl font-semibold">{time.time}</span>
         <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">

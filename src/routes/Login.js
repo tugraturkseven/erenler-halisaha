@@ -61,6 +61,9 @@ function Login() {
           ✨ Kayıt Ol
         </a>
       </div>
+      <span className="absolute bottom-5 text-xs mt-8 text-center">
+        version: 27.08.2024 22:18
+      </span>
     </div>
   );
 }

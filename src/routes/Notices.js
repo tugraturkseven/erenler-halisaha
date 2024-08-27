@@ -4,6 +4,7 @@ import { getAllNotices, getNoticeAutoflow } from "../firebase";
 import AnnouncementDisplay from "../components/AnnouncementDisplay";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ColorSelectBox from "../components/ColorSelect";
 
 const Notices = () => {
   const [time, setTime] = useState({
@@ -14,6 +15,7 @@ const Notices = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [autoFlow, setAutoFlow] = useState(false);
+  const [color, setColor] = useState("bg-white");
 
   const settings = {
     dots: true,
@@ -35,14 +37,24 @@ const Notices = () => {
     }
   };
 
+  const isArray = (obj) => Array.isArray(obj);
+
   const fetchNotices = async () => {
     const notices = await getAllNotices();
     setLoading(false);
     if (!notices) return;
-    const filteredNotices = notices.filter(
-      (item) => item.id > 0 && item.isActive
-    );
-    setNotices(filteredNotices);
+    if (isArray(notices)) {
+      const filteredNotices = notices.filter(
+        (item) => item.message.length > 0 && item.isActive
+      );
+      setNotices(filteredNotices);
+    } else {
+      // Convert the object into an array if necessary
+      const templatesArray = Object.keys(notices).map((key) => ({
+        ...notices[key],
+      }));
+      setNotices(templatesArray);
+    }
   };
 
   useEffect(() => {
@@ -64,7 +76,7 @@ const Notices = () => {
   }, []);
 
   return (
-    <div className="flex flex-col m-5 h-screen">
+    <div className={`flex flex-col p-5 h-screen ${color}`}>
       <div className="flex flex-row w-full justify-between">
         <div
           className="flex flex-col items-center justify-center relative cursor-pointer"
@@ -75,6 +87,7 @@ const Notices = () => {
             EFELERPARK
           </span>
         </div>
+
         <div className="flex flex-row gap-10">
           <span className="text-3xl font-semibold">{time.date}</span>
           <span className="text-3xl font-semibold w-32">{time.time}</span>
@@ -94,6 +107,7 @@ const Notices = () => {
           </span>
         )}
       </div>
+      <ColorSelectBox onColorChange={setColor} />
     </div>
   );
 };

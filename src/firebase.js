@@ -561,9 +561,9 @@ const getAnnouncementMessages = async () => {
   }
 };
 
-const addNotice = async (notice) => {
+const addNotice = async (notice, index) => {
   const db = getDatabase();
-  const noticeRef = ref(db, "notices/" + notice.id);
+  const noticeRef = ref(db, "notices/" + index);
 
   try {
     await set(noticeRef, notice);
@@ -573,9 +573,9 @@ const addNotice = async (notice) => {
   }
 };
 
-const deleteNotice = async (id) => {
+const deleteNotice = async (index) => {
   const db = getDatabase();
-  const noticeRef = ref(db, "notices/" + id);
+  const noticeRef = ref(db, "notices/" + index);
 
   try {
     await remove(noticeRef);
@@ -591,6 +591,7 @@ const deleteAllNotices = async () => {
 
   try {
     await remove(noticesRef);
+    return { success: true };
   } catch (error) {
     throw error;
   }
