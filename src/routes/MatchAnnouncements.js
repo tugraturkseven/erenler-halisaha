@@ -14,7 +14,6 @@ const MatchAnnouncements = () => {
     navigate("/announcementDetails", { state: { template } });
   };
   const [announcements, setAnnouncements] = useState([
-    { id: 1, description: "Baslangic", message: "Mesaj 1" },
     { id: 2, description: "Bitis", message: "Mesaj 2" },
     { id: 3, description: "Uzatma", message: "Mesaj 3" },
   ]);
@@ -35,7 +34,6 @@ const MatchAnnouncements = () => {
             {/* head */}
             <thead>
               <tr>
-                <th>#</th>
                 <th>Rol</th>{" "}
                 {/* Name - set to take half of the remaining space */}
                 <th>Mesaj</th>{" "}
@@ -46,10 +44,9 @@ const MatchAnnouncements = () => {
 
             <tbody>
               {!loading &&
-                announcements.map((template, index) => {
+                announcements.map((template, i) => {
                   return (
                     <tr key={template.id}>
-                      <th className="text-center">{index + 1}</th>
                       <td className="text-center font-semibold">
                         {template.description}
                       </td>

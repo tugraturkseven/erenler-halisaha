@@ -52,9 +52,22 @@ const Score = () => {
     }
   };
 
-  function formatMinutes(minutes) {
+  function formatTime(minutes) {
     return String(minutes).padStart(2, "0");
   }
+
+  const getPreviousReservationHour = (pitchMinute) => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // If the current time is before the pitch minute in this hour
+    if (currentMinute < pitchMinute) {
+      return currentHour - 1 >= 0 ? formatTime(currentHour - 1) : 23; // Return the previous hour, handle midnight case
+    } else {
+      return formatTime(currentHour); // If it's past the pitch minute in the current hour, return this hour
+    }
+  };
 
   const fetchReservations = async () => {
     const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
@@ -62,9 +75,10 @@ const Score = () => {
     if (items) setLoading(false);
     setReservations(items);
 
+    const previousReservationHour = getPreviousReservationHour(pitch.minute);
     // Check isPlaying at the moment of reservations fetched
     const currentReservation = items.find(
-      (item) => item.hour == formatMinutes(new Date().getHours())
+      (item) => item.hour == formatTime(previousReservationHour)
     );
 
     const { reservationType, reservedUserName } = currentReservation;
@@ -89,8 +103,8 @@ const Score = () => {
       });
 
       if (
-        minute == formatMinutes(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
-        `00` == formatMinutes(new Date().getSeconds())
+        minute == formatTime(new Date().getMinutes()) && // sahaya ait dakika ile anlik dakikayi karsilastirma
+        `00` == formatTime(new Date().getSeconds())
       ) {
         checkReservation();
       }
@@ -112,12 +126,9 @@ const Score = () => {
       announcements.find((item) => item?.description == "Bitis")?.message ||
       "Son düdük! Maç bitti!";
     const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
-    const start =
-      announcements.find((item) => item?.description == "Baslangic")?.message ||
-      "İlk düdük! Maç başladı!";
 
     const index = reservations.findIndex(
-      (item) => item.hour == formatMinutes(new Date().getHours().toString()) // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
+      (item) => item.hour == formatTime(new Date().getHours().toString()) // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
     );
     const reservationDetails = await getReservationDetails(
       date,
@@ -133,13 +144,7 @@ const Score = () => {
       if (isPlaying) {
         // Make an announcement for end of the current game.
         setText(finish);
-        // wait for 60 seconds
-        setTimeout(() => {
-          setText(start);
-        }, 60000);
       } else {
-        // Make an announcement for start of the current game.
-        setText(start);
         setIsPlaying(true);
       }
     } else {
