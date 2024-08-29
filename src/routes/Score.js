@@ -61,6 +61,15 @@ const Score = () => {
     const items = await getReservations(date, pitch.name);
     if (items) setLoading(false);
     setReservations(items);
+
+    // Check isPlaying at the moment of reservations fetched
+    const currentReservation = items.find(
+      (item) => item.hour == formatMinutes(new Date().getHours())
+    );
+
+    const { reservationType, reservedUserName } = currentReservation;
+
+    if (reservationType == "Kesin Rez." && reservedUserName) setIsPlaying(true);
   };
 
   const fetchAnnouncements = async () => {
@@ -110,14 +119,11 @@ const Score = () => {
     const index = reservations.findIndex(
       (item) => item.hour == formatMinutes(new Date().getHours().toString()) // mac saati ile anlik saati karsilastirma item.hour === new Date().getHours().toString()
     );
-    console.log("index", index, "reservations", reservations);
     const reservationDetails = await getReservationDetails(
       date,
       pitch.name,
       index
     );
-
-    console.log("reservationDetails", reservationDetails);
 
     if (!reservationDetails) return;
 
@@ -137,7 +143,9 @@ const Score = () => {
         setIsPlaying(true);
       }
     } else {
+      // No reservation at the moment
       if (isPlaying) {
+        // Check for end of the current game.
         // Make an announcement for end of the current game.
         const extraTime =
           announcements.find((item) => item?.description == "Uzatma")
