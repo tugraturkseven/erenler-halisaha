@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const ScoreCard = (props) => {
   const { teamName, teamIndex, score, setScore } = props;
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl bg-accent size-96 text-accent-content pt-10">
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-accent h-96 w-[25vw]  text-accent-content pt-10">
       <h2 className="text-4xl font-mono">{teamName}</h2>
       <span className="flex flex-col items-center justify-center font-mono font-bold text-[250px] leading-none flex-1">
         {score}

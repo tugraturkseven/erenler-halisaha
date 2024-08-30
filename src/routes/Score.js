@@ -5,14 +5,21 @@ import {
   getReservationDetails,
   getAnnouncementMessages,
   getReservations,
+  getAnnouncementLatency,
 } from "../firebase";
 import { useSpeech } from "react-text-to-speech";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
 
 const Score = () => {
   const pitchList = useContext(PitchListContext);
   const [reservations, setReservations] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [announcements, setAnnouncements] = useState([]);
+  const [exitRequest, setExitRequest] = useState({
+    password: "",
+    exit: false,
+  });
   const [pitch, setPitch] = useState({
     name: "",
     minute: "",
@@ -21,7 +28,10 @@ const Score = () => {
     teamA: 0,
     teamB: 0,
   });
-
+  const [announcementLatency, setAnnouncementLatency] = useState({
+    minute: 0,
+    hour: 0,
+  });
   const [time, setTime] = useState({
     date: new Date().toLocaleDateString(),
     time: new Date().toLocaleTimeString(),
@@ -88,7 +98,32 @@ const Score = () => {
 
   const fetchAnnouncements = async () => {
     const messages = await getAnnouncementMessages();
-    setAnnouncements(messages);
+    if (messages) {
+      // Check the local storage for announcements is the same as the database
+      const localAnnouncements = JSON.parse(
+        localStorage.getItem("announcements")
+      );
+      if (localAnnouncements) {
+        if (JSON.stringify(localAnnouncements) !== JSON.stringify(messages)) {
+          localStorage.setItem("announcements", JSON.stringify(messages));
+        }
+      } else {
+        localStorage.setItem("announcements", JSON.stringify(messages));
+      }
+      setAnnouncements(messages);
+    } else {
+      const localAnnouncements = JSON.parse(
+        localStorage.getItem("announcements")
+      );
+      setAnnouncements(localAnnouncements);
+    }
+  };
+
+  const fetchAnnouncementLatency = async () => {
+    const latency = await getAnnouncementLatency();
+    if (latency) {
+      setAnnouncementLatency(latency);
+    }
   };
 
   useEffect(() => {
@@ -119,6 +154,8 @@ const Score = () => {
     if (!pitch.name || !pitch.minute) return;
     fetchReservations();
     fetchAnnouncements();
+    fetchAnnouncementLatency();
+    document.documentElement.requestFullscreen();
   }, [pitch]);
 
   const checkReservation = async () => {
@@ -156,6 +193,11 @@ const Score = () => {
           announcements.find((item) => item?.description == "Uzatma")
             ?.message || "Maç bitmek üzere, son dakikalar!";
         setText(extraTime);
+        // wait for 10 minutes and announce end of the game
+        setTimeout(() => {
+          setText(finish);
+          setIsPlaying(false);
+        }, 10 * 60 * 1000);
       }
     }
   };
@@ -179,7 +221,27 @@ const Score = () => {
     }
   };
 
+  const handleFullScreenButtonClick = () => {
+    if (document.fullscreenElement) {
+      // Add a delay to wait for the exit from fullscreen to complete
+      if (exitRequest.exit) {
+        if (exitRequest.password === "11111") {
+          document.exitFullscreen();
+          setExitRequest({ exit: false, password: "" });
+        } else {
+          setExitRequest({ exit: false, password: "" });
+        }
+      } else {
+        setExitRequest({ exit: true, password: "" });
+      }
+    } else {
+      document.documentElement.requestFullscreen();
+    }
+  };
+
   const handleKeyPress = (e) => {
+    // If target is an input element, do nothing
+    if (e.target.tagName === "INPUT") return;
     switch (e.key) {
       case `1`:
         handleScoreChange(0, -1);
@@ -195,6 +257,12 @@ const Score = () => {
         break;
       case `5`:
         setScores({ teamA: 0, teamB: 0 });
+        break;
+      // If ESC is pressed and the document is in fullscreen, prevent the default behavior
+      case `Escape`:
+        if (document.fullscreenElement) {
+          e.preventDefault();
+        }
         break;
       default:
         break;
@@ -225,6 +293,7 @@ const Score = () => {
         score={scores.teamA}
         setScore={handleScoreChange}
       />
+
       <div className="flex flex-col items-center justify-evenly h-96">
         <h1 className="text-5xl font-semibold tracking-widest">EFELERPARK</h1>
         <span className="text-5xl font-semibold">
@@ -232,20 +301,47 @@ const Score = () => {
         </span>
         <span className="text-5xl font-semibold">{time.date}</span>
         <span className="text-5xl font-semibold">{time.time}</span>
-        <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
-          <button className="text-3xl" onClick={handleNavigateBackWithPassword}>
-            ⚙️
-          </button>
-          <button
-            className="text-3xl"
-            onClick={() => setScores({ teamA: 0, teamB: 0 })}
-          >
-            ↩️
-          </button>
-          <button className="text-3xl" onClick={handleTestSpeak}>
-            🔊
-          </button>
-        </div>
+        {exitRequest.exit ? (
+          <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
+            <input
+              type="password"
+              placeholder="Sifrenizi giriniz"
+              className="input input-bordered w-full max-w-xs"
+              autoComplete="off"
+              autoSave="off"
+              onChange={(e) =>
+                setExitRequest({ ...exitRequest, password: e.target.value })
+              }
+            />
+            <button
+              className="btn btn-md text-xl "
+              onClick={handleFullScreenButtonClick}
+            >
+              Tamam
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
+            <button
+              className="text-3xl"
+              onClick={handleNavigateBackWithPassword}
+            >
+              ⚙️
+            </button>
+            <button
+              className="text-3xl"
+              onClick={() => setScores({ teamA: 0, teamB: 0 })}
+            >
+              ↩️
+            </button>
+            <button className="text-3xl" onClick={handleTestSpeak}>
+              🔊
+            </button>
+            <button className="text-3xl" onClick={handleFullScreenButtonClick}>
+              <FontAwesomeIcon icon={faExpand} color="black" />
+            </button>
+          </div>
+        )}
       </div>
       <ScoreCard
         teamName={"TAKIM 2"}

@@ -653,6 +653,33 @@ const setNoticeAutoflow = async (autoflow) => {
   }
 };
 
+const setAnnouncementLatency = async (latency) => {
+  const db = getDatabase();
+  const latencyRef = ref(db, "settings/announcementLatency");
+  try {
+    await set(latencyRef, latency);
+    return { success: true };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getAnnouncementLatency = async () => {
+  const db = getDatabase();
+  const latencyRef = ref(db, "settings/announcementLatency");
+
+  try {
+    const snapshot = await get(latencyRef);
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -700,4 +727,6 @@ export {
   setNoticeAutoflow,
   getNoticeAutoflow,
   updateAllNotices,
+  setAnnouncementLatency,
+  getAnnouncementLatency,
 };

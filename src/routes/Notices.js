@@ -77,37 +77,41 @@ const Notices = () => {
 
   return (
     <div className={`flex flex-col p-5 h-screen ${color}`}>
-      <div className="flex flex-row w-full justify-between">
+      <div className="flex flex-col md:flex-row w-full justify-between items-center md:items-start">
         <div
           className="flex flex-col items-center justify-center relative cursor-pointer"
           onClick={() => (window.location.href = "/")}
         >
-          <img src="assets/logo.png" className="relative" />
-          <span className="absolute bottom-10 tracking-widest font-bold text-lg">
+          <img src="assets/logo.png" className="relative w-32 md:w-auto" />
+          <span className="absolute bottom-10 tracking-widest font-bold text-lg text-center md:text-left">
             EFELERPARK
           </span>
         </div>
 
-        <div className="flex flex-row gap-10">
-          <span className="text-3xl font-semibold">{time.date}</span>
-          <span className="text-3xl font-semibold w-32">{time.time}</span>
+        <div className="flex flex-col md:flex-row gap-4 md:gap-10 mt-4 md:mt-0">
+          <span className="text-xl md:text-3xl font-semibold">{time.date}</span>
+          <span className="text-xl md:text-3xl font-semibold w-32">
+            {time.time}
+          </span>
         </div>
       </div>
-      <div className="block slider-container mx-5 h-full text-center">
+      <div className="block slider-container mx-2 md:mx-5 h-full text-center">
         {notices.length > 0 && !loading && (
           <Slider {...settings}>
-            {notices.map((notice) => {
-              return <AnnouncementDisplay content={notice.message} />;
+            {notices.map((notice, index) => {
+              return (
+                <AnnouncementDisplay key={index} content={notice.message} />
+              );
             })}
           </Slider>
         )}
         {notices.length === 0 && !loading && (
-          <span className="text-3xl font-semibold tracking-widest">
+          <span className="text-xl md:text-3xl font-semibold tracking-widest">
             Güncel duyuru bulunmamaktadır!
           </span>
         )}
       </div>
-      <ColorSelectBox onColorChange={setColor} />
+      <ColorSelectBox onColorChange={setColor} className="mt-5 md:mt-0" />
     </div>
   );
 };

@@ -2,12 +2,20 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { getAnnouncementMessages } from "../firebase";
+import {
+  getAnnouncementMessages,
+  getAnnouncementLatency,
+  setAnnouncementLatency,
+} from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const MatchAnnouncements = () => {
   const [loading, setLoading] = useState(true);
-
+  const [latency, setLatency] = useState({
+    minute: 0,
+    hour: 0,
+  });
   const navigate = useNavigate();
   const handleEdit = (template) => {
     // Handle edit here
@@ -19,16 +27,69 @@ const MatchAnnouncements = () => {
   ]);
 
   useEffect(() => {
-    getAnnouncementMessages().then((data) => {
-      setAnnouncements(data);
+    const fetchAnnouncements = async () => {
+      const messages = await getAnnouncementMessages();
+      if (messages) {
+        setAnnouncements(messages);
+      }
+    };
+    const fetchLatency = async () => {
+      const latency = await getAnnouncementLatency();
+      if (latency) {
+        setLatency(latency);
+      }
+    };
+
+    Promise.all([fetchAnnouncements(), fetchLatency()]).then(() => {
       setLoading(false);
     });
   }, []);
+
+  const handleSaveLatency = async () => {
+    const res = await setAnnouncementLatency(latency);
+    if (res) {
+      toast("Gecikme Ayarı Kaydedildi");
+    } else {
+      toast("Gecikme Ayarı Kaydedilemedi");
+    }
+  };
+
+  const saveButton = (
+    <button
+      className="btn btn-ghost normal-case text-xl xl:text-3xl"
+      onClick={handleSaveLatency}
+    >
+      💾
+    </button>
+  );
+
   return (
     <div>
-      <Navbar />
+      <Navbar endButton={saveButton} />
       <div className="flex flex-col justify-center items-center gap-7">
-        <h1 className="text-lg font-semibold">📣 Anonslar</h1>
+        <div className="mt-7">
+          <h2 className="text-lg font-bold">⏰ Gecikme Ayarı</h2>
+          <label className="label">Saat </label>
+          <input
+            type="number"
+            min={0}
+            max={23}
+            defaultValue={0}
+            onChange={(e) => setLatency({ ...latency, hour: e.target.value })}
+            className="input input-bordered w-full max-w-xs"
+          />
+          <label className="label">Dakika </label>
+          <input
+            type="number"
+            min={0}
+            max={59}
+            defaultValue={0}
+            onChange={(e) => setLatency({ ...latency, minute: e.target.value })}
+            className="input input-bordered w-full max-w-xs"
+          />
+        </div>
+
+        <h2 className="text-lg font-semibold">📣 Anonslar</h2>
         <div className="overflow-x-auto max-w-2xl w-full">
           <table className="table">
             {/* head */}

@@ -17,53 +17,53 @@ code {
 }
 
 .ql-size-12 {
-  font-size: 12px;
+  font-size: calc((12 / 1920) * 100vw); /* 0.625vw */
 }
 
 .ql-size-16 {
-  font-size: 16px;
+  font-size: calc((16 / 1920) * 100vw); /* 0.833vw */
 }
 
 .ql-size-24 {
-  font-size: 24px;
+  font-size: calc((24 / 1920) * 100vw); /* 1.25vw */
 }
 
 .ql-size-28 {
-  font-size: 28px;
+  font-size: calc((28 / 1920) * 100vw); /* 1.458vw */
 }
 
 .ql-size-32 {
-  font-size: 32px;
+  font-size: calc((32 / 1920) * 100vw); /* 1.667vw */
 }
 
 .ql-size-40 {
-  font-size: 40px;
+  font-size: calc((40 / 1920) * 100vw); /* 2.083vw */
 }
 
 .ql-size-48 {
-  font-size: 48px;
+  font-size: calc((48 / 1920) * 100vw); /* 2.5vw */
 }
 
 .ql-size-56 {
-  font-size: 56px;
+  font-size: calc((56 / 1920) * 100vw); /* 2.917vw */
 }
 
 .ql-size-64 {
-  font-size: 64px;
+  font-size: calc((64 / 1920) * 100vw); /* 3.333vw */
 }
 
 .ql-size-72 {
-  font-size: 72px;
+  font-size: calc((72 / 1920) * 100vw); /* 3.75vw */
 }
 
 .ql-size-80 {
-  font-size: 80px;
+  font-size: calc((80 / 1920) * 100vw); /* 4.167vw */
 }
 
 .ql-size-96 {
-  font-size: 96px;
+  font-size: calc((96 / 1920) * 100vw); /* 5vw */
 }
 
 .ql-size-128 {
-  font-size: 128px;
+  font-size: calc((128 / 1920) * 100vw); /* 6.667vw */
 }
