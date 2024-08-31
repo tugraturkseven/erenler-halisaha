@@ -5,6 +5,8 @@ import AnnouncementDisplay from "../components/AnnouncementDisplay";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ColorSelectBox from "../components/ColorSelect";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
 
 const Notices = () => {
   const [time, setTime] = useState({
@@ -75,6 +77,14 @@ const Notices = () => {
     };
   }, []);
 
+  const handleFullScreenButtonClick = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen();
+    }
+  };
+
   return (
     <div className={`flex flex-col p-5 h-screen ${color}`}>
       <div className="flex flex-col md:flex-row w-full justify-between items-center md:items-start">
@@ -112,6 +122,12 @@ const Notices = () => {
         )}
       </div>
       <ColorSelectBox onColorChange={setColor} className="mt-5 md:mt-0" />
+      <button
+        className="btn btn-md absolute bottom-5 right-5"
+        onClick={handleFullScreenButtonClick}
+      >
+        <FontAwesomeIcon icon={faExpand} color="white" size="lg" />
+      </button>
     </div>
   );
 };

@@ -82,7 +82,6 @@ const Score = () => {
   const fetchReservations = async () => {
     const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
     const items = await getReservations(date, pitch.name);
-    if (items) setLoading(false);
     setReservations(items);
 
     const previousReservationHour = getPreviousReservationHour(pitch.minute);
@@ -99,23 +98,52 @@ const Score = () => {
   const fetchAnnouncements = async () => {
     const messages = await getAnnouncementMessages();
     if (messages) {
+      // Filter messages from empty items.
+      const filteredMessages = messages.filter((item) => item?.message);
       // Check the local storage for announcements is the same as the database
       const localAnnouncements = JSON.parse(
         localStorage.getItem("announcements")
       );
       if (localAnnouncements) {
-        if (JSON.stringify(localAnnouncements) !== JSON.stringify(messages)) {
-          localStorage.setItem("announcements", JSON.stringify(messages));
+        if (
+          JSON.stringify(localAnnouncements) !==
+          JSON.stringify(filteredMessages)
+        ) {
+          localStorage.setItem(
+            "announcements",
+            JSON.stringify(filteredMessages)
+          );
         }
       } else {
-        localStorage.setItem("announcements", JSON.stringify(messages));
+        localStorage.setItem("announcements", JSON.stringify(filteredMessages));
       }
-      setAnnouncements(messages);
+      setAnnouncements(filteredMessages);
     } else {
       const localAnnouncements = JSON.parse(
         localStorage.getItem("announcements")
       );
-      setAnnouncements(localAnnouncements);
+      if (localAnnouncements) {
+        setAnnouncements(localAnnouncements);
+      } else {
+        const defaultAnnouncements = [
+          {
+            description: "Bitis",
+            id: 2,
+            message:
+              "Maçınız sona ermiştir. Lütfen formalarınızı saha içerisinde bırakmayınız.",
+          },
+          {
+            description: "Uzatma",
+            id: 3,
+            message: "Oynamak isterseniz on dakika uzatma.",
+          },
+        ];
+        localStorage.setItem(
+          "announcements",
+          JSON.stringify(defaultAnnouncements)
+        );
+        setAnnouncements(defaultAnnouncements);
+      }
     }
   };
 
@@ -152,16 +180,20 @@ const Score = () => {
 
   useEffect(() => {
     if (!pitch.name || !pitch.minute) return;
-    fetchReservations();
-    fetchAnnouncements();
-    fetchAnnouncementLatency();
+    Promise.all([
+      fetchReservations(),
+      fetchAnnouncements(),
+      fetchAnnouncementLatency(),
+    ]).then(() => {
+      setLoading(false);
+    });
     document.documentElement.requestFullscreen();
   }, [pitch]);
 
   const checkReservation = async () => {
-    const finish =
-      announcements.find((item) => item?.description == "Bitis")?.message ||
-      "Son düdük! Maç bitti!";
+    const finish = announcements.find(
+      (item) => item.description == "Bitis"
+    ).message;
     const date = new Date().toLocaleDateString("tr").replace(/\./g, "-");
 
     const index = reservations.findIndex(
@@ -189,9 +221,9 @@ const Score = () => {
       if (isPlaying) {
         // Check for end of the current game.
         // Make an announcement for end of the current game.
-        const extraTime =
-          announcements.find((item) => item?.description == "Uzatma")
-            ?.message || "Maç bitmek üzere, son dakikalar!";
+        const extraTime = announcements.find(
+          (item) => item.description == "Uzatma"
+        ).message;
         setText(extraTime);
         // wait for 10 minutes and announce end of the game
         setTimeout(() => {

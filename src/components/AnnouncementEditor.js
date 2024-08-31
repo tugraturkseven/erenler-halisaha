@@ -80,6 +80,7 @@ AnnouncementEditor.formats = [
   "link",
   "color",
   "background",
+  "align",
 ];
 
 export default AnnouncementEditor;
