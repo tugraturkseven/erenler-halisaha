@@ -60,10 +60,42 @@ code {
   font-size: calc((80 / 1920) * 100vw); /* 4.167vw */
 }
 
+.ql-size-88 {
+  font-size: calc((88 / 1920) * 100vw); /* 4.583vw */
+}
+
 .ql-size-96 {
   font-size: calc((96 / 1920) * 100vw); /* 5vw */
 }
 
+.ql-size-104 {
+  font-size: calc((100 / 1920) * 100vw); /* 5.208vw */
+}
+
+.ql-size-112 {
+  font-size: calc((112 / 1920) * 100vw); /* 5.833vw */
+}
+
+.ql-size-120 {
+  font-size: calc((120 / 1920) * 100vw); /* 6.25vw */
+}
+
 .ql-size-128 {
   font-size: calc((128 / 1920) * 100vw); /* 6.667vw */
+}
+
+.ql-size-136 {
+  font-size: calc((136 / 1920) * 100vw); /* 7.083vw */
+}
+
+.ql-size-144 {
+  font-size: calc((144 / 1920) * 100vw); /* 7.5vw */
+}
+
+.ql-align-center {
+  text-align: center;
+}
+
+.ql-align-right {
+  text-align: right;
 }

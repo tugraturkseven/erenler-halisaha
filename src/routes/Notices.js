@@ -86,8 +86,8 @@ const Notices = () => {
   };
 
   return (
-    <div className={`flex flex-col p-5 h-screen ${color}`}>
-      <div className="flex flex-col md:flex-row w-full justify-between items-center md:items-start">
+    <div className={`flex flex-col px-5 py-20 h-screen ${color}`}>
+      {/* <div className="flex flex-col md:flex-row w-full justify-between items-center md:items-start">
         <div
           className="flex flex-col items-center justify-center relative cursor-pointer"
           onClick={() => (window.location.href = "/")}
@@ -104,7 +104,7 @@ const Notices = () => {
             {time.time}
           </span>
         </div>
-      </div>
+      </div> */}
       <div className="block slider-container mx-2 md:mx-5 h-full text-center">
         {notices.length > 0 && !loading && (
           <Slider {...settings}>
