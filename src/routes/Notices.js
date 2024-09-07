@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 import ColorSelectBox from "../components/ColorSelect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand } from "@fortawesome/free-solid-svg-icons";
+import { useSpeech } from "react-text-to-speech";
 
 const Notices = () => {
   const [time, setTime] = useState({
@@ -18,6 +19,16 @@ const Notices = () => {
   const [loading, setLoading] = useState(true);
   const [autoFlow, setAutoFlow] = useState(false);
   const [color, setColor] = useState("bg-white");
+  const [text, setText] = useState("");
+  const { start, stop, speechStatus } = useSpeech({
+    text: text,
+    pitch: 0.6,
+    rate: 1,
+    volume: 1,
+    lang: "tr-TR",
+    voiceURI: "",
+    highlightText: false,
+  });
 
   const settings = {
     dots: true,
@@ -58,6 +69,37 @@ const Notices = () => {
       setNotices(templatesArray);
     }
   };
+
+  const getPlainText = (html) => {
+    var divContainer = document.createElement("div");
+    divContainer.innerHTML = html;
+    return divContainer.textContent || divContainer.innerText || "";
+  };
+
+  useEffect(() => {
+    if (text.length == 0) return;
+    console.log("Text changed: ", text);
+    start();
+  }, [text]);
+
+  useEffect(() => {
+    if (loading) return;
+    const messages = notices.map((notice) => notice.message);
+    let i = 0;
+    let plainText = "";
+    const interval = setInterval(() => {
+      if (i === messages.length) {
+        i = 0;
+      }
+      plainText = getPlainText(messages[i]);
+      setText(plainText);
+      i++;
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [loading]);
 
   useEffect(() => {
     if (!notices.length <= 0) return;
