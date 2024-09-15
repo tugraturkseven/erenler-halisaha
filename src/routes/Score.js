@@ -190,6 +190,11 @@ const Score = () => {
     document.documentElement.requestFullscreen();
   }, [pitch]);
 
+  const playRing = async () => {
+    const audio = new Audio("/assets/ring.mp4");
+    await audio.play();
+  };
+
   const checkReservation = async () => {
     const finish = announcements.find(
       (item) => item.description == "Bitis"
@@ -212,6 +217,7 @@ const Score = () => {
     if (reservationType == "Kesin Rez." && reservedUserName) {
       if (isPlaying) {
         // Make an announcement for end of the current game.
+        await playRing();
         setText(finish);
       } else {
         setIsPlaying(true);
@@ -226,7 +232,9 @@ const Score = () => {
         ).message;
         setText(extraTime);
         // wait for 10 minutes and announce end of the game
-        setTimeout(() => {
+        setTimeout(async () => {
+          // Play the ring mp4 file
+          await playRing();
           setText(finish);
           setIsPlaying(false);
         }, 10 * 60 * 1000);
@@ -366,7 +374,7 @@ const Score = () => {
             >
               ↩️
             </button>
-            <button className="text-3xl" onClick={handleTestSpeak}>
+            <button className="text-3xl" onClick={playRing}>
               🔊
             </button>
             <button className="text-3xl" onClick={handleFullScreenButtonClick}>
