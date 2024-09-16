@@ -27,12 +27,17 @@ const Notices = () => {
   const [noticeText, setNoticeText] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [speechSettings, setSpeechSettings] = useState({
-    pitch: 0.6,
-    rate: 1,
-    volume: 1,
-    lang: "tr-TR",
-    voiceURI: "",
+  const [speechSettings, setSpeechSettings] = useState(() => {
+    const savedSettings = localStorage.getItem("speechSettings");
+    return savedSettings
+      ? JSON.parse(savedSettings)
+      : {
+          pitch: 0.1,
+          rate: 1,
+          volume: 1,
+          lang: "tr-TR",
+          voiceURI: "",
+        };
   });
   const sliderRef = useRef(null);
   const { start, speechStatus } = useSpeech({
@@ -93,7 +98,7 @@ const Notices = () => {
   useEffect(() => {
     if (loading || notices.length === 0) return;
     const currentMessage = notices[currentSlide].message;
-    const plainText = getPlainText(currentMessage).replace(/[.,;:!?]/g, "");
+    const plainText = getPlainText(currentMessage).replace(/[_.,;:!?]/g, "");
     setNoticeText(plainText);
   }, [currentSlide, loading, notices]);
 
@@ -127,7 +132,9 @@ const Notices = () => {
   };
 
   const handleSpeechSettingChange = (setting, value) => {
-    setSpeechSettings((prev) => ({ ...prev, [setting]: value }));
+    const newSettings = { ...speechSettings, [setting]: value };
+    setSpeechSettings(newSettings);
+    localStorage.setItem("speechSettings", JSON.stringify(newSettings));
   };
 
   const renderSettingsPage = () => (
