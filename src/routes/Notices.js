@@ -11,6 +11,8 @@ import {
   faCog,
   faTable,
   faArrowLeft,
+  faVolumeUp,
+  faVolumeMute,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSpeech } from "react-text-to-speech";
 
@@ -38,6 +40,10 @@ const Notices = () => {
           lang: "tr-TR",
           voiceURI: "",
         };
+  });
+  const [noticeSoundSettings, setNoticeSoundSettings] = useState(() => {
+    const savedSettings = localStorage.getItem("noticeSoundSettings");
+    return savedSettings ? JSON.parse(savedSettings) : {};
   });
   const sliderRef = useRef(null);
   const { start, speechStatus } = useSpeech({
@@ -77,22 +83,44 @@ const Notices = () => {
         (item) => item.message.length > 0 && item.isActive
       );
       setNotices(filteredNotices);
+      updateNoticeSoundSettings(filteredNotices);
     } else {
       const templatesArray = Object.keys(notices).map((key) => ({
         ...notices[key],
       }));
       setNotices(templatesArray);
+      updateNoticeSoundSettings(templatesArray);
     }
   };
 
+  const updateNoticeSoundSettings = (newNotices) => {
+    const updatedSettings = { ...noticeSoundSettings };
+    newNotices.forEach((notice, index) => {
+      if (!(index in updatedSettings)) {
+        updatedSettings[index] = true;
+      }
+    });
+    setNoticeSoundSettings(updatedSettings);
+    localStorage.setItem(
+      "noticeSoundSettings",
+      JSON.stringify(updatedSettings)
+    );
+  };
+
   const getPlainText = (html) => {
-    var divContainer = document.createElement("div");
+    const divContainer = document.createElement("div");
     divContainer.innerHTML = html;
-    return divContainer.textContent || divContainer.innerText || "";
+    let text = divContainer.textContent || divContainer.innerText || "";
+    text = text.toLowerCase();
+    // Remove all characters that are not Turkish letters or spaces
+    return text;
   };
 
   useEffect(() => {
-    start();
+    if (noticeSoundSettings[currentSlide]) {
+      console.log("noticeText", noticeText);
+      start();
+    }
   }, [noticeText]);
 
   useEffect(() => {
@@ -135,6 +163,15 @@ const Notices = () => {
     const newSettings = { ...speechSettings, [setting]: value };
     setSpeechSettings(newSettings);
     localStorage.setItem("speechSettings", JSON.stringify(newSettings));
+  };
+
+  const handleNoticeSoundToggle = (index) => {
+    const newSettings = {
+      ...noticeSoundSettings,
+      [index]: !noticeSoundSettings[index],
+    };
+    setNoticeSoundSettings(newSettings);
+    localStorage.setItem("noticeSoundSettings", JSON.stringify(newSettings));
   };
 
   const renderSettingsPage = () => (
@@ -209,7 +246,26 @@ const Notices = () => {
           ))}
         </select>
       </div>
-      <button className="btn btn-sm" onClick={handleSettingsToggle}>
+      <h3 className="text-xl font-bold mb-4">Duyuru Ses Ayarları</h3>
+      {notices.map((notice, index) => (
+        <div
+          key={index}
+          className="flex items-center justify-between w-64 mb-2"
+        >
+          <span>{notice.message.substring(0, 20)}...</span>
+          <button
+            className="btn btn-sm"
+            onClick={() => handleNoticeSoundToggle(index)}
+          >
+            <FontAwesomeIcon
+              icon={noticeSoundSettings[index] ? faVolumeUp : faVolumeMute}
+              className="mr-2"
+            />
+            {noticeSoundSettings[index] ? "Açık" : "Kapalı"}
+          </button>
+        </div>
+      ))}
+      <button className="btn btn-sm mt-4" onClick={handleSettingsToggle}>
         <FontAwesomeIcon icon={faArrowLeft} className="mr-2" /> Geri Dön
       </button>
     </div>
@@ -236,6 +292,20 @@ const Notices = () => {
             )}
           </div>
           <ColorSelectBox onColorChange={setColor} className="mt-5 md:mt-0" />
+          <div className="absolute bottom-5 left-5">
+            <button
+              className="btn btn-md"
+              onClick={() => handleNoticeSoundToggle(currentSlide)}
+            >
+              <FontAwesomeIcon
+                icon={
+                  noticeSoundSettings[currentSlide] ? faVolumeUp : faVolumeMute
+                }
+                color="white"
+                size="lg"
+              />
+            </button>
+          </div>
           <div className="absolute bottom-5 right-5 flex">
             <button className="btn btn-md mr-2" onClick={handleSettingsToggle}>
               <FontAwesomeIcon

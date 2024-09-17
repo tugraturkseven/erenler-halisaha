@@ -62,7 +62,7 @@ function Login() {
         </a>
       </div>
       <span className="absolute bottom-5 text-xs mt-8 text-center">
-        version: 15.09.2024 23:25
+        version: 17.09.2024 22:35
       </span>
     </div>
   );
