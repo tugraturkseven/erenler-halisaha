@@ -190,9 +190,12 @@ const Score = () => {
     document.documentElement.requestFullscreen();
   }, [pitch]);
 
-  const playRing = async () => {
-    const audio = new Audio("/assets/ring.mp4");
-    await audio.play();
+  const playRing = () => {
+    return new Promise((resolve) => {
+      const audio = new Audio("/assets/ring.mp4");
+      audio.play();
+      audio.onended = resolve;
+    });
   };
 
   const checkReservation = async () => {
