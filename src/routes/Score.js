@@ -289,16 +289,16 @@ const Score = () => {
       case `1`:
         handleScoreChange(0, -1);
         break;
-      case `2`:
+      case `7`:
         handleScoreChange(0, 1);
         break;
       case `3`:
         handleScoreChange(1, -1);
         break;
-      case `4`:
+      case `9`:
         handleScoreChange(1, 1);
         break;
-      case `5`:
+      case `Delete`:
         setScores({ teamA: 0, teamB: 0 });
         break;
       // If ESC is pressed and the document is in fullscreen, prevent the default behavior

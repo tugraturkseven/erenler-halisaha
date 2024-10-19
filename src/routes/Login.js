@@ -3,11 +3,47 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import PhoneNumberInput from "../components/PhoneNumberInput";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import { toast } from "react-toastify";
 
 function Login() {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState();
-  const [password, setPassword] = useState("jackass1*");
+  const [password, setPassword] = useState("");
+  const [isForgetPassword, setIsForgetPassword] = useState(false);
+
+  const resetPassword = async () => {
+    if (!phoneNumber || !isValidPhoneNumber(phoneNumber)) {
+      alert("Lütfen geçerli bir telefon numaranızı giriniz.");
+      return;
+    }
+
+    const url = "https://erenler-halisaha-backend.vercel.app/reset-password";
+    const data = {
+      phoneNumber: phoneNumber,
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      alert("Şifre sıfırlama isteğiniz başarılı. Admin email'e gönderildi.");
+      return result;
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      throw error;
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -48,18 +84,43 @@ function Login() {
           phoneNumber={phoneNumber}
           setPhoneNumber={setPhoneNumber}
         />
-        <input
-          type="password"
-          placeholder="🔑 Sifre"
-          className="input input-bordered w-full max-w-xs"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <a onClick={onSubmit} className="btn btn-success btn-block">
-          🚪 Giriş Yap
-        </a>
-        <a href="/signin" className="btn btn-info btn-block">
-          ✨ Kayıt Ol
-        </a>
+        {!isForgetPassword ? (
+          <>
+            <input
+              type="password"
+              placeholder="🔑 Sifre"
+              className="input input-bordered w-full max-w-xs"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              className="text-sm  text-center text-gray-400"
+              onClick={() => setIsForgetPassword(true)}
+            >
+              Şifremi Unuttum
+            </button>
+            <a onClick={onSubmit} className="btn btn-success btn-block">
+              🚪 Giriş Yap
+            </a>
+            <a href="/signin" className="btn btn-info btn-block">
+              ✨ Kayıt Ol
+            </a>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={resetPassword}
+              className="btn btn-success btn-block"
+            >
+              🔑 Şifremi Sıfırla
+            </button>
+            <button
+              onClick={() => setIsForgetPassword(false)}
+              className="btn btn-info btn-block"
+            >
+              🚪 Geri Dön
+            </button>
+          </>
+        )}
       </div>
       <span className="absolute bottom-5 text-xs mt-8 text-center">
         version: 19.09.2024 22:15
