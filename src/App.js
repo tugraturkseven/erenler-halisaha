@@ -29,6 +29,7 @@ import MatchAnnouncements from "./routes/MatchAnnouncements";
 import MatchAnnouncementsDetails from "./routes/MatchAnnouncementDetails";
 import Notices from "./routes/Notices";
 import NoticesSettings from "./routes/NoticesSettings";
+import ResetPassword from "./routes/ResetPassword";
 
 function App() {
   return (
@@ -43,6 +44,10 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Login />} />
                       <Route path="/signin" element={<SignUp />} />
+                      <Route
+                        path="/reset-password"
+                        element={<ResetPassword />}
+                      />
                       <Route path="/home" element={<Home />} />
                       <Route path="/reservation" element={<Reservation />} />
                       <Route path="/customers" element={<Costumers />} />

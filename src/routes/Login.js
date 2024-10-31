@@ -18,7 +18,8 @@ function Login() {
       return;
     }
 
-    const url = "https://erenler-halisaha-backend.vercel.app/reset-password";
+    const url =
+      "https://erenler-halisaha-backend.vercel.app/request-password-reset";
     const data = {
       phoneNumber: phoneNumber,
     };
