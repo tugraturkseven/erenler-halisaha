@@ -35,6 +35,7 @@ function Settings() {
         <Card icon="📱" title="SMS" route="smsSettings" />
         <Card icon="📢" title="Anons" route="matchannouncements" />
         <Card icon="🏟️" title="Saha" route="pitchSettings" />
+        <Card icon="💰" title="Finansal" route="financialSettings" />
         <Card icon="⛓️" title="Şema" route="schemaSettings" />
         <Card icon="🥅" title="Skor Tablosu" route="score" />
       </div>

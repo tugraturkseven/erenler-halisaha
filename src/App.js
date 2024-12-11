@@ -16,6 +16,7 @@ import ChooseCustomer from "./routes/ChooseCustomer";
 import CreateCustomer from "./routes/CreateCustomer";
 import SmsSettings from "./routes/SmsSettings";
 import SMSTemplateDetails from "./routes/SMSTemplateDetails";
+import FinancialSettings from "./routes/FinancialSettings";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext";
@@ -106,6 +107,10 @@ function App() {
                         element={<MatchAnnouncementsDetails />}
                       />
                       <Route path="/notices" element={<Notices />} />
+                      <Route
+                        path="/financialSettings"
+                        element={<FinancialSettings />}
+                      />
                     </Routes>
                   </PitchListProvider>
                 </SMSTemplatesProvider>

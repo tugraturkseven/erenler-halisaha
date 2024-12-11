@@ -8,6 +8,7 @@ import {
   remove,
   update,
   push,
+  child,
 } from "firebase/database";
 import "firebase/database";
 
@@ -680,6 +681,56 @@ const getAnnouncementLatency = async () => {
   }
 };
 
+// Fetch all financial data
+const getFinancialData = async () => {
+  const db = getDatabase();
+  const dbRef = ref(db, "financials/");
+  try {
+    const snapshot = await get(dbRef);
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      return { incomes: {}, expenses: {} };
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Add a financial record
+const addFinancialRecord = async (type, year, month, record) => {
+  const db = getDatabase();
+  const recordRef = ref(db, `financials/${type}s/${year}/${month}`);
+  try {
+    const newRecordRef = push(recordRef);
+    await set(newRecordRef, record);
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update a financial record
+const updateFinancialRecord = async (type, year, month, id, updatedRecord) => {
+  const db = getDatabase();
+  const recordRef = ref(db, `financials/${type}s/${year}/${month}/${id}`);
+  try {
+    await update(recordRef, updatedRecord);
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete a financial record
+const deleteFinancialRecord = async (type, year, month, id) => {
+  const db = getDatabase();
+  const recordRef = ref(db, `financials/${type}s/${year}/${month}/${id}`);
+  try {
+    await remove(recordRef);
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -729,4 +780,8 @@ export {
   updateAllNotices,
   setAnnouncementLatency,
   getAnnouncementLatency,
+  getFinancialData,
+  addFinancialRecord,
+  updateFinancialRecord,
+  deleteFinancialRecord,
 };
