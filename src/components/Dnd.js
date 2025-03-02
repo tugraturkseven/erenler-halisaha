@@ -550,9 +550,6 @@ function Dnd({ reservations, tomorrowNight }) {
             key={`${pitch.pitchName}-${index}`}
             className="w-1/3 px-[1px] sm:px-1"
           >
-            <h2 className="text-center font-bold text-xs sm:text-sm md:text-base mb-1 bg-base-300 py-1 rounded-md">
-              {pitch.pitchName}
-            </h2>
             <Droppable droppableId={pitch.pitchName}>
               {(provided) => (
                 <ul
