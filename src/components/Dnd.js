@@ -84,6 +84,24 @@ function Dnd({ reservations, tomorrowNight }) {
     );
   };
 
+  const fetchReservations = useMemo(
+    () =>
+      async (pitchName = "Saha 1") => {
+        const dateStr = selectedDay.replaceAll(".", "-");
+        const items = await getReservations(dateStr, pitchName);
+        return items;
+      },
+    [selectedDay]
+  );
+
+  const determineDBIndexOfItem = async (hour, pitchName = "Saha 1") => {
+    const items = await fetchReservations(pitchName);
+    const index = items.findIndex((item) => item.hour === hour);
+    if (index !== -1) {
+      return index;
+    }
+  };
+
   const updateDatabaseOnDragEnd = async (
     pitchA,
     pitchB,
@@ -97,8 +115,8 @@ function Dnd({ reservations, tomorrowNight }) {
       const dateAString = dateA.replaceAll(".", "-");
       const dateBString = dateB.replaceAll(".", "-");
 
-      const indexA = await determineDBIndexOfItem(hourA);
-      const indexB = await determineDBIndexOfItem(hourB);
+      const indexA = await determineDBIndexOfItem(hourA, pitchA);
+      const indexB = await determineDBIndexOfItem(hourB, pitchB);
 
       const itemA = await getReservationDetails(dateAString, pitchA, indexA);
       const itemB = await getReservationDetails(dateBString, pitchB, indexB);
@@ -176,23 +194,6 @@ function Dnd({ reservations, tomorrowNight }) {
       return destination.index;
     } else {
       return destination.index - pitchReservations[0].reservations.length;
-    }
-  };
-
-  const fetchReservations = useMemo(
-    () => async () => {
-      const dateStr = selectedDay.replaceAll(".", "-");
-      const items = await getReservations(dateStr, "Saha 1");
-      return items;
-    },
-    [selectedDay]
-  );
-
-  const determineDBIndexOfItem = async (hour) => {
-    const items = await fetchReservations();
-    const index = items.findIndex((item) => item.hour === hour);
-    if (index !== -1) {
-      return index;
     }
   };
 
@@ -512,7 +513,7 @@ function Dnd({ reservations, tomorrowNight }) {
     const isReserved = item.reservedUserName !== "";
     const date = item.date;
     const type = item.reservationType;
-    const index = await determineDBIndexOfItem(item.hour);
+    const index = await determineDBIndexOfItem(item.hour, pitch);
     if (user.type === "admin") {
       if (isReserved) {
         navigate("/reservationDetails", {
@@ -542,14 +543,16 @@ function Dnd({ reservations, tomorrowNight }) {
   };
 
   return (
-    <div className="flex flex-row gap-2  justify-around w-full px-5 sm:px-10">
+    <div className="flex flex-row gap-0 justify-between w-full px-0 sm:px-1 overflow-x-auto">
       <DragDropContext onDragEnd={onDragEnd}>
         {pitchReservations.map((pitch, index) => (
           <div
             key={`${pitch.pitchName}-${index}`}
-            className="flex-1"
-            style={{ minWidth: "50%" }}
+            className="w-1/3 px-[1px] sm:px-1"
           >
+            <h2 className="text-center font-bold text-xs sm:text-sm md:text-base mb-1 bg-base-300 py-1 rounded-md">
+              {pitch.pitchName}
+            </h2>
             <Droppable droppableId={pitch.pitchName}>
               {(provided) => (
                 <ul
@@ -563,7 +566,7 @@ function Dnd({ reservations, tomorrowNight }) {
                         <li
                           className={`${handleBackground(
                             item
-                          )} rounded shadow-md h-20`}
+                          )} rounded shadow-md h-16 sm:h-20`}
                           key={item.hour}
                         >
                           <Draggable
@@ -581,13 +584,14 @@ function Dnd({ reservations, tomorrowNight }) {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
+                                className="h-full w-full"
                               >
                                 <div
-                                  className={`flex flex-col text-center  py-2 px-2`}
+                                  className={`flex flex-col text-center py-1 px-1 h-full`}
                                 >
                                   <div className="flex flex-row justify-between align-baseline items-baseline">
                                     <p
-                                      className={`mr-1 text-lg text-left font-bold ${
+                                      className={`text-sm sm:text-base text-left font-bold ${
                                         snapshot.isDragging
                                           ? "text-transparent"
                                           : ""
@@ -595,11 +599,11 @@ function Dnd({ reservations, tomorrowNight }) {
                                     >
                                       {item.hour + ":" + item.minute}
                                     </p>
-                                    <p className="text-sm flex-1 font-semibold truncate text-left md:text-right md:text-base xl:text-lg">
+                                    <p className="text-xs sm:text-sm flex-1 font-semibold truncate text-right">
                                       {showReservedOrNot(item)}
                                     </p>
                                   </div>
-                                  <p className="text-lg font-semibold h-10 truncate pt-1">
+                                  <p className="text-xs sm:text-sm font-semibold h-8 sm:h-10 truncate pt-1">
                                     {user.type === "admin" ? item.note : ""}
                                   </p>
                                 </div>
@@ -615,7 +619,7 @@ function Dnd({ reservations, tomorrowNight }) {
                       (item, index) =>
                         item.visible && (
                           <li
-                            className="bg-slate-700 rounded shadow-md h-20"
+                            className="bg-slate-700 rounded shadow-md h-16 sm:h-20"
                             key={item.hour}
                           >
                             <Draggable
@@ -641,13 +645,14 @@ function Dnd({ reservations, tomorrowNight }) {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
+                                  className="h-full w-full"
                                 >
                                   <div
-                                    className={`flex flex-col text-center md:w-52 py-2 px-2 ${handleWidth()}`}
+                                    className={`flex flex-col text-center py-1 px-1 h-full`}
                                   >
                                     <div className="flex flex-row justify-between align-baseline items-baseline">
                                       <p
-                                        className={`mr-2 text-lg text-left font-bold ${
+                                        className={`text-sm sm:text-base text-left font-bold ${
                                           snapshot.isDragging
                                             ? "text-transparent"
                                             : ""
@@ -655,11 +660,11 @@ function Dnd({ reservations, tomorrowNight }) {
                                       >
                                         {item.hour + ":" + item.minute}
                                       </p>
-                                      <p className="text-sm flex-1 font-semibold truncate">
+                                      <p className="text-xs sm:text-sm flex-1 font-semibold truncate text-right">
                                         {showReservedOrNot(item)}
                                       </p>
                                     </div>
-                                    <p className="text-lg font-semibold h-10 truncate pt-1">
+                                    <p className="text-xs sm:text-sm font-semibold h-8 sm:h-10 truncate pt-1">
                                       {user.type === "admin" ? item.note : ""}
                                     </p>
                                   </div>

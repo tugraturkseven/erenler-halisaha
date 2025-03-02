@@ -200,16 +200,38 @@ const setAllReservations = (date, reservations) => {
   const db = getDatabase();
   const [day, month, year] = date.split("-");
 
-  set(ref(db, `reservations_restructured/${year}/${month}/${day}`), {
-    ...reservations,
-  });
+  // Ensure day and month have leading zeros
+  const formattedDay = day.padStart(2, "0");
+  const formattedMonth = month.padStart(2, "0");
+
+  set(
+    ref(
+      db,
+      `reservations_restructured/${year}/${formattedMonth}/${formattedDay}`
+    ),
+    {
+      ...reservations,
+    }
+  );
 };
 
 const addPitchToDate = (date, pitchName, reservationSchema) => {
   const db = getDatabase();
-  set(ref(db, "reservations_restructured/" + date + "/" + pitchName), {
-    ...reservationSchema,
-  });
+  const [day, month, year] = date.split("-");
+
+  // Ensure day and month have leading zeros
+  const formattedDay = day.padStart(2, "0");
+  const formattedMonth = month.padStart(2, "0");
+
+  set(
+    ref(
+      db,
+      `reservations_restructured/${year}/${formattedMonth}/${formattedDay}/${pitchName}`
+    ),
+    {
+      ...reservationSchema,
+    }
+  );
 };
 
 const setReservation = async (
@@ -229,10 +251,14 @@ const setReservation = async (
     const db = getDatabase();
     const [day, month, year] = date.split("-");
 
+    // Ensure day and month have leading zeros
+    const formattedDay = day.padStart(2, "0");
+    const formattedMonth = month.padStart(2, "0");
+
     // Create a reference to the reservation data
     const reservationRef = ref(
       db,
-      `reservations_restructured/${year}/${month}/${day}/${pitch}/${index}`
+      `reservations_restructured/${year}/${formattedMonth}/${formattedDay}/${pitch}/${index}`
     );
 
     // Create an object with reservation details
@@ -290,9 +316,16 @@ const getAllCostumers = async () => {
 const getReservations = async (date, pitchName) => {
   const db = getDatabase();
   const [day, month, year] = date.split("-");
+
+  // Ensure day and month have leading zeros
+  const formattedDay = day.padStart(2, "0");
+  const formattedMonth = month.padStart(2, "0");
+
   const reservationRef = ref(
     db,
-    `reservations_restructured/${year}/${month}/${day}` + "/" + pitchName
+    `reservations_restructured/${year}/${formattedMonth}/${formattedDay}` +
+      "/" +
+      pitchName
   );
   try {
     const snapshot = await get(reservationRef);
@@ -310,9 +343,14 @@ const getReservations = async (date, pitchName) => {
 const checkDateExist = async (date) => {
   const db = getDatabase();
   const [day, month, year] = date.split("-");
+
+  // Ensure day and month have leading zeros
+  const formattedDay = day.padStart(2, "0");
+  const formattedMonth = month.padStart(2, "0");
+
   const reservationRef = ref(
     db,
-    `reservations_restructured/${year}/${month}/${day}`
+    `reservations_restructured/${year}/${formattedMonth}/${formattedDay}`
   );
   try {
     const snapshot = await get(reservationRef);
@@ -331,10 +369,15 @@ const getReservationDetails = async (date, pitch, index) => {
     // Initialize the Firebase database
     const db = getDatabase();
     const [day, month, year] = date.split("-");
+
+    // Ensure day and month have leading zeros
+    const formattedDay = day.padStart(2, "0");
+    const formattedMonth = month.padStart(2, "0");
+
     // Create a reference to the reservation data
     const reservationRef = ref(
       db,
-      `reservations_restructured/${year}/${month}/${day}/${pitch}/${index}`
+      `reservations_restructured/${year}/${formattedMonth}/${formattedDay}/${pitch}/${index}`
     );
 
     // Fetch the data using get
@@ -431,8 +474,15 @@ const countReservations = async (date) => {
   // const year = new Date().getFullYear();
   // Date is in the format of DD.MM.YYYY, so we need to split it into day, month, and year
   const [day, month, year] = date?.split(".");
+
+  // Ensure month has leading zeros
+  const formattedMonth = month.padStart(2, "0");
+
   const db = getDatabase();
-  const reservationsRef = ref(db, `reservations_restructured/${year}/${month}`);
+  const reservationsRef = ref(
+    db,
+    `reservations_restructured/${year}/${formattedMonth}`
+  );
 
   try {
     const snapshot = await get(reservationsRef);
@@ -488,9 +538,14 @@ const updateReservationProperty = async (
   value
 ) => {
   const db = getDatabase();
+
+  // Ensure day and month have leading zeros
+  const formattedDay = day.padStart(2, "0");
+  const formattedMonth = month.padStart(2, "0");
+
   const reservationRef = ref(
     db,
-    `reservations_restructured/${year}/${month}/${day}/${pitch}/${index}`
+    `reservations_restructured/${year}/${formattedMonth}/${formattedDay}/${pitch}/${index}`
   );
   try {
     const updateData = {};
@@ -510,9 +565,14 @@ const addSubscriberToReservation = async (
   value
 ) => {
   const db = getDatabase();
+
+  // Ensure day and month have leading zeros
+  const formattedDay = day.padStart(2, "0");
+  const formattedMonth = month.padStart(2, "0");
+
   const reservationRef = ref(
     db,
-    `reservations_restructured/${year}/${month}/${day}/${pitch}/${index}`
+    `reservations_restructured/${year}/${formattedMonth}/${formattedDay}/${pitch}/${index}`
   );
   try {
     const subscribers = (await get(reservationRef)).val().subscribers;

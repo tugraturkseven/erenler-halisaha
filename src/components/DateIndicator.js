@@ -8,23 +8,41 @@ import { DateContext } from "../contexts/DateContext";
 function DateIndicator() {
   const { selectedDay, setSelectedDay } = useContext(DateContext);
   const getTurkishDayName = (dateString) => {
+    // Check if dateString is defined
+    if (!dateString) return "";
+
     // Split the dateString by '.'
-    const parts = dateString?.split(".");
+    const parts = dateString.split(".");
+
+    // Check if parts has enough elements
+    if (parts.length < 3) return "";
 
     // Reformat the date to YYYY-MM-DD
     const formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
-    // Create a new date object
-    const date = new Date(format(new Date(formattedDate), "yyyy-MM-dd"));
+    try {
+      // Create a new date object
+      const date = new Date(format(new Date(formattedDate), "yyyy-MM-dd"));
 
-    // Get the day name in Turkish
-    return format(date, "EEE", { locale: tr }) + " ";
+      // Get the day name in Turkish
+      return format(date, "EEE", { locale: tr }) + " ";
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
   };
 
   const turkishDayName = getTurkishDayName(selectedDay);
 
   const handleDateChange = (date, target) => {
+    // Check if date is defined
+    if (!date) return;
+
     const dateComponents = date.split(".");
+
+    // Check if dateComponents has enough elements
+    if (dateComponents.length < 3) return;
+
     const day = parseInt(dateComponents[0], 10);
     const month = parseInt(dateComponents[1], 10) - 1; // Adjust for zero-index month
     const year = parseInt(dateComponents[2], 10);
