@@ -66,6 +66,22 @@ const Score = () => {
     return String(minutes).padStart(2, "0");
   }
 
+  const playScoreSound = (type) => {
+    const audio = new Audio();
+
+    if (type === "increase") {
+      // Randomly select one of the 3 goal sound effects
+      const randomGoal = Math.floor(Math.random() * 3) + 1;
+      audio.src = `/assets/scoreboard/goal-${randomGoal}.mp3`;
+    } else if (type === "decrease") {
+      audio.src = "/assets/scoreboard/increase.mp3";
+    } else if (type === "reset") {
+      audio.src = "/assets/scoreboard/reset.mp3";
+    }
+
+    audio.play();
+  };
+
   const getPreviousReservationHour = (pitchMinute) => {
     const now = new Date();
     const currentHour = now.getHours();
@@ -250,8 +266,14 @@ const Score = () => {
     setScores((prevScores) => {
       const newScore = prevScores[teamName] + value;
       if (newScore < 0) return prevScores; // Prevent negative scores
+      playScoreSound(value > 0 ? "increase" : "decrease");
       return { ...prevScores, [teamName]: newScore };
     });
+  };
+
+  const handleScoreReset = () => {
+    setScores({ teamA: 0, teamB: 0 });
+    playScoreSound("reset");
   };
 
   const handleNavigateBackWithPassword = () => {
@@ -329,69 +351,73 @@ const Score = () => {
   }
 
   return (
-    <div className="w-full h-screen flex flex-row items-center justify-evenly">
-      <ScoreCard
-        teamName={"TAKIM 1"}
-        teamIndex={0}
-        score={scores.teamA}
-        setScore={handleScoreChange}
-      />
-
-      <div className="flex flex-col items-center justify-evenly h-96">
-        <h1 className="text-5xl font-semibold tracking-widest">EFELERPARK</h1>
-        <span className="text-5xl font-semibold">
-          {String(pitch.name).toUpperCase()}
-        </span>
-        <span className="text-5xl font-semibold">{time.date}</span>
-        <span className="text-5xl font-semibold">{time.time}</span>
-        {exitRequest.exit ? (
-          <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
-            <input
-              type="password"
-              placeholder="Sifrenizi giriniz"
-              className="input input-bordered w-full max-w-xs"
-              autoComplete="off"
-              autoSave="off"
-              onChange={(e) =>
-                setExitRequest({ ...exitRequest, password: e.target.value })
-              }
-            />
-            <button
-              className="btn btn-md text-xl "
-              onClick={handleFullScreenButtonClick}
-            >
-              Tamam
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
-            <button
-              className="text-3xl"
-              onClick={handleNavigateBackWithPassword}
-            >
-              ⚙️
-            </button>
-            <button
-              className="text-3xl"
-              onClick={() => setScores({ teamA: 0, teamB: 0 })}
-            >
-              ↩️
-            </button>
-            <button className="text-3xl" onClick={playRing}>
-              🔊
-            </button>
-            <button className="text-3xl" onClick={handleFullScreenButtonClick}>
-              <FontAwesomeIcon icon={faExpand} color="black" />
-            </button>
-          </div>
-        )}
+    <div className="w-full h-screen flex flex-col items-center justify-evenly gap-10">
+      <div className="w-full flex flex-row gap-5 p-10 items-center justify-center">
+        <span className="text-9xl font-bold italic">{time.time}</span>
       </div>
-      <ScoreCard
-        teamName={"TAKIM 2"}
-        teamIndex={1}
-        score={scores.teamB}
-        setScore={handleScoreChange}
-      />
+      <div className="w-full h-screen flex flex-row items-start justify-evenly">
+        <ScoreCard
+          teamName={"TAKIM 1"}
+          teamIndex={0}
+          score={scores.teamA}
+          setScore={handleScoreChange}
+        />
+
+        <div className="flex flex-col items-center justify-evenly h-96">
+          <h1 className="text-5xl font-semibold tracking-widest">EFELERPARK</h1>
+          <span className="text-5xl font-semibold">
+            {String(pitch.name).toUpperCase()}
+          </span>
+          <span className="text-5xl font-semibold">{time.date}</span>
+          {exitRequest.exit ? (
+            <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
+              <input
+                type="password"
+                placeholder="Sifrenizi giriniz"
+                className="input input-bordered w-full max-w-xs"
+                autoComplete="off"
+                autoSave="off"
+                onChange={(e) =>
+                  setExitRequest({ ...exitRequest, password: e.target.value })
+                }
+              />
+              <button
+                className="btn btn-md text-xl "
+                onClick={handleFullScreenButtonClick}
+              >
+                Tamam
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-row justify-between p-2 bg-white rounded gap-5">
+              <button
+                className="text-3xl"
+                onClick={handleNavigateBackWithPassword}
+              >
+                ⚙️
+              </button>
+              <button className="text-3xl" onClick={() => handleScoreReset()}>
+                ↩️
+              </button>
+              <button className="text-3xl" onClick={playRing}>
+                🔊
+              </button>
+              <button
+                className="text-3xl"
+                onClick={handleFullScreenButtonClick}
+              >
+                <FontAwesomeIcon icon={faExpand} color="black" />
+              </button>
+            </div>
+          )}
+        </div>
+        <ScoreCard
+          teamName={"TAKIM 2"}
+          teamIndex={1}
+          score={scores.teamB}
+          setScore={handleScoreChange}
+        />
+      </div>
     </div>
   );
 };
